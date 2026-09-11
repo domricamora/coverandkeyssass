@@ -2,7 +2,7 @@
 
 ## Current Phase
 
-Phase 01 - Foundation — **COMPLETE (verified)**
+Phase 02 - Module engine — **COMPLETE (verified)**
 
 ## Completed
 
@@ -19,18 +19,18 @@ Phase 01 - Foundation — **COMPLETE (verified)**
 - Audit logging: user.registered, auth.login/logout, tenant.created/updated, team.*, platform.* events with actor/subject/IP/UA
 - Branding & UI: **Cover & Keys** identity with bnb design system (Playfair Display + system font stack, ink/bone neutrals with muted gold + brown accents), ported app.css + components.css, responsive app/guest/auth shells, business selector, tenant dashboard, team page, settings, admin screens, branded error pages (403/404/419/500/503)
 - Frontend build: Vite assets compiled (bnb CSS + Tailwind utilities)
-- Tests: Pest suite — **49 passed, 124 assertions** (`php artisan test`, real MySQL)
+- Tests: Pest suite — **65 passed, 158 assertions** (`php artisan test`, real MySQL)
 - Security: composer audit clean, npm audit 0 vulnerabilities, CSRF on, secrets out of repo
 - Documentation: docs/{AI,ARCHITECTURE,DATABASE,API,SECURITY,DEPLOYMENT,MODULES,TESTING,CHANGELOG}.md + docs/modules/* (19 stubs)
 - Product renamed **Cover & Keys** (brand name "Cover & Keys" adopted from the bnb theme); all views, components, config, .env, docs updated
+- **Module engine**: modules + module_features + module_plans + tenant_modules, ModuleService with dependency + trial support, ModuleSeeder (property/restaurant/dining/reviews/messaging/notifications), admin CRUD for modules and tenant-module assignments, tenant module enable/disable page, permission-gated
 
 ## In Progress
 
-- (nothing — Phase 02 not started)
+- (nothing — Phase 03 not started)
 
 ## Pending
 
-- Phase 02: Module engine (modules, module_features, tenant_modules, module_plans)
 - Phases 03–38: marketplace, properties, booking, payments (PayMongo), restaurants, ordering, delivery, folio, housekeeping, maintenance, staff, inventory, POS, accounting, CRM, marketing, loyalty, reviews, messaging, notifications, SaaS billing, API, PWA, timezone/currency, integrations, security audit, performance, testing, deployment, backups, monitoring, final audit
 
 ## Known Issues
@@ -51,4 +51,4 @@ Cline (Claude)
 
 php artisan test
 
-Result: PASS (49 tests, 124 assertions, MySQL `hospitality_os_testing`)
+Result: PASS (65 tests, 158 assertions, MySQL `hospitality_os_testing`)
