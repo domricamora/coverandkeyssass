@@ -1,5 +1,12 @@
 @tailwind utilities;
 
-/* Cover & Keys design system is provided by bnb-app.css + bnb-components.css.
-   Tailwind utilities remain available for layout/spacing; the .hoso-* component
-   classes were removed in favour of bnb's .btn/.card/.form-input/.table etc. */
+/*
+ * Cover & Keys — design layers:
+ *   - bnb-app.css + bnb-components.css: marketing UI (static, served from public/css)
+ *   - Tailwind utilities: app UI (slate surfaces, sky focus rings)
+ *
+ * Body uses slate-50 background per the hospitality design system.
+ */
+body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+}

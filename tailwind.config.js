@@ -14,15 +14,18 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
-                display: ['"Playfair Display"', 'Georgia', 'Times New Roman', 'serif'],
+                sans: ['"Geist"', 'ui-sans-serif', 'system-ui', '-apple-system', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+                mono: ['"Geist Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+                display: ['"Playfair Display"', 'Georgia', '"Times New Roman"', 'serif'],
             },
             colors: {
+                // Marketing palette (ink/bone neutrals + gold/brown accents)
                 ink: {
                     900: '#0a0a0b',
                     800: '#121213',
                     700: '#1a1a1c',
                     600: '#232326',
+                    500: '#33333a',
                 },
                 bone: '#f7f5f2',
                 mist: '#d8d5d0',
@@ -37,16 +40,23 @@ export default {
                     DEFAULT: '#6b4f3a',
                     soft: '#a9866a',
                 },
-                paper: '#faf9f6',
-                surface: '#ffffff',
-                sand: {
-                    50: '#faf8f5',
-                    100: '#f3efe8',
-                    200: '#e5ddcf',
+                // App UI palette (slate surfaces + sky focus rings)
+                slate: {
+                    50: '#f8fafc',
+                    100: '#f1f5f9',
+                    200: '#e2e8f0',
+                    300: '#cbd5e1',
+                    500: '#64748b',
+                    600: '#475569',
+                    700: '#334155',
+                    900: '#0f172a',
+                },
+                sky: {
+                    600: '#0284c7',
                 },
             },
             boxShadow: {
-                card: '0 1px 2px rgba(28, 58, 43, 0.06), 0 8px 24px -12px rgba(28, 58, 43, 0.18)',
+                card: '0 1px 2px rgba(15, 23, 42, 0.06), 0 8px 24px -12px rgba(15, 23, 42, 0.18)',
             },
         },
     },

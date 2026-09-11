@@ -11,9 +11,11 @@
             <div class="container nav nav--slim">
                 <a class="brand" href="{{ route('home') }}" aria-label="{{ config('app.name') }} home">
                     <span class="brand__mark" aria-hidden="true">
-                        <svg viewBox="0 0 28 28" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <rect x="1" y="1" width="26" height="26" rx="7" fill="var(--gold)"/>
-                            <path d="M9 9h6a3 3 0 0 1 0 6H9V9Zm2 2v2h4a1 1 0 0 0 0-2h-4Zm0 6v4h-2v-4h2Zm4 0h4a3 3 0 0 1 0 6h-4v-6Zm2 2v2h2a1 1 0 0 0 0-2h-2Z" fill="var(--ink-900)"/>
+                        <svg viewBox="0 0 32 32" width="22" height="22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M16 3.2a12.8 12.8 0 1 1-9.05 21.85" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                            <circle cx="16" cy="16" r="8.4" stroke="currentColor" stroke-width="1.1" opacity="0.45"/>
+                            <circle cx="16" cy="13.6" r="3" fill="currentColor"/>
+                            <path d="M16 16.4 14.7 23h2.6L16 16.4Z" fill="currentColor"/>
                         </svg>
                     </span>
                     <span class="brand__name">{{ config('app.name') }}</span>
