@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html {
+        font-feature-settings: 'ss01';
+    }
+    body {
+        @apply bg-sand-50 text-brand-950 antialiased dark:bg-brand-950 dark:text-sand-50;
+    }
+    h1, h2, h3 {
+        @apply font-display tracking-tight;
+    }
+}
+
+@layer components {
+    .hoso-card {
+        @apply rounded-xl border border-sand-200 bg-white shadow-card dark:border-brand-800 dark:bg-brand-900;
+    }
+    .hoso-label {
+        @apply block text-sm font-medium text-brand-900 dark:text-sand-100;
+    }
+    .hoso-input {
+        @apply block w-full rounded-lg border-sand-200 bg-white text-brand-950 shadow-sm
+            focus:border-brand-500 focus:ring-brand-500
+            dark:border-brand-700 dark:bg-brand-900 dark:text-sand-50 dark:focus:border-brand-400;
+    }
+    .hoso-btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold
+            transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2
+            disabled:opacity-50 disabled:pointer-events-none dark:focus-visible:ring-offset-brand-950;
+    }
+    .hoso-btn-primary {
+        @apply hoso-btn bg-brand-600 text-white hover:bg-brand-700 active:bg-brand-800;
+    }
+    .hoso-btn-secondary {
+        @apply hoso-btn border border-sand-200 bg-white text-brand-800 hover:bg-sand-50
+            dark:border-brand-700 dark:bg-brand-900 dark:text-sand-100 dark:hover:bg-brand-800;
+    }
+    .hoso-btn-danger {
+        @apply hoso-btn bg-red-600 text-white hover:bg-red-700;
+    }
+    .hoso-badge {
+        @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold;
+    }
+}
