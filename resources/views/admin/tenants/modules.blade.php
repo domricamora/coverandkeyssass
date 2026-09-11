@@ -28,13 +28,19 @@
                     </div>
                     <div class="mt-3">
                         @if ($isActive)
-                            <form method="POST" action="{{ route('tenants.modules.destroy', [$tenant, $module]) }}">
+                            @php($tenantModule = $tenant->modules()->withoutGlobalScopes()->where('module_id', $module->id)->first())
+                            @if ($tenantModule && $tenantModule->trialEndsAtDisplay())
+                                <div class="text-xs mt-2 text-center" style="color:var(--text-3)">
+                                    Trial ends {{ $tenantModule->trialEndsAtDisplay() }}
+                                </div>
+                            @endif
+                            <form method="POST" action="{{ route('admin.tenants.modules.destroy', [$tenant, $module]) }}">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="btn btn-sm btn-danger">Disable</button>
                             </form>
                         @else
-                            <form method="POST" action="{{ route('tenants.modules.store', $tenant) }}">
+                            <form method="POST" action="{{ route('admin.tenants.modules.store', $tenant) }}">
                                 @csrf
                                 <input type="hidden" name="module_id" value="{{ $module->id }}">
                                 <button type="submit" class="btn btn-sm btn-primary">Enable</button>
