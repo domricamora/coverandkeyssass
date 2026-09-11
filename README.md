@@ -1,7 +1,7 @@
-# Hospitality OS
+# Cover & Keys
 
 Multi-tenant hospitality SaaS (marketplace + PMS + restaurant + payments), built per
-`Hospitality OS — AI Development Master Plan.md`.
+`Cover & Keys — AI Development Master Plan.md`.
 
 ## Quick start (local dev, Windows/WAMP)
 

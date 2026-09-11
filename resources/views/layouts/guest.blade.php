@@ -2,30 +2,42 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
     <head>
         @include('layouts.partials.head')
-        <title>{{ config('app.name', 'Hospitality OS') }} — {{ $title ?? 'Welcome' }}</title>
+        <title>{{ config('app.name') }} — {{ $title ?? 'Welcome' }}</title>
     </head>
-    <body class="h-full bg-sand-50 font-sans text-brand-950 antialiased dark:bg-brand-950 dark:text-sand-100">
+    <body class="h-full dash-body">
         <div class="flex min-h-full flex-col">
-            <header class="border-b border-sand-200 dark:border-brand-800">
-                <div class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
-                    <a href="{{ route('home') }}" class="flex items-center gap-2">
-                        <span class="grid h-9 w-9 place-items-center rounded-lg bg-brand-600 font-display text-base font-bold text-white">H</span>
-                        <span class="font-display text-lg font-semibold tracking-tight text-brand-900 dark:text-sand-50">Hospitality OS</span>
+            <header class="site-header">
+                <div class="container nav">
+                    <a class="brand" href="{{ route('home') }}" aria-label="{{ config('app.name') }} home">
+                        <span class="brand__mark" aria-hidden="true">
+                            <svg viewBox="0 0 28 28" width="26" height="26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="1" y="1" width="26" height="26" rx="7" fill="var(--gold)"/>
+                                <path d="M9 9h6a3 3 0 0 1 0 6H9V9Zm2 2v2h4a1 1 0 0 0 0-2h-4Zm0 6v4h-2v-4h2Zm4 0h4a3 3 0 0 1 0 6h-4v-6Zm2 2v2h2a1 1 0 0 0 0-2h-2Z" fill="var(--ink-900)"/>
+                            </svg>
+                        </span>
+                        <span class="brand__name">{{ config('app.name') }}</span>
                     </a>
-                    <nav class="flex items-center gap-3 text-sm font-medium">
-                        <a href="{{ route('login') }}" class="text-brand-700 underline-offset-4 hover:underline dark:text-brand-300">Log in</a>
-                        <a href="{{ route('register') }}" class="hoso-btn-primary h-9 px-4">Create account</a>
+                    <nav class="nav-user">
+                        @if (Route::has('login'))
+                            @auth
+                                <a class="btn btn-ghost btn-sm" href="{{ route('dashboard') }}">Dashboard</a>
+                            @else
+                                <a class="nav-user__link" href="{{ route('login') }}">Sign in</a>
+                                @if (Route::has('register'))
+                                    <a class="btn btn-primary btn-sm" href="{{ route('register') }}">Sign up</a>
+                                @endif
+                            @endauth
+                        @endif
                     </nav>
                 </div>
             </header>
 
             <main class="flex-1">
-                @include('layouts.partials.messages')
                 {{ $slot }}
             </main>
 
-            <footer class="border-t border-sand-200 px-6 py-4 text-xs text-brand-500 dark:border-brand-800 dark:text-brand-400">
-                {{ config('app.name') }} · Laravel {{ app()->version() }}
+            <footer class="site-footer" style="border-top:1px solid var(--border);padding:18px 0;text-align:center;font-size:.8rem;color:var(--text-3);">
+                <div class="container">&copy; {{ date('Y') }} {{ config('app.name') }} &middot; Foundation</div>
             </footer>
         </div>
     </body>

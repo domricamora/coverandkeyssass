@@ -1,8 +1,17 @@
-<x-guest-layout>
-    <div class="mx-auto max-w-lg px-4 py-20 text-center">
-        <p class="hoso-badge inline-flex bg-brand-100 text-brand-800 dark:bg-brand-800 dark:text-brand-100">Error {{ $code }}</p>
-        <h1 class="mt-4 font-display text-4xl font-semibold text-brand-950 dark:text-sand-50">{{ $title }}</h1>
-        <p class="mt-3 text-brand-600 dark:text-brand-300">{{ $message }}</p>
-        <a href="{{ route('home') }}" class="hoso-btn-primary mt-8">Back to home</a>
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    @include('layouts.partials.head')
+    <title>{{ $code }} — {{ config('app.name') }}</title>
+</head>
+<body class="dash-body">
+    <div class="auth-wrap">
+        <div class="auth-card card text-center">
+            <p class="pill-badge pill-badge--amber">{{ $code }}</p>
+            <h1 class="mt-4">{{ $title }}</h1>
+            <p class="auth-card__sub">{{ $message }}</p>
+            <a href="{{ url('/') }}" class="btn btn-primary mt-4">Back to home</a>
+        </div>
     </div>
-</x-guest-layout>
+</body>
+</html>

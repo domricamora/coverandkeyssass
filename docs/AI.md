@@ -1,7 +1,7 @@
 # AI.md — Agent Operating Instructions
 
-Hospitality OS is built by AI agents, one phase at a time, per the master plan
-(`Hospitality OS — AI Development Master Plan.md` at the repository root).
+Cover & Keys is built by AI agents, one phase at a time, per the master plan
+(`Cover & Keys — AI Development Master Plan.md` at the repository root).
 
 ## Before doing any work, read
 

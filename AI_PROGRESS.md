@@ -17,11 +17,12 @@ Phase 01 - Foundation — **COMPLETE (verified)**
 - Super Admin area: guarded /admin dashboard, user suspend/activate (session revocation, platform-admin protection), tenant create/show/suspend/activate/delete
 - `superadmin:create` artisan command (validated, audited) — first admin: see DEPLOYMENT.md
 - Audit logging: user.registered, auth.login/logout, tenant.created/updated, team.*, platform.* events with actor/subject/IP/UA
-- Base UI: hospitality design system (Fraunces/Work Sans, evergreen+brass), responsive app/guest shells, business selector, tenant dashboard, team page, settings, admin screens, branded error pages (403/404/419/500/503), dark mode
-- Frontend build: Vite/Tailwind assets compiled
+- Branding & UI: **Cover & Keys** identity with bnb design system (Playfair Display + system font stack, ink/bone neutrals with muted gold + brown accents), ported app.css + components.css, responsive app/guest/auth shells, business selector, tenant dashboard, team page, settings, admin screens, branded error pages (403/404/419/500/503)
+- Frontend build: Vite assets compiled (bnb CSS + Tailwind utilities)
 - Tests: Pest suite — **49 passed, 124 assertions** (`php artisan test`, real MySQL)
 - Security: composer audit clean, npm audit 0 vulnerabilities, CSRF on, secrets out of repo
 - Documentation: docs/{AI,ARCHITECTURE,DATABASE,API,SECURITY,DEPLOYMENT,MODULES,TESTING,CHANGELOG}.md + docs/modules/* (19 stubs)
+- Product renamed **Cover & Keys** (brand name "Cover & Keys" adopted from the bnb theme); all views, components, config, .env, docs updated
 
 ## In Progress
 

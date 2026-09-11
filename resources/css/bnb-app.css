@@ -1,0 +1,272 @@
+/* ============================================================
+   Cover & Keys — base styles
+   Warm ink and bone neutrals with muted gold + brown accents,
+   Playfair Display for display type, ink-on-paper hospitality register.
+   ============================================================ */
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/fonts/playfair-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/fonts/playfair-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+:root {
+  color-scheme: light;
+
+  /* ── Cover & Keys marketing palette ────────────────────────────────
+     Monochrome carries the layout; gold and brown are accents only.
+     Warm greys read as ink on paper against the muted brass. */
+  --ink-900: #0a0a0b;   /* page base / footer / admin rail */
+  --ink-800: #121213;   /* raised dark section */
+  --ink-700: #1a1a1c;   /* dark card */
+  --hairline: #232326;  /* hairline on dark */
+
+  --bone:  #f7f5f2;     /* warm white - headings on dark */
+  --mist:  #d8d5d0;     /* body copy on dark */
+  --smoke: #9a958d;     /* muted copy */
+  --ash:   #848076;     /* dimmest legible copy */
+
+  --gold:      #c9a227;               /* primary accent */
+  --gold-soft: #d9bd6a;               /* on-dark accent text */
+  --gold-dim:  rgba(201, 162, 39, .14);
+  --gold-deep: #a8861d;               /* hover/pressed gold */
+
+  --brown:      #6b4f3a;              /* secondary accent */
+  --brown-soft: #a9866a;
+
+  /* Warm light-surface tokens (the marketplace side) */
+  --paper:      #faf9f6;              /* page background */
+  --surface:    #ffffff;
+  --gray-100:   #f4f2ee;              /* warm soft fill */
+  --gray-200:   #e7e3db;              /* warm hairline */
+  --gray-400:   #b8b2a7;              /* input borders */
+  --gray-600:   #6d685f;              /* muted copy */
+  --gray-700:   #3f3c37;              /* body copy */
+
+  --ink: var(--ink-900);              /* legacy alias: primary text / dark buttons */
+  --rausch: var(--gold);              /* legacy alias: primary accent */
+  --rausch-dark: var(--gold-deep);    /* legacy alias: accent hover */
+  --babu: var(--brown);               /* legacy alias: secondary accent */
+
+  --amber: #8a5a12;  --amber-bg: #f9efdb;
+  --green: #33691e;  --green-bg: #edf3e4;
+  --red:   #a1352c;  --red-bg: #faeae7;
+  --blue:  #1f4e66;  --blue-bg: #e6eef2;
+
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgba(10, 10, 11, .06), 0 4px 12px rgba(10, 10, 11, .05);
+  --shadow: 0 6px 16px rgba(10, 10, 11, .12);
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --container: 1200px;
+
+  /* ── Semantic surface tokens ─────────────────────────────────────────
+     The public marketplace runs on the Cover & Keys dark marketing theme
+     (ink surfaces, bone text, gold accents). The signed-in dashboards use
+     the light application theme — exactly like the reference product. */
+  --bg: var(--ink-900);
+  --bg-raised: var(--ink-800);
+  --surface: #1a1a1c;
+  --surface-2: #121213;
+  --border: var(--hairline);
+  --text: var(--bone);
+  --text-2: var(--mist);
+  --text-3: var(--smoke);
+  --text-4: var(--ash);
+  --soft: rgba(255, 255, 255, .05);
+  --soft-2: rgba(255, 255, 255, .07);
+  --input-bg: rgba(255, 255, 255, .04);
+  --input-border: #33333a;
+  --shadow-color: 10, 10, 11;
+}
+
+/* Light application theme (dashboards + admin) */
+.dash-body, .admin-body {
+  --bg: #faf9f6;
+  --bg-raised: #f4f2ee;
+  --surface: #ffffff;
+  --surface-2: #ffffff;
+  --border: #e7e3db;
+  --text: #0a0a0b;
+  --text-2: #3f3c37;
+  --text-3: #6d685f;
+  --text-4: #848076;
+  --soft: #f4f2ee;
+  --soft-2: #ece8e0;
+  --input-bg: #ffffff;
+  --input-border: #b8b2a7;
+  --shadow-color: 10, 10, 11;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+/* Premium thin scrollbar (WebKit) */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-4); }
+
+/* Premium thin scrollbar (Firefox) */
+* { scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--bg);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; display: block; }
+a { color: inherit; text-decoration: none; }
+a:hover { text-decoration: none; }
+h1, h2, h3 { line-height: 1.2; margin: 0 0 .5rem; }
+h1, h2 { font-family: var(--font-display); font-weight: 500; letter-spacing: -.01em; }
+h1 { font-size: 1.95rem; }
+h2 { font-size: 1.45rem; }
+h3 { font-size: 1.05rem; font-weight: 600; }
+p { margin: .35rem 0; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .85em; background: var(--soft); padding: 2px 6px; border-radius: 6px; }
+hr { border: 0; border-top: 1px solid var(--border); margin: .5rem 0; }
+ul { padding-left: 1.2rem; }
+
+.container { max-width: var(--container); margin: 0 auto; padding: 0 24px; }
+.muted { color: var(--text-3); font-size: .92rem; }
+.center { text-align: center; }
+.mt-2 { margin-top: .5rem; }
+.mt-4 { margin-top: 1.5rem; }
+.mb-3 { margin-bottom: 1rem; }
+
+.eyebrow {
+  font-size: .72rem; font-weight: 600; letter-spacing: .22em; text-transform: uppercase;
+  color: var(--gold-soft); margin: 0 0 10px;
+}
+
+.skip-link {
+  position: absolute; left: -9999px; top: 0; background: var(--gold); color: var(--ink-900);
+  padding: 8px 14px; border-radius: 0 0 8px 0; z-index: 200;
+}
+.skip-link:focus { left: 0; }
+
+/* ------------------------------- buttons ------------------------------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font: inherit; font-weight: 600; font-size: .95rem;
+  padding: 12px 22px; border-radius: var(--radius); border: 1px solid transparent;
+  cursor: pointer; transition: transform .06s ease, background .15s ease, box-shadow .15s ease;
+  text-align: center; white-space: nowrap;
+}
+.btn:active { transform: scale(.98); }
+.btn-dark { background: var(--ink-900); color: var(--bone); border: 1px solid var(--ink-500, #33333a); }
+.dash-body .btn-dark, .admin-body .btn-dark { border-color: transparent; }
+.btn-dark:hover { background: #000; }
+.btn-primary { background: var(--gold); color: var(--ink-900); }
+.btn-primary:hover { background: var(--gold-soft); }
+.btn-primary:disabled { opacity: .55; cursor: not-allowed; }
+.btn-outline { background: transparent; color: var(--text); border-color: var(--input-border); }
+.btn-outline:hover { border-color: var(--gold); color: var(--gold-soft); }
+.btn-ghost { background: transparent; color: var(--text-2); }
+.btn-ghost:hover { background: var(--soft); color: var(--text); }
+.btn-light { background: transparent; color: var(--gold-soft); border: 1px solid var(--border); }
+.btn-light:hover { background: var(--gold-dim); color: var(--gold-soft); }
+.btn-danger { background: var(--red-bg); color: var(--red); }
+.btn-danger:hover { background: #f3d9d3; }
+.btn-sm { padding: 8px 14px; font-size: .85rem; border-radius: 9px; }
+.btn-block { width: 100%; white-space: normal; }
+/* Visible keyboard focus everywhere. */
+.btn:focus-visible, .menu__btn:focus-visible, .search-pill__btn:focus-visible,
+.gallery__thumb:focus-visible, .cat-chip:focus-visible, .page-btn:focus-visible,
+.nav-search-mobile:focus-visible {
+  outline: 2px solid var(--gold); outline-offset: 2px;
+}
+
+/* ------------------------------- forms --------------------------------- */
+.form-label {
+  display: block; font-weight: 600; font-size: .85rem; margin: 14px 0 4px; color: var(--text);
+}
+.form-input {
+  display: block;
+  width: 100%; min-width: 0; font: inherit; font-size: .95rem; color: var(--text);
+  padding: 11px 13px; border: 1px solid var(--input-border); border-radius: var(--radius-sm);
+  background: var(--input-bg); outline: none; transition: border-color .15s ease, box-shadow .15s ease;
+}
+.form-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-dim); }
+.form-input--sm { padding: 6px 9px; font-size: .85rem; width: auto; }
+textarea.form-input { resize: vertical; }
+.form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.check {
+  display: inline-flex; align-items: center; gap: 8px; font-size: .9rem; color: var(--text-2);
+  padding: 7px 12px; border: 1px solid var(--border); border-radius: 999px;
+  cursor: pointer; background: var(--input-bg); margin: 3px 4px 3px 0;
+}
+.check input { accent-color: var(--gold); }
+.check--lg { border: none; padding: 6px 0; margin-top: 10px; }
+.check:hover { border-color: var(--gold); color: var(--text); }
+.check--lg:hover { background: transparent; }
+
+/* -------------------------------- cards -------------------------------- */
+.card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 20px;
+  box-shadow: 0 1px 2px rgba(var(--shadow-color), .25);
+}
+
+/* ------------------------------- badges -------------------------------- */
+.badge {
+  display: inline-block; font-size: .72rem; font-weight: 700; letter-spacing: .02em;
+  padding: 3px 9px; border-radius: 999px; text-transform: capitalize; vertical-align: middle;
+}
+.badge-green { background: var(--green-bg); color: var(--green); }
+.badge-amber { background: var(--amber-bg); color: var(--amber); }
+.badge-red   { background: var(--red-bg); color: var(--red); }
+.badge-blue  { background: var(--blue-bg); color: var(--blue); }
+.badge-gray  { background: var(--gray-100); color: var(--gray-600); }
+.pill-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 19px; height: 19px; padding: 0 5px; border-radius: 999px;
+  background: var(--rausch); color: #fff; font-size: .7rem; font-weight: 700;
+}
+.pill-badge--amber { background: var(--gold-deep); color: var(--bone); display: inline-flex; margin-bottom: 8px; }
+
+.avatar {
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%; color: #fff; font-weight: 700; flex-shrink: 0; user-select: none;
+}
+.avatar--photo { object-fit: cover; border: 2px solid #fff; box-shadow: var(--shadow-sm); }
+.kind-chip {
+  display: inline-flex; align-items: center; gap: 4px; padding: 2px 9px; border-radius: 999px;
+  background: var(--gold-dim); color: var(--brown-soft); font-size: .7rem; font-weight: 700; vertical-align: middle;
+}
+
+/* ------------------------------ flashes -------------------------------- */
+.flashes {
+  position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
+  z-index: 300; display: flex; flex-direction: column; gap: 8px; width: min(480px, calc(100vw - 32px));
+}
+.flash {
+  display: flex; align-items: center; gap: 9px;
+  padding: 13px 18px; border-radius: var(--radius); font-weight: 600; font-size: .92rem;
+  box-shadow: var(--shadow); animation: flash-in .25s ease;
+}
+.flash-success { background: var(--surface-2); color: var(--gold-soft); border: 1px solid rgba(201, 162, 39, .35); }
+.flash-warning { background: var(--amber-bg); color: var(--amber); border: 1px solid #e9d8a6; }
+.flash-error { background: var(--red-bg); color: var(--red); border: 1px solid #eccdc6; }
+@keyframes flash-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+
+/* ------------------------------- rating -------------------------------- */
+.rating { display: inline-flex; gap: 1px; color: var(--gold); }

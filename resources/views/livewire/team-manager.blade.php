@@ -1,13 +1,13 @@
-<div class="mx-auto max-w-4xl">
-    <div class="flex items-end justify-between">
+<div>
+    <div class="dash-row-head">
         <div>
-            <h1 class="text-2xl font-semibold text-brand-950 dark:text-sand-50">Team</h1>
-            <p class="mt-1 text-sm text-brand-600 dark:text-brand-300">People with access to {{ $tenant->name }}.</p>
+            <h1>Team</h1>
+            <p class="mt-1 text-sm" style="color:var(--text-3)">People with access to {{ $tenant->name }}.</p>
         </div>
     </div>
 
-    <div class="hoso-card mt-6 overflow-hidden">
-        <table class="hoso-table">
+    <div class="table-wrap card mt-6">
+        <table class="table">
             <thead>
                 <tr>
                     <th>Name</th>
@@ -19,12 +19,12 @@
             <tbody>
                 @forelse ($members as $member)
                     <tr wire:key="member-{{ $member->user_id }}">
-                        <td class="font-semibold">{{ $member->user->name }}</td>
-                        <td class="text-brand-500 dark:text-brand-400">{{ $member->user->email }}</td>
+                        <td class="font-semibold" style="color:var(--text)">{{ $member->user->name }}</td>
+                        <td style="color:var(--text-3)">{{ $member->user->email }}</td>
                         <td>
                             <select wire:change="changeRole({{ $member->user_id }}, $event.target.value)"
                                     wire:loading.attr="disabled"
-                                    class="rounded-lg border-sand-300 bg-white text-sm dark:border-brand-700 dark:bg-brand-950 dark:text-sand-50"
+                                    class="form-input form-input--sm"
                                     aria-label="Role for {{ $member->user->name }}">
                                 @foreach ($roles as $role)
                                     <option value="{{ $role->slug }}" @selected($member->role?->slug === $role->slug)>{{ $role->display_name }}</option>
@@ -34,48 +34,48 @@
                         <td class="text-right">
                             <button wire:click="removeMember({{ $member->user_id }})"
                                     wire:confirm="Remove {{ $member->user->name }} from this business?"
-                                    class="text-sm font-semibold text-red-600 hover:underline dark:text-red-400">
+                                    class="btn btn-sm btn-danger">
                                 Remove
                             </button>
                         </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="4" class="py-8 text-center text-sm text-brand-500 dark:text-brand-400">No members yet — invite your first teammate below.</td>
+                        <td colspan="4" class="py-8 text-center text-sm" style="color:var(--text-3)">No members yet — invite your first teammate below.</td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 
-    <div class="hoso-card mt-6 p-6">
-        <h2 class="font-display text-lg font-semibold text-brand-900 dark:text-sand-50">Add a team member</h2>
+    <div class="card mt-6 p-6">
+        <h2 class="dash-h2" style="margin-top:0">Add a team member</h2>
         <form wire:submit="addMember" class="mt-4 grid gap-4 sm:grid-cols-4">
             <div class="sm:col-span-1">
-                <label class="hoso-label" for="member-name">Name</label>
-                <input id="member-name" type="text" wire:model="name" class="hoso-input" placeholder="Juan Dela Cruz" />
-                @error('name') <span class="hoso-error">{{ $message }}</span> @enderror
+                <label class="form-label" for="member-name">Name</label>
+                <input id="member-name" type="text" wire:model="name" class="form-input" placeholder="Juan Dela Cruz" />
+                @error('name') <span class="text-xs" style="color:var(--red)">{{ $message }}</span> @enderror
             </div>
             <div class="sm:col-span-1">
-                <label class="hoso-label" for="member-email">Email</label>
-                <input id="member-email" type="email" wire:model="email" class="hoso-input" placeholder="juan@example.com" />
-                @error('email') <span class="hoso-error">{{ $message }}</span> @enderror
+                <label class="form-label" for="member-email">Email</label>
+                <input id="member-email" type="email" wire:model="email" class="form-input" placeholder="juan@example.com" />
+                @error('email') <span class="text-xs" style="color:var(--red)">{{ $message }}</span> @enderror
             </div>
             <div class="sm:col-span-1">
-                <label class="hoso-label" for="member-role">Role</label>
-                <select id="member-role" wire:model="roleSlug" class="hoso-input">
+                <label class="form-label" for="member-role">Role</label>
+                <select id="member-role" wire:model="roleSlug" class="form-input">
                     @foreach ($roles as $role)
                         <option value="{{ $role->slug }}">{{ $role->display_name }}</option>
                     @endforeach
                 </select>
-                @error('roleSlug') <span class="hoso-error">{{ $message }}</span> @enderror
+                @error('roleSlug') <span class="text-xs" style="color:var(--red)">{{ $message }}</span> @enderror
             </div>
             <div class="flex items-end sm:col-span-1">
-                <button type="submit" class="hoso-btn-primary w-full">Add member</button>
+                <button type="submit" class="btn btn-primary w-full">Add member</button>
             </div>
         </form>
-        <p class="mt-3 text-xs text-brand-500 dark:text-brand-400">
-            New members get a platform account with a generated password — they can set a new one through “Forgot password”.
+        <p class="mt-3 text-xs" style="color:var(--text-3)">
+            New members get a platform account with a generated password — they can set a new one through "Forgot password".
         </p>
     </div>
 </div>

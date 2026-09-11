@@ -14,36 +14,31 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['"Work Sans"', ...defaultTheme.fontFamily.sans],
-                display: ['Fraunces', 'Georgia', 'serif'],
+                sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+                display: ['"Playfair Display"', 'Georgia', 'Times New Roman', 'serif'],
             },
             colors: {
-                brand: {
-                    50: '#f2f8f4',
-                    100: '#e0efe5',
-                    200: '#c2dfcc',
-                    300: '#95c7a8',
-                    400: '#63a97f',
-                    500: '#418b61',
-                    600: '#2f6e4c',
-                    700: '#27583e',
-                    800: '#214633',
-                    900: '#1c3a2b',
-                    950: '#0d2018',
+                ink: {
+                    900: '#0a0a0b',
+                    800: '#121213',
+                    700: '#1a1a1c',
+                    600: '#232326',
                 },
-                brass: {
-                    50: '#fbf9eb',
-                    100: '#f6efcb',
-                    200: '#eedd9b',
-                    300: '#e4c55f',
-                    400: '#dbab36',
-                    500: '#c99027',
-                    600: '#ad6f1f',
-                    700: '#8b521c',
-                    800: '#73421d',
-                    900: '#63381d',
-                    950: '#391c0c',
+                bone: '#f7f5f2',
+                mist: '#d8d5d0',
+                smoke: '#9a958d',
+                ash: '#848076',
+                gold: {
+                    DEFAULT: '#c9a227',
+                    soft: '#d9bd6a',
+                    deep: '#a8861d',
                 },
+                brown: {
+                    DEFAULT: '#6b4f3a',
+                    soft: '#a9866a',
+                },
+                paper: '#faf9f6',
+                surface: '#ffffff',
                 sand: {
                     50: '#faf8f5',
                     100: '#f3efe8',

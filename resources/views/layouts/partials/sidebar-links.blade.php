@@ -10,13 +10,16 @@
 ])
 
 @foreach ($links as [$name, $label, $path])
-    <a href="{{ route($name) }}"
-       @class([
-           'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium',
-           'bg-brand-600 text-white shadow-sm' => $route === $name,
-           'text-brand-700 hover:bg-sand-100 dark:text-sand-200 dark:hover:bg-brand-800' => $route !== $name,
-       ])>
-        <svg class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $path }}"/></svg>
+    <a class="{{ $route === $name ? 'is-active' : '' }}" href="{{ route($name) }}">
+        <svg class="side-nav__icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $path }}"/></svg>
         {{ $label }}
     </a>
 @endforeach
+
+@if ($current->has())
+    <p class="side-nav__head">{{ $current->tenant()->name }}</p>
+    <a class="{{ request()->routeIs('tenants.index') ? 'is-active' : '' }}" href="{{ route('tenants.index') }}">
+        <svg class="side-nav__icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+        Switch business
+    </a>
+@endif

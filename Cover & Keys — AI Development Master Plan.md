@@ -1,8 +1,8 @@
-# HOSPITALITY OS
+# COVER & KEYS
 ## AI-DRIVEN DEVELOPMENT MASTER PLAN
 
 Version: 1.0  
-Project: Hospitality OS SaaS  
+Project: COVER & KEYS SaaS  
 Target Platforms: Hotels, Resorts, B&Bs, Rooms, Vacation Rentals, Restaurants  
 Primary Stack: PHP + Laravel + MySQL  
 Hosting: Z.com VPS + cPanel  
@@ -13,9 +13,9 @@ AI Development Agents: GLM, DeepSeek, Qwen, Claude Code or equivalent
 
 # 1. PURPOSE
 
-This document is the master implementation instruction for AI coding agents building Hospitality OS.
+This document is the master implementation instruction for AI coding agents building COVER & KEYS.
 
-Hospitality OS is a multi-tenant SaaS platform combining:
+COVER & KEYS is a multi-tenant SaaS platform combining:
 
 1. Hospitality marketplace
 2. Hotel/property management system
@@ -365,7 +365,7 @@ Never hard-code:
 Example:
 
 ```text
-APP_NAME="Hospitality OS"
+APP_NAME="COVER & KEYS"
 APP_ENV=production
 APP_DEBUG=false
 APP_URL=
@@ -464,7 +464,7 @@ Do not create a giant controller.
 
 # 12. MULTI-TENANCY
 
-Hospitality OS is a multi-tenant SaaS.
+COVER & KEYS is a multi-tenant SaaS.
 
 Every tenant represents a business.
 
@@ -2110,7 +2110,7 @@ Never allow two agents to modify the same critical files simultaneously.
 When handing work from one AI agent to another, provide:
 
 ```text
-You are continuing development of Hospitality OS.
+You are continuing development of COVER & KEYS.
 
 Read:
 
@@ -2325,7 +2325,7 @@ Advanced reporting
 The final system should operate as:
 
 ```text
-                         HOSPITALITY OS
+                         COVER & KEYS
                               │
              ┌────────────────┼────────────────┐
              │                │                │
