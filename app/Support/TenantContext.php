@@ -40,4 +40,20 @@ class TenantContext
     {
         return $this->tenant !== null;
     }
+
+    /**
+     * Capture the current tenant so it can be restored later.
+     */
+    public function snapshot(): ?Tenant
+    {
+        return $this->tenant;
+    }
+
+    /**
+     * Restore a previously captured tenant snapshot.
+     */
+    public function restore(?Tenant $tenant): void
+    {
+        $this->tenant = $tenant;
+    }
 }

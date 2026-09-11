@@ -39,6 +39,12 @@ class PermissionRegistry
                 'platform.tenants.view' => 'View all tenants',
                 'platform.tenants.manage' => 'Create, suspend and delete tenants',
             ],
+            'modules' => [
+                'modules.view' => 'View modules',
+                'modules.manage' => 'Create and edit modules',
+                'modules.activate' => 'Activate modules for tenants',
+                'modules.deactivate' => 'Disable modules for tenants',
+            ],
         ];
     }
 

@@ -53,6 +53,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'super.admin'])->gro
     Route::post('/tenants/{tenant}/suspend', [AdminTenantController::class, 'suspend'])->name('tenants.suspend');
     Route::post('/tenants/{tenant}/activate', [AdminTenantController::class, 'activate'])->name('tenants.activate');
     Route::delete('/tenants/{tenant}', [AdminTenantController::class, 'destroy'])->name('tenants.destroy');
+
+    // Module engine
+    Route::resource('modules', \App\Http\Controllers\Admin\ModuleController::class);
+    Route::get('/tenants/{tenant}/modules', [\App\Http\Controllers\Admin\TenantModuleController::class, 'edit'])->name('tenants.modules.edit');
+    Route::post('/tenants/{tenant}/modules', [\App\Http\Controllers\Admin\TenantModuleController::class, 'store'])->name('tenants.modules.store');
+    Route::delete('/tenants/{tenant}/modules/{module}', [\App\Http\Controllers\Admin\TenantModuleController::class, 'destroy'])->name('tenants.modules.destroy');
 });
 
 // ---------------------------------------------------------------------

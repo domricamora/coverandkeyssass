@@ -156,6 +156,17 @@ class User extends Authenticatable
         $this->roles()->syncWithoutDetaching([$role->id => ['tenant_id' => $tenantId]]);
     }
 
+    /** Assign the platform super_admin role (tenant_id = NULL). */
+    public function assignPlatformRole(): void
+    {
+        $superAdmin = Role::query()
+            ->where('slug', 'super_admin')
+            ->whereNull('tenant_id')
+            ->firstOrFail();
+
+        $this->roles()->syncWithoutDetaching([$superAdmin->id => ['tenant_id' => null]]);
+    }
+
     /** The tenant the current request operates on (from the context). */
     public function currentTenant(): ?Tenant
     {
