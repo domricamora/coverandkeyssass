@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Illustration of a coastal horizon">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#14121a"/>
+      <stop offset="55%" stop-color="#2b2330"/>
+      <stop offset="100%" stop-color="#6b4f3a"/>
+    </linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2f3a40"/>
+      <stop offset="100%" stop-color="#101318"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#sky)"/>
+  <circle cx="880" cy="268" r="86" fill="#c9a227" opacity="0.85"/>
+  <circle cx="880" cy="268" r="150" fill="#c9a227" opacity="0.12"/>
+  <rect y="470" width="1200" height="330" fill="url(#sea)"/>
+  <rect y="470" width="1200" height="6" fill="#d9bd6a" opacity="0.5"/>
+  <path d="M0 560c140-18 260 26 420 8s280-42 420-16 220 22 360 4v244H0z" fill="#0a0a0b" opacity="0.55"/>
+  <path d="M150 470V330m0 0c-34 8-56 34-62 68 26-12 52-8 62 4 10-12 36-16 62-4-6-34-28-60-62-68z" fill="#0a0a0b" opacity="0.75"/>
+  <path d="M1000 470V356m0 0c-28 7-46 28-51 56 21-10 43-7 51 3 8-10 30-13 51-3-5-28-23-49-51-56z" fill="#0a0a0b" opacity="0.6"/>
+</svg>

@@ -45,6 +45,20 @@ class PermissionRegistry
                 'modules.activate' => 'Activate modules for tenants',
                 'modules.deactivate' => 'Disable modules for tenants',
             ],
+            'properties' => [
+                'properties.view' => 'View properties',
+                'properties.create' => 'Create properties',
+                'properties.update' => 'Update properties',
+                'properties.delete' => 'Delete properties',
+                'properties.publish' => 'Publish or unpublish properties',
+            ],
+            'restaurants' => [
+                'restaurants.view' => 'View restaurant listings',
+                'restaurants.create' => 'Create restaurant listings',
+                'restaurants.update' => 'Update restaurant listings',
+                'restaurants.delete' => 'Delete restaurant listings',
+                'restaurants.publish' => 'Publish or unpublish restaurant listings',
+            ],
         ];
     }
 

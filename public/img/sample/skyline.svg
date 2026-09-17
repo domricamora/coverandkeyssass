@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="Illustration of a night city skyline">
+  <defs>
+    <linearGradient id="night" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0a0b"/>
+      <stop offset="70%" stop-color="#1a1a1c"/>
+      <stop offset="100%" stop-color="#33333a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#night)"/>
+  <rect x="120" y="330" width="130" height="470" fill="#1f1f22"/>
+  <rect x="290" y="240" width="170" height="560" fill="#242428"/>
+  <rect x="500" y="380" width="120" height="420" fill="#1c1c20"/>
+  <rect x="660" y="180" width="150" height="620" fill="#232326"/>
+  <rect x="850" y="330" width="200" height="470" fill="#1a1a1d"/>
+  <g fill="#c9a227" opacity="0.75">
+    <rect x="320" y="280" width="16" height="16"/><rect x="356" y="280" width="16" height="16"/>
+    <rect x="320" y="330" width="16" height="16"/><rect x="392" y="330" width="16" height="16"/>
+    <rect x="690" y="240" width="16" height="16"/><rect x="740" y="280" width="16" height="16"/>
+    <rect x="690" y="360" width="16" height="16"/><rect x="160" y="400" width="16" height="16"/>
+    <rect x="540" y="440" width="16" height="16"/><rect x="900" y="400" width="16" height="16"/>
+    <rect x="960" y="460" width="16" height="16"/>
+  </g>
+  <rect y="780" width="1200" height="20" fill="#0a0a0b"/>
+</svg>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Marketing\PageController as MarketingPageController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\TenantController as AdminTenantController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
@@ -8,9 +9,14 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TenantController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+// ---------------------------------------------------------------------
+// Public marketing site
+// ---------------------------------------------------------------------
+
+Route::get('/', [MarketingPageController::class, 'home'])->name('home');
+Route::get('/features', [MarketingPageController::class, 'features'])->name('marketing.features');
+Route::get('/pricing', [MarketingPageController::class, 'pricing'])->name('marketing.pricing');
+Route::get('/contact', [MarketingPageController::class, 'contact'])->name('marketing.contact');
 
 // ---------------------------------------------------------------------
 // Tenant (host) area

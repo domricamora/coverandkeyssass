@@ -25,6 +25,8 @@ class RoleSeeder extends Seeder
                     'team.view', 'team.manage',
                     'roles.view', 'roles.manage',
                     'audit.view',
+                    'properties.view', 'properties.create', 'properties.update', 'properties.delete', 'properties.publish',
+                    'restaurants.view', 'restaurants.create', 'restaurants.update', 'restaurants.delete', 'restaurants.publish',
                 ],
             ],
             'manager' => [
@@ -34,12 +36,14 @@ class RoleSeeder extends Seeder
                     'tenants.view', 'tenants.update',
                     'team.view', 'team.manage',
                     'roles.view',
+                    'properties.view', 'properties.create', 'properties.update', 'properties.publish',
+                    'restaurants.view', 'restaurants.create', 'restaurants.update', 'restaurants.publish',
                 ],
             ],
             'front_desk' => [
                 'display_name' => 'Front Desk',
                 'description' => 'Handles guest-facing operations.',
-                'permissions' => ['team.view'],
+                'permissions' => ['team.view', 'properties.view', 'restaurants.view'],
             ],
             'staff' => [
                 'display_name' => 'Staff',

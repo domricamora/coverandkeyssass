@@ -117,12 +117,128 @@ class ModuleSeeder extends Seeder
         ];
     }
 
+    /**
+     * Commercial catalogue: monthly price (in cents) and the feature bullets
+     * shown on the marketing site and in the Super Admin module screens.
+     *
+     * Kept separate from moduleDefinitions() so those arrays only ever carry
+     * `modules` columns.
+     */
+    public static function moduleCatalog(): array
+    {
+        return [
+            'core' => [
+                'price_cents' => 0,
+                'features' => [
+                    ['Multi-tenant accounts', 'One login per business, hard-isolated data.', true],
+                    ['Roles & permissions', 'Granular RBAC with per-property permission sets.', true],
+                    ['Audit trail', 'Every privileged action recorded with actor and IP.', false],
+                ],
+            ],
+            'property' => [
+                'price_cents' => 149900,
+                'features' => [
+                    ['Properties & room inventory', 'Hotels, resorts, B&Bs and rentals in one registry.', true],
+                    ['Room types & rates', 'Room type → room → rate plan structure.', true],
+                    ['Amenities & policies', 'Reusable catalogue for listings and filters.', false],
+                    ['Photo galleries', 'Cover image and unlimited gallery uploads.', false],
+                ],
+            ],
+            'booking' => [
+                'price_cents' => 199900,
+                'features' => [
+                    ['Live availability calendar', 'Backend-authoritative availability, never client-trusted.', true],
+                    ['Zero double bookings', 'Transactional inventory locking on every reservation.', true],
+                    ['Multi-room & group stays', 'Book several rooms on one reservation.', false],
+                    ['Deposits, holds & no-shows', 'Full reservation lifecycle with audit.', false],
+                ],
+            ],
+            'workforce' => [
+                'price_cents' => 69900,
+                'features' => [
+                    ['Staff & roles', 'Front desk, housekeeping, kitchen and maintenance roles.', true],
+                    ['Shift scheduling', 'Weekly rosters with coverage checks.', false],
+                    ['Task assignment', 'Housekeeping and maintenance queues.', false],
+                ],
+            ],
+            'restaurant' => [
+                'price_cents' => 149900,
+                'features' => [
+                    ['Menus & modifiers', 'Categories, items, add-ons and pricing.', true],
+                    ['Table reservations', 'Time slots with overbooking protection.', true],
+                    ['Online ordering', 'Pickup, delivery and hotel room service.', false],
+                ],
+            ],
+            'inventory' => [
+                'price_cents' => 99900,
+                'features' => [
+                    ['Stock tracking', 'Per-store quantities with reorder levels.', true],
+                    ['Purchase orders', 'Suppliers, receiving and cost history.', false],
+                ],
+            ],
+            'finance' => [
+                'price_cents' => 129900,
+                'features' => [
+                    ['Guest folios', 'Room, food and service charges on one bill.', true],
+                    ['Invoices & payouts', 'Host wallet, commissions and payout runs.', true],
+                ],
+            ],
+            'crm' => [
+                'price_cents' => 89900,
+                'features' => [
+                    ['Guest profiles', 'Stay history, preferences and contact data.', true],
+                    ['Loyalty & campaigns', 'Points, coupons and automated follow-ups.', false],
+                ],
+            ],
+            'analytics' => [
+                'price_cents' => 79900,
+                'features' => [
+                    ['Occupancy & ADR', 'Revenue KPIs that update as bookings land.', true],
+                    ['Custom reports', 'Exportable operational and financial reports.', false],
+                ],
+            ],
+        ];
+    }
+
     public function run(): void
     {
         foreach (self::moduleDefinitions() as $definition) {
-            Module::query()->updateOrCreate(
+            $module = Module::query()->updateOrCreate(
                 ['slug' => $definition['slug']],
                 $definition,
+            );
+
+            $this->seedCatalog($module);
+        }
+    }
+
+    /** Seeds the module's monthly plan and feature bullets (idempotent). */
+    private function seedCatalog(Module $module): void
+    {
+        $catalog = self::moduleCatalog()[$module->slug] ?? null;
+
+        if ($catalog === null) {
+            return;
+        }
+
+        $module->plans()->updateOrCreate(
+            ['name' => 'Monthly'],
+            [
+                'price_cents' => $catalog['price_cents'],
+                'currency' => 'PHP',
+                'billing_interval' => 'monthly',
+                'is_active' => true,
+            ],
+        );
+
+        foreach ($catalog['features'] as $index => [$name, $description, $highlighted]) {
+            $module->features()->updateOrCreate(
+                ['name' => $name],
+                [
+                    'description' => $description,
+                    'is_highlighted' => $highlighted,
+                    'sort_order' => $index,
+                ],
             );
         }
     }

@@ -1,0 +1,227 @@
+@php
+    $p = $property;
+    $url = route('marketplace.properties.show', $p->slug);
+    $gallery = $p->galleryUrls();
+    $highlights = (array) ($p->highlights ?? []);
+    $amenities = $p->relationLoaded('amenities') ? $p->amenities : collect();
+    $reviews = $p->relationLoaded('reviews') ? $p->reviews : collect();
+@endphp
+
+<x-public-layout :title="$title" :description="Str::limit(strip_tags($p->tagline ?: $p->description ?: $p->name), 150)">
+    <div class="listing-page container">
+        <a class="back-link" href="{{ url()->previous() !== url()->current() ? url()->previous() : route('marketplace.hotels') }}">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+            Back to results
+        </a>
+
+        <div class="listing-head">
+            <h1>{{ $p->name }}</h1>
+            <div class="listing-head__sub">
+                <span class="listing-head__rating">
+                    @include('marketplace::partials.stars', ['rating' => $p->avg_rating, 'count' => $p->reviews_count])
+                    @if ((float) $p->avg_rating > 0)
+                        {{ number_format((float) $p->avg_rating, 1) }} ({{ $p->reviews_count }})
+                    @endif
+                </span>
+                <span>
+                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-6.1 7-11a7 7 0 10-14 0c0 4.9 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                    {{ $p->locationLabel() ?: $p->country_code }}
+                </span>
+                @if ($p->propertyType)
+                    <span class="kind-chip">{{ $p->propertyType->name }}</span>
+                @endif
+            </div>
+        </div>
+
+        <div class="gallery">
+            @if ($gallery !== [])
+                <img class="gallery__main" src="{{ $gallery[0] }}" alt="{{ $p->name }}" decoding="async">
+                @if (count($gallery) > 1)
+                    <div class="thumb-row">
+                        @foreach (array_slice($gallery, 1, 5) as $image)
+                            <span class="thumb-row__item"><img src="{{ $image }}" alt="{{ $p->name }} photo" loading="lazy" decoding="async"></span>
+                        @endforeach
+                    </div>
+                @endif
+            @else
+                <span class="gallery__main gallery__main--fallback">
+                    @include('marketplace::partials.cover', ['listing' => $p, 'variant' => 'hero'])
+                </span>
+                <p class="muted mt-2">The host has not uploaded photos yet — the listing renders a placeholder instead of a stock image.</p>
+            @endif
+        </div>
+
+        <div class="listing-body">
+            <div>
+                <div class="listing-host">
+                    <span class="avatar" aria-hidden="true">{{ strtoupper(substr($p->host?->name ?? 'H', 0, 1)) }}</span>
+                    <div>
+                        <p class="listing-host__name">Hosted by {{ $p->host?->name ?? 'the property team' }}</p>
+                        <p class="listing-host__meta">
+                            {{ $p->bedrooms }} {{ Str::plural('bedroom', $p->bedrooms) }} &middot;
+                            {{ $p->beds }} {{ Str::plural('bed', $p->beds) }} &middot;
+                            {{ $p->bathrooms }} {{ Str::plural('bathroom', $p->bathrooms) }} &middot;
+                            up to {{ $p->max_guests }} {{ Str::plural('guest', $p->max_guests) }}
+                        </p>
+                    </div>
+                </div>
+
+                @if ($p->tagline)
+                    <p class="listing-desc" style="font-size:1.05rem;color:var(--text);">{{ $p->tagline }}</p>
+                @endif
+
+                <p class="listing-desc">{!! nl2br(e($p->description ?: 'The host has not written a description yet.')) !!}</p>
+
+                @if ($highlights !== [])
+                    <div class="listing-block">
+                        <h2>What makes this stay</h2>
+                        <ul class="amenities">
+                            @foreach ($highlights as $highlight)
+                                <li>
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                    {{ $highlight }}
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                @if ($amenities->isNotEmpty())
+                    <div class="listing-block">
+                        <h2>Amenities</h2>
+                        <ul class="amenities">
+                            @foreach ($amenities as $amenity)
+                                <li>
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                    {{ $amenity->name }}
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <div class="listing-block">
+                    <h2>House rules &amp; times</h2>
+                    <p class="muted">Check-in from {{ $p->check_in_time }} &middot; check-out by {{ $p->check_out_time }}.</p>
+                    @if (! empty($p->policies))
+                        <ul class="amenities">
+                            @foreach ((array) $p->policies as $key => $value)
+                                <li>
+                                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8h.01M11 12h1v4h1"/></svg>
+                                    <span><strong>{{ Str::headline($key) }}:</strong> {{ is_bool($value) ? ($value ? 'Yes' : 'No') : $value }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </div>
+
+                <div class="listing-block">
+                    <h2>Guest reviews</h2>
+
+                    @if ($reviews->isEmpty())
+                        <p class="muted">No published reviews yet. Guests can leave a review after their stay — moderation arrives with the Reviews module.</p>
+                    @else
+                        <ul class="reviews">
+                            @foreach ($reviews as $review)
+                                <li>
+                                    <div class="review__head">
+                                        <span class="avatar avatar--sm" aria-hidden="true">{{ strtoupper(substr($review->user?->name ?? 'G', 0, 1)) }}</span>
+                                        <div>
+                                            <p class="review__name">{{ $review->user?->name ?? 'Guest' }}</p>
+                                            <p class="review__date">{{ $review->published_at?->format('M Y') ?? $review->created_at->format('M Y') }}</p>
+                                        </div>
+                                        <span class="review__stars">
+                                            @include('marketplace::partials.stars', ['rating' => $review->rating])
+                                        </span>
+                                    </div>
+                                    @if ($review->title)
+                                        <p class="review__body"><strong>{{ $review->title }}</strong></p>
+                                    @endif
+                                    <p class="review__body">{{ $review->comment }}</p>
+
+                                    @if ($review->host_response)
+                                        <div class="card" style="margin-top:10px;">
+                                            <p class="muted" style="margin:0;"><strong>Response from the host:</strong> {{ $review->host_response }}</p>
+                                        </div>
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </div>
+            </div>
+
+            <div>
+                <div class="card booking-widget">
+                    <p class="booking-widget__price">
+                        {{ $p->priceLabel() }} <span>/ night</span>
+                    </p>
+
+                    <div class="price-breakdown">
+                        <p><span>Nightly rate</span> <strong>{{ $p->priceLabel() }}</strong></p>
+                        @if ((float) $p->cleaning_fee > 0)
+                            <p><span>Cleaning fee</span> <strong>{{ $p->currency }} {{ number_format((float) $p->cleaning_fee, 0) }}</strong></p>
+                        @endif
+                        @if ($p->weekend_price)
+                            <p><span>Weekend rate</span> <strong>{{ $p->currency }} {{ number_format((float) $p->weekend_price, 0) }}</strong></p>
+                        @endif
+                        <p class="price-breakdown__total"><span>Stay total</span> <span>Calculated on your dates</span></p>
+                    </div>
+
+                    <div class="card" style="margin-top:14px;background:var(--surface-2);">
+                        <p class="muted" style="margin:0;">
+                            <strong>Reservations open with the booking engine (Phase 05).</strong>
+                            Availability will be calculated by the platform, never by the browser —
+                            so dates can never be double-sold.
+                        </p>
+                    </div>
+
+                    <div style="margin-top:14px;display:grid;gap:8px;">
+                        @auth
+                            <form method="POST" action="{{ $isFavorited
+                                ? route('marketplace.favorites.destroy', ['property', $p->id])
+                                : route('marketplace.favorites.store', ['property', $p->id]) }}">
+                                @csrf
+                                @if ($isFavorited)
+                                    @method('DELETE')
+                                @endif
+                                <button class="btn {{ $isFavorited ? 'btn-outline' : 'btn-primary' }} btn-block" type="submit">
+                                    <svg width="16" height="16" fill="{{ $isFavorited ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20.5S3.8 15.4 3.8 9.6A4.6 4.6 0 0112 6.9a4.6 4.6 0 018.2 2.7c0 5.8-8.2 10.9-8.2 10.9z"/></svg>
+                                    {{ $isFavorited ? 'Saved to wish list' : 'Save to wish list' }}
+                                </button>
+                            </form>
+                        @else
+                            <a class="btn btn-primary btn-block" href="{{ route('login') }}">Sign in to save this stay</a>
+                        @endauth
+
+                        <a class="btn btn-ghost btn-block" href="{{ route('marketplace.hotels', ['location' => $p->location?->slug]) }}">More stays in this destination</a>
+                    </div>
+
+                    <p class="booking-widget__note">
+                        Listing reference {{ Str::upper(Str::substr($p->uuid, 0, 8)) }} &middot; published {{ $p->published_at?->format('M Y') ?? 'recently' }}
+                    </p>
+                </div>
+
+                @if ($similar->isNotEmpty())
+                    <div style="margin-top:26px;">
+                        <h2 style="font-size:1.1rem;">Similar stays</h2>
+                        <div class="grid" style="grid-template-columns:1fr;gap:16px;">
+                            @foreach ($similar as $other)
+                                <a class="card" href="{{ route('marketplace.properties.show', $other->slug) }}" style="display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:center;padding:12px;">
+                                    <span class="media-frame media-frame--wide" style="aspect-ratio:4/3;border-radius:10px;">
+                                        @include('marketplace::partials.cover', ['listing' => $other, 'variant' => 'thumb'])
+                                    </span>
+                                    <span>
+                                        <strong style="display:block;color:var(--text);">{{ $other->name }}</strong>
+                                        <span class="muted">{{ $other->locationLabel() }}</span>
+                                        <span class="muted" style="display:block;">{{ $other->priceLabel() }} / night</span>
+                                    </span>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+</x-public-layout>

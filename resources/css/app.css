@@ -10,3 +10,182 @@
 body {
     @apply bg-slate-50 text-slate-900 antialiased;
 }
+
+/* ============================================================================
+   Public marketplace layer (Phase 03)
+   Extends the bnb design system with the pieces the marketplace needs:
+   photo placeholders for listings without uploads, media frames, the
+   responsive results rail and small layout helpers.
+   ========================================================================== */
+
+body.public-body {
+    background: var(--bg);
+}
+
+/* ---------------------------------------------------------------- nav --- */
+.nav-links .is-active {
+    color: var(--text);
+    background: var(--soft);
+}
+
+/* -------------------------------------------------- media / placeholders --- */
+.media-frame {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    background: var(--surface-2);
+    aspect-ratio: 20 / 19;
+}
+
+.media-frame--hero {
+    aspect-ratio: 21 / 10;
+    border: 1px solid var(--border);
+}
+
+.media-frame--wide {
+    aspect-ratio: 16 / 10;
+    border: 1px solid var(--border);
+}
+
+.media-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Gradient placeholder used when a listing has no photo yet: keeps the
+   marketplace visually complete without pretending to show a real photo. */
+.cover-fallback {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    text-align: center;
+    padding: 14px;
+}
+
+.cover-fallback__inner {
+    display: grid;
+    justify-items: center;
+    gap: 8px;
+    max-width: 24ch;
+}
+
+.cover-fallback__kicker {
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(247, 245, 242, 0.55);
+}
+
+.cover-fallback__name {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    line-height: 1.25;
+    color: rgba(247, 245, 242, 0.94);
+}
+
+.media-frame--hero .cover-fallback__name {
+    font-size: 1.5rem;
+}
+
+.cover-fallback__mark {
+    color: rgba(247, 245, 242, 0.35);
+}
+
+/* -------------------------------------------------- marketplace filters --- */
+.filter-rail {
+    position: sticky;
+    top: 96px;
+    align-self: start;
+}
+
+.filter-rail__group + .filter-rail__group {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.filter-rail__title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    margin: 0 0 8px;
+}
+
+.filter-rail .check {
+    font-size: 0.82rem;
+    padding: 5px 10px;
+}
+
+.results__count {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-3);
+    font-size: 0.9rem;
+}
+
+/* ------------------------------------------------------------ misc bits --- */
+.meta-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 0;
+}
+
+.chip-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-3);
+}
+
+.gallery__main--fallback {
+    position: relative;
+    display: block;
+    aspect-ratio: 21 / 10;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.thumb-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.thumb-row__item {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    border: 2px solid transparent;
+}
+
+.thumb-row__item img,
+.thumb-row__item .cover-fallback {
+    width: 100%;
+    height: 100%;
+}
+
+@media (max-width: 900px) {
+    .results {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .filter-rail {
+        position: static;
+        max-height: none;
+    }
+}
