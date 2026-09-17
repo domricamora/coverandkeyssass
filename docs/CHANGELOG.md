@@ -1,5 +1,26 @@
 # CHANGELOG.md
 
+## 2026-09-17 — Phase 03: Marketplace (v0.3.0)
+
+Public, cross-tenant marketplace (verified: 70 tests / 181 assertions):
+
+- Public surface: `/stays` landing, `/hotels` + `/search` with keyword/destination/price/guests/type filters and sorting, `/hotels/{location}` destination pages, `/property/{slug}` and `/restaurants` + `/restaurant/{slug}` detail pages.
+- Tenant-owned listings with `draft → pending → published → suspended` lifecycle; published rows only on the public side (`publicQuery()` — the single cross-tenant read path).
+- Polymorphic media (covers/galleries) with cover fallback; amenities for stays, cuisines for dining.
+- Guest reviews (polymorphic, 1–5) with rating aggregates maintained by observers; wish list (favorites) with auth + personal scope and type whitelist.
+- `PropertyPolicy` registered for host-side abilities ahead of Phase 04; additive morph map (`property`, `restaurant`).
+- Marketing site: features / pricing / contact pages wired into the public layout.
+- Reference seeders (`MarketplaceReferenceSeeder`) + demo data seeder; module docs completed (`docs/modules/marketplace.md`).
+
+## 2026-09-11 — Phase 02: Module engine (v0.2.0)
+
+(verified: 65 tests / 158 assertions)
+
+- `modules`, `module_features`, `module_plans`, `tenant_modules` tables; `ModuleService` with dependency auto-enable, trials and guarded disable.
+- Admin CRUD for modules and tenant-module assignments (enable/disable per tenant, permission-gated); tenant-facing module enable/disable page with timezone-aware trial countdown.
+- `ModuleSeeder`: canonical module catalogue (core, property, booking, workforce, restaurant, inventory, finance, crm, analytics) with monthly plans + feature bullets.
+- Branding refresh to **Cover & Keys** (bnb design system, Playfair Display) across marketing/auth/app shells; hospitality design system port.
+
 ## 2026-09-11 — Phase 01: Foundation (v0.1.0)
 
 Implemented and verified (49 passing tests, 124 assertions):

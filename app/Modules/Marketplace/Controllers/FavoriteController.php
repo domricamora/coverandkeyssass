@@ -8,7 +8,7 @@ use App\Modules\Marketplace\Models\Restaurant;
 use App\Modules\Marketplace\Services\FavoriteService;
 use App\Modules\Marketplace\Services\MarketplaceSearchService;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\MorphTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;

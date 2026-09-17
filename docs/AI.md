@@ -38,5 +38,5 @@ CHANGELOG.md
 
 ## Current state
 
-Phase 01 (Foundation) is implemented and passing. Next: Phase 02 (Module Engine).
+Phase 03 (Marketplace) is implemented and passing. Next: Phase 04 (Property Management).
 See `AI_PROGRESS.md` for the authoritative status.
