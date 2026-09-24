@@ -1,5 +1,20 @@
 # CHANGELOG.md
 
+## 2026-09-17 — Phase 04: Property Management (v0.4.0)
+
+Host-side property management (verified: 98 tests / 320 assertions):
+
+- New `App\Modules\PropertyManagement` module managing the Marketplace `Property` rows: profile CRUD (description, policies JSON, amenities sync, location, check-in/out, pricing), publish/unpublish with audit trail, draft-first lifecycle.
+- Media: additive `kind` column on `media` (image/video) — photo + video URLs, single cover with promotion, gallery/video helpers on `HasMedia`.
+- Inventory: `room_types` → `rooms` (physical inventory with per-property unique room numbers, active/maintenance/inactive states), `rate_periods` (date-range price overrides with overlap rejection), `availability_blocks` (room type or single room, inclusive ranges).
+- `AvailabilityService`: sellable-inventory resolution (`blockedRoomIds`, `availableRoomCount`) — the foundation the Phase 05 booking engine consumes.
+- Property staff: per-property assignments restricted to active business members, unique per property + user, audited.
+- Module gating: generic `module.active:<slug>` middleware; host area requires the `property` module (trial-aware via ModuleService).
+- Permissions: `rooms.*`, `rates.*`, `availability.*`, `properties.staff.manage` added to `PermissionRegistry`; system role map extended (owner full, manager no deletes, front_desk view-only); `db:seed` now refreshes existing tenants' roles.
+- Tenant-scoped UI: sidebar "Properties" link (permission-gated), five management screens on the bnb design system.
+- Correctness: route model binding runs before `tenant.context` (middleware priority), so all `{property}`/nested params resolve manually through tenant-scoped relations — cross-tenant rows are plain 404s.
+- Tests: 24 new Pest tests covering gating, isolation, authorization per role, CRUD, media, inventory, rates, availability and staff.
+
 ## 2026-09-17 — Phase 03: Marketplace (v0.3.0)
 
 Public, cross-tenant marketplace (verified: 70 tests / 181 assertions):

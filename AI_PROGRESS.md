@@ -2,8 +2,8 @@
 
 ## Current Phase
 
-Phase 03 - Marketplace — **COMPLETE (verified)**
-Next: Phase 04 - Property Management
+Phase 04 - Property Management — **COMPLETE (verified)**
+Next: Phase 05 - Booking Engine
 
 ## Completed
 
@@ -11,12 +11,14 @@ Next: Phase 04 - Property Management
 - **Phase 02 — Module engine**: modules/module_features/module_plans/tenant_modules, ModuleService (dependency auto-enable, trials, guarded disable), admin CRUD + tenant enable/disable page with timezone-aware trial countdown, ModuleSeeder catalogue (core/property/booking/workforce/restaurant/inventory/finance/crm/analytics), 65 tests
 - **Phase 03 — Marketplace**: public cross-tenant browse of published stays and dining (`/stays`, `/hotels` + keyword/destination/price/guests/type filters and sorting, `/hotels/{location}` destination pages, `/property/{slug}`, `/restaurants`, `/restaurant/{slug}`); tenant-owned listings with `draft → pending → published → suspended` lifecycle and `publicQuery()` as the single cross-tenant read path; polymorphic media (cover + ordered galleries); amenities/cuisines; guest reviews with rating aggregates maintained by observers; personal wish list (favorites, auth + type whitelist); marketing site (features/pricing/contact); `MarketplaceReferenceSeeder` + `MarketplaceDemoSeeder`; `PropertyPolicy` registered ahead of Phase 04
 - **Bugfix (Phase 03 verification)**: `FavoriteController` typed the wish-list eager-load closure against the wrong `MorphTo` class, so a wish list containing items returned HTTP 500 — found by the new wish-list HTTP tests and fixed to `Illuminate\Database\Eloquent\Relations\MorphTo`
-- Tests: Pest suite — **74 passed, 200 assertions** (`php artisan test`, real MySQL), including full marketplace HTTP + wish-list coverage
-- Documentation: docs/* updated per phase; `docs/modules/marketplace.md` completed; CHANGELOG carries Phase 01–03 entries
+- **Phase 04 — Property Management**: new `App\Modules\PropertyManagement` module extending the Marketplace `Property`; host-side profile CRUD (policies JSON, amenities sync, location, pricing), publish/unpublish with audit trail; photos + videos via additive `media.kind` (single cover with promotion); room types → rooms inventory (per-property unique room numbers, active/maintenance/inactive); rate periods with overlap rejection; availability blocks; `AvailabilityService` (`blockedRoomIds`, `availableRoomCount`) as the Phase 05 foundation; property staff assignments (business members only, audited); generic `module.active:property` gating middleware; permissions (`rooms.*`, `rates.*`, `availability.*`, `properties.staff.manage`) + extended role map; sidebar link + five management screens; `db:seed` refreshes existing tenants' roles
+- **Architecture fix (Phase 04)**: Laravel's `SubstituteBindings` runs before `tenant.context` (middleware priority), so module routes resolve `{property}`/nested params manually through tenant-scoped relations — cross-tenant rows are plain 404s (documented in ARCHITECTURE.md + module docs)
+- Tests: Pest suite — **98 passed, 320 assertions** (`php artisan test`, real MySQL), including 24 Phase 04 coverage tests
+- Documentation: docs/* updated per phase; `docs/modules/{marketplace,property-management}.md` completed; CHANGELOG carries Phase 01–04 entries
 
 ## In Progress
 
-- **Phase 04 — Property Management (host side)**: property profile CRUD (description, policies, amenities, location, photos/videos via `media.kind`), room types → rooms inventory, rate periods, availability blocks, property staff; `module.active:property` gating; new permissions (rooms/rates/availability/property staff) + role map; Pest coverage
+- (nothing — Phase 05 not started)
 
 ## Pending
 
@@ -41,4 +43,4 @@ Cline (Claude)
 
 php artisan test
 
-Result: PASS (74 tests, 200 assertions, MySQL `hospitality_os_testing`)
+Result: PASS (98 tests, 320 assertions, MySQL `hospitality_os_testing`)

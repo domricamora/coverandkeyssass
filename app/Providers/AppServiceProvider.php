@@ -38,6 +38,12 @@ class AppServiceProvider extends ServiceProvider
         // Model policies.
         Gate::policy(Tenant::class, TenantPolicy::class);
 
+        // Module gating for tenant feature areas (e.g. `module.active:property`).
+        \Illuminate\Support\Facades\Route::aliasMiddleware(
+            'module.active',
+            \App\Http\Middleware\EnsureModuleActive::class,
+        );
+
         // Platform super admins bypass per-tenant permission checks.
         // The EnsureSuperAdmin middleware remains the authoritative gate
         // for /admin routes; this only simplifies tenant-side checks.

@@ -18,6 +18,12 @@
 
 @if ($current->has())
     <p class="side-nav__head">{{ $current->tenant()->name }}</p>
+    @if (auth()->user()?->can('viewAny', \App\Modules\Marketplace\Models\Property::class))
+        <a class="{{ $route === 'properties.index' || str_starts_with((string) $route, 'properties.') ? 'is-active' : '' }}" href="{{ route('properties.index') }}">
+            <svg class="side-nav__icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V7l7-4 7 4v14M9 9h.01M15 9h.01M9 13h.01M15 13h.01M9 17h.01M15 17h.01"/></svg>
+            Properties
+        </a>
+    @endif
     <a class="{{ request()->routeIs('tenants.index') ? 'is-active' : '' }}" href="{{ route('tenants.index') }}">
         <svg class="side-nav__icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
         Switch business

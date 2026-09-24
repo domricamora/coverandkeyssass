@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Storage;
  * tenant-scoped (host side) or publication-filtered (public side).
  */
 #[Fillable([
-    'mediable_type', 'mediable_id', 'disk', 'path', 'alt', 'caption',
+    'mediable_type', 'mediable_id', 'disk', 'path', 'alt', 'caption', 'kind',
     'is_cover', 'sort_order', 'width', 'height',
 ])]
 class Media extends Model
@@ -24,6 +24,10 @@ class Media extends Model
     use HasFactory;
 
     protected $table = 'media';
+
+    public const KIND_IMAGE = 'image';
+
+    public const KIND_VIDEO = 'video';
 
     protected function casts(): array
     {
@@ -63,6 +67,11 @@ class Media extends Model
     public function scopeCover($query)
     {
         return $query->where('is_cover', true);
+    }
+
+    public function scopeKind($query, string $kind)
+    {
+        return $query->where('kind', $kind);
     }
 
     public function scopeOrdered($query)

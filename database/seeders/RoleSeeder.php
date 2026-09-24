@@ -25,8 +25,11 @@ class RoleSeeder extends Seeder
                     'team.view', 'team.manage',
                     'roles.view', 'roles.manage',
                     'audit.view',
-                    'properties.view', 'properties.create', 'properties.update', 'properties.delete', 'properties.publish',
+                    'properties.view', 'properties.create', 'properties.update', 'properties.delete', 'properties.publish', 'properties.staff.manage',
                     'restaurants.view', 'restaurants.create', 'restaurants.update', 'restaurants.delete', 'restaurants.publish',
+                    'rooms.view', 'rooms.create', 'rooms.update', 'rooms.delete',
+                    'rates.view', 'rates.manage',
+                    'availability.view', 'availability.manage',
                 ],
             ],
             'manager' => [
@@ -36,14 +39,22 @@ class RoleSeeder extends Seeder
                     'tenants.view', 'tenants.update',
                     'team.view', 'team.manage',
                     'roles.view',
-                    'properties.view', 'properties.create', 'properties.update', 'properties.publish',
+                    'properties.view', 'properties.create', 'properties.update', 'properties.publish', 'properties.staff.manage',
                     'restaurants.view', 'restaurants.create', 'restaurants.update', 'restaurants.publish',
+                    'rooms.view', 'rooms.create', 'rooms.update',
+                    'rates.view', 'rates.manage',
+                    'availability.view', 'availability.manage',
                 ],
             ],
             'front_desk' => [
                 'display_name' => 'Front Desk',
                 'description' => 'Handles guest-facing operations.',
-                'permissions' => ['team.view', 'properties.view', 'restaurants.view'],
+                'permissions' => [
+                    'team.view',
+                    'properties.view',
+                    'restaurants.view',
+                    'rooms.view', 'rates.view', 'availability.view',
+                ],
             ],
             'staff' => [
                 'display_name' => 'Staff',
@@ -67,6 +78,13 @@ class RoleSeeder extends Seeder
         );
 
         $superAdmin->syncPermissions(Permission::query()->pluck('name')->all());
+
+        // Refresh existing tenants' system roles so new catalogue entries
+        // (e.g. Phase 04 inventory permissions) reach already-provisioned
+        // businesses when `php artisan db:seed` is re-run.
+        foreach (\App\Models\Tenant::query()->get(['id']) as $tenant) {
+            self::ensureTenantRoles($tenant->id);
+        }
     }
 
     public static function ensureTenantRoles(int $tenantId): void

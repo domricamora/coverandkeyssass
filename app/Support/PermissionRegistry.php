@@ -45,12 +45,23 @@ class PermissionRegistry
                 'modules.activate' => 'Activate modules for tenants',
                 'modules.deactivate' => 'Disable modules for tenants',
             ],
+            'inventory' => [
+                'rooms.view' => 'View room types and rooms',
+                'rooms.create' => 'Create room types and rooms',
+                'rooms.update' => 'Update room types and rooms',
+                'rooms.delete' => 'Delete room types and rooms',
+                'rates.view' => 'View rates',
+                'rates.manage' => 'Create, edit and delete rate periods',
+                'availability.view' => 'View availability',
+                'availability.manage' => 'Block and reopen availability',
+            ],
             'properties' => [
                 'properties.view' => 'View properties',
                 'properties.create' => 'Create properties',
                 'properties.update' => 'Update properties',
                 'properties.delete' => 'Delete properties',
                 'properties.publish' => 'Publish or unpublish properties',
+                'properties.staff.manage' => 'Assign property staff',
             ],
             'restaurants' => [
                 'restaurants.view' => 'View restaurant listings',

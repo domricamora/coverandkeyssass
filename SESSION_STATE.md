@@ -5,9 +5,9 @@
 ## Snapshot
 
 - Date: 2026-09-17
-- Phase: **03 — Marketplace COMPLETE (verified)** → next **04 — Property Management**
-- Tests: PASS — 74 tests, 200 assertions, MySQL `hospitality_os_testing`
-- Git: local `master` only — **no remote configured, commits are local-only** until an origin is added
+- Phase: **04 — Property Management COMPLETE (verified)** → next **05 — Booking Engine**
+- Tests: PASS — 98 tests, 320 assertions, MySQL `hospitality_os_testing`
+- Git: local `master` — gh CLI installed but NOT authenticated; if `gh auth login` runs, create private repo + push
 
 ## Environment (ready)
 
@@ -17,21 +17,22 @@
 - Frontend build: `node node_modules/vite/bin/vite.js build` (the `&` in the path breaks npm shims).
 - Dev URL: `http://localhost/ck/public`.
 
-## Next actions (Phase 04 — Property Management)
+## Next actions (Phase 05 — Booking Engine)
 
-1. New module `App\Modules\PropertyManagement` (provider registered in `bootstrap/providers.php`): host-side management of the existing Marketplace `Property` — extend, never duplicate.
-2. Module-owned migrations: `room_types`, `rooms` (inventory), `rate_periods`, `availability_blocks`, `property_staff`, plus an additive `kind` column on `media` for videos.
-3. Permissions: add `rooms.*`, `rates.*`, `availability.*`, `properties.staff.manage` to `PermissionRegistry`; extend `RoleSeeder::tenantRoleMap()` (owner full, manager operations, front_desk view-only, staff none); re-seed.
-4. Route gating: `auth + tenant.context + module.active:property` (new generic middleware using `ModuleService::isEnabled`).
-5. Host controllers under `/dashboard/properties/...`: profile (policies JSON, amenities sync, location, media photos/videos), room types, rooms, rates, availability blocks, property staff.
-6. Views namespaced `property-management::` on `<x-app-layout>` (bnb classes only — no build changes); sidebar link gated by `properties.view`.
-7. Pest coverage: auth, module gating, tenant isolation, permissions per role, inventory rules (unique room per property), rate overlap validation, availability block resolution, staff membership checks, media handling.
-8. `php artisan test` must pass → update `AI_PROGRESS.md` + `docs/modules/property-management.md` + `docs/DATABASE.md` + CHANGELOG → commit.
+1. New module `App\Modules\Booking` (provider in `bootstrap/providers.php`); gated `auth + tenant.context + module.active:booking` (booking depends on property per ModuleSeeder metadata).
+2. Master plan PHASE 05 scope: availability, calendar, reservations, room inventory, pricing, discounts, promotions, cancellation, guest info, check-in, check-out, no-show, walk-in, manual reservation, multi-room + group booking.
+3. Booking states: pending, held, confirmed, checked_in, checked_out, cancelled, no_show, refunded, completed.
+4. **Critical: prevent double booking** — DB transactions + inventory locking (`AvailabilityService::availableRoomCount` is the source of truth; lock rows `FOR UPDATE` inside the transaction; store room-level assignments so two reservations can never hold the same room on the same night).
+5. Migrations: `bookings` (+ per-room `booking_rooms`), guest fields on booking; state machine transitions validated in a `BookingService`.
+6. Permissions: `bookings.*` group; role map: owner/manager/front_desk manage (front_desk is the natural operator).
+7. Host UI: `/dashboard/bookings` (list + filters by state/date), create (walk-in/manual with date range + room type + quantity), state transition actions (confirm, check-in, check-out, cancel, no-show), calendar view per room type.
+8. Tests: double-booking prevention (two concurrent reservations for the last room — one must fail), state-machine guards, cancellation rules, availability math vs blocks from Phase 04, permissions.
+9. `php artisan test` must pass → update AI_PROGRESS/CHANGELOG/DATABASE/module docs → commit.
 
 ## Last command run
 
-`_ai\run.bat php artisan test` → PASS (74 tests, 200 assertions).
+`_ai\run.bat php artisan test` → PASS (98 tests, 320 assertions).
 
 ## Last test result
 
-PASS — Phase 03 complete (incl. wish-list HTTP coverage). Found + fixed during verification: `FavoriteController` eager-load closure typed against wrong `MorphTo` class (wish list with items returned 500).
+PASS — Phase 04 complete (24 tests). Notable bugs found & fixed during the phase: controller base missing `AuthorizesRequests` trait, missing `HasMany` import on `Property`, fixture missing `property_id`, and the route-binding-before-tenant-context architecture trap (resolved with manual tenant-scoped resolution).

@@ -22,10 +22,35 @@ Framework tables (`cache`, `jobs`, `sessions`, …) follow the Laravel defaults;
 - BIGINT UNSIGNED ids, timestamps everywhere, soft deletes where meaningful.
 - Foreign keys with explicit `cascadeOnDelete` / `nullOnDelete`.
 - Composite uniques for pivots; indexes on status/tenant_id columns.
+- Room numbers are unique per property **among live rows** — enforced in the application (a MySQL unique index including the nullable `deleted_at` never fires); the composite index backs the lookup.
+
+## Phase 03 tables (Marketplace)
+
+| Table | Purpose | Notes |
+|---|---|---|
+| locations | destinations (SEO landing pages) | reference data, slug-identified |
+| property_types | stay categories | reference data (hotel, resort, villa…) |
+| amenities | stay features | reference data; `property_amenity` pivot |
+| cuisines | dining categories | reference data; `cuisine_restaurant` pivot |
+| properties | tenant-owned stay listings | status lifecycle `draft→pending→published→suspended`, uuid + slug, pricing/capacity/geo, `highlights` + `policies` JSON, rating aggregates, soft deletes |
+| restaurants | tenant-owned dining listings | same lifecycle/scope rules as properties |
+| media | polymorphic gallery | morph `mediable`, cover flag, `kind` (image/video — Phase 04); no tenant column, reached only through its parent |
+| favorites | guest wish list | unique (user, morphed listing); counters maintained by observers |
+| reviews | guest reviews | polymorphic `reviewable`, 1–5 rating, status lifecycle; aggregates (`avg_rating`, `reviews_count`) on the listing |
+
+## Phase 04 tables (Property Management)
+
+| Table | Purpose | Notes |
+|---|---|---|
+| room_types | sellable categories per property ("Deluxe Room") | tenant + property FKs, occupancy, bed info, base/weekend price, min stay, soft deletes; unique name per property among live rows (app-enforced) |
+| rooms | physical inventory ("101, 102…") | property + room_type FKs, room_number unique per property (live rows), status `active/maintenance/inactive`, soft deletes |
+| rate_periods | date-range price overrides | room_type FK, inclusive start/end, nightly + weekend price, min stay; overlaps rejected in the app |
+| availability_blocks | maintenance/owner blocks | room_type FK, optional room FK, inclusive date range, reason; consumed by AvailabilityService |
+| property_staff | per-property assignments | property + user FKs, role label, assigned_by; unique (property_id, user_id); members must be active tenant members |
 
 ## Seeding
 
-`php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin`).
+`php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin` **and** a refresh of every existing tenant's system roles, so newly added catalogue permissions reach already-provisioned businesses).
 Tenant roles (owner, manager, front_desk, staff) are provisioned per tenant at creation time via `RoleSeeder::ensureTenantRoles()` — the same call tenant-creation endpoints make.
 
 ## Provisioning the first Super Admin

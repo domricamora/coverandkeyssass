@@ -38,6 +38,22 @@ trait HasMedia
     {
         $media = $this->relationLoaded('media') ? $this->media : $this->media()->get();
 
-        return $media->map(fn (Media $item) => $item->url())->unique()->values()->all();
+        return $media->where('kind', Media::KIND_IMAGE)
+            ->map(fn (Media $item) => $item->url())
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /** Promo videos attached to the listing, in display order. */
+    public function videos(): MorphMany
+    {
+        return $this->morphMany(Media::class, 'mediable')->kind(Media::KIND_VIDEO)->ordered();
+    }
+
+    /** @return list<string> */
+    public function videoUrls(): array
+    {
+        return $this->videos()->get()->map(fn (Media $item) => $item->url())->all();
     }
 }
