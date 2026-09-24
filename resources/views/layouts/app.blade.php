@@ -33,6 +33,7 @@
                         <div class="menu__panel">
                             <p class="menu__head">{{ auth()->user()->name }}<br><small>{{ auth()->user()->email }}</small></p>
                             <hr>
+                            <a href="{{ route('account.dashboard') }}">My trips</a>
                             <a href="{{ route('dashboard') }}">Dashboard</a>
                             <a href="{{ route('tenants.index') }}">Businesses</a>
                             <a href="{{ route('profile.edit') }}">Profile</a>

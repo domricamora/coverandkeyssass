@@ -48,6 +48,21 @@ Framework tables (`cache`, `jobs`, `sessions`, …) follow the Laravel defaults;
 | availability_blocks | maintenance/owner blocks | room_type FK, optional room FK, inclusive date range, reason; consumed by AvailabilityService |
 | property_staff | per-property assignments | property + user FKs, role label, assigned_by; unique (property_id, user_id); members must be active tenant members |
 
+## Phase 05 tables (Booking Engine)
+
+| Table | Purpose | Notes |
+|---|---|---|
+| promotions | promo codes | tenant FK, optional property FK, `percent/fixed` value, date window, min nights, max/used counts, active flag; unique (tenant_id, code) |
+| bookings | reservations `[check_in, check_out)` | unique `reference`; tenant + property FKs, optional customer `user_id`, `created_by`, `promotion_id`; source `walk_in/manual/marketplace`; status (9-state machine); guest info, group name, adults/children; subtotal/discount/total; hold expiry and lifecycle timestamps |
+| booking_rooms | rooms assigned to a booking | booking + room_type + room FKs, `nightly_rates` JSON price snapshot, total |
+| room_nights | occupied inventory | booking_room + room FKs, `night`; **unique (room_id, night)** is the DB-level double-booking guard; rows deleted when a booking stops occupying the room |
+
+## Phase 06 tables (Customer Portal)
+
+| Table | Purpose | Notes |
+|---|---|---|
+| notifications | Laravel database notifications | booking confirmed/cancelled messages for customers |
+
 ## Seeding
 
 `php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin` **and** a refresh of every existing tenant's system roles, so newly added catalogue permissions reach already-provisioned businesses).

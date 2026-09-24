@@ -14,13 +14,11 @@
         </div>
         <div class="stat card">
             <p class="stat__label">Properties</p>
-            <p class="stat__value">&mdash;</p>
-            <p class="stat__sub">Arrives with Property Management (Phase 04)</p>
+            <p class="stat__value">{{ \App\Modules\Marketplace\Models\Property::query()->count() }}</p>
         </div>
         <div class="stat card">
-            <p class="stat__label">Reservations</p>
-            <p class="stat__value">&mdash;</p>
-            <p class="stat__sub">Arrives with the Booking Engine (Phase 05)</p>
+            <p class="stat__label">Upcoming reservations</p>
+            <p class="stat__value">{{ \App\Modules\Booking\Models\Booking::query()->whereIn('status', ['pending', 'held', 'confirmed'])->where('check_in', '>=', today()->toDateString())->count() }}</p>
         </div>
     </div>
 

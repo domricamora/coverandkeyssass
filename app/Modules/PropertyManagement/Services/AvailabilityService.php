@@ -7,6 +7,7 @@ use App\Modules\PropertyManagement\Models\AvailabilityBlock;
 use App\Modules\PropertyManagement\Models\Room;
 use App\Modules\PropertyManagement\Models\RoomType;
 use Carbon\CarbonImmutable;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Resolves sellable room inventory for a date window.
@@ -55,12 +56,23 @@ class AvailabilityService
      */
     public function availableRoomCount(RoomType $roomType, string|CarbonImmutable $from, string|CarbonImmutable $to): int
     {
+        return count($this->freeRoomIds($roomType, $from, $to));
+    }
+
+    /**
+     * Sellable rooms of a room type free for every night of the inclusive
+     * window: not blocked and not occupied by a booking (room_nights).
+     *
+     * @return list<int>
+     */
+    public function freeRoomIds(RoomType $roomType, string|CarbonImmutable $from, string|CarbonImmutable $to): array
+    {
         [$from, $to] = $this->normalise($from, $to);
 
-        $sellable = $roomType->rooms()->sellable()->pluck('id');
+        $sellable = $roomType->rooms()->sellable()->orderBy('id')->pluck('id');
 
         if ($sellable->isEmpty()) {
-            return 0;
+            return [];
         }
 
         $blocks = AvailabilityBlock::query()
@@ -68,18 +80,18 @@ class AvailabilityService
             ->intersecting($from->toDateString(), $to->toDateString())
             ->get(['room_id']);
 
-        if ($blocks->isEmpty()) {
-            return $sellable->count();
-        }
-
         // A single whole-type block takes the room type off the market.
         if ($blocks->contains(fn (AvailabilityBlock $block) => $block->room_id === null)) {
-            return 0;
+            return [];
         }
 
-        $blocked = $blocks->pluck('room_id')->intersect($sellable)->unique()->count();
+        $booked = DB::table('room_nights')
+            ->whereIn('room_id', $sellable)
+            ->whereBetween('night', [$from->toDateString(), $to->toDateString()])
+            ->distinct()
+            ->pluck('room_id');
 
-        return max(0, $sellable->count() - $blocked);
+        return $sellable->diff($blocks->pluck('room_id'))->diff($booked)->values()->all();
     }
 
     /**

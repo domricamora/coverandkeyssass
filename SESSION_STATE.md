@@ -4,35 +4,34 @@
 
 ## Snapshot
 
-- Date: 2026-09-17
-- Phase: **04 — Property Management COMPLETE (verified)** → next **05 — Booking Engine**
-- Tests: PASS — 98 tests, 320 assertions, MySQL `hospitality_os_testing`
+- Date: 2026-09-24
+- Phase: **05 Booking Engine + 06 Customer Portal COMPLETE (verified)** → next **07 — PayMongo**
+- Tests: PASS — 124 tests, 425 assertions, MySQL `hospitality_os_testing`
 - Git: local `master` — gh CLI installed but NOT authenticated; if `gh auth login` runs, create private repo + push
 
 ## Environment (ready)
 
 - Windows WAMP PHP 8.3.14 (`C:\wamp64\bin\php\php8.3.14`), Composer 2.10.3, MySQL 9.1.0 (root / no password).
-- Dev DB `hospitality_os`, test DB `hospitality_os_testing`.
+- Dev DB `hospitality_os` (migrated + permissions/roles/modules re-seeded 2026-09-24), test DB `hospitality_os_testing`.
 - The default `php` on PATH is 7.4 — run everything via: `cmd.exe /c "cd /d C:\wamp64\www\ck && _ai\run.bat <cmd>"`.
 - Frontend build: `node node_modules/vite/bin/vite.js build` (the `&` in the path breaks npm shims).
 - Dev URL: `http://localhost/ck/public`.
+- No Python on this machine; use PHP / bash for scripting.
 
-## Next actions (Phase 05 — Booking Engine)
+## Next actions (Phase 07 — PayMongo)
 
-1. New module `App\Modules\Booking` (provider in `bootstrap/providers.php`); gated `auth + tenant.context + module.active:booking` (booking depends on property per ModuleSeeder metadata).
-2. Master plan PHASE 05 scope: availability, calendar, reservations, room inventory, pricing, discounts, promotions, cancellation, guest info, check-in, check-out, no-show, walk-in, manual reservation, multi-room + group booking.
-3. Booking states: pending, held, confirmed, checked_in, checked_out, cancelled, no_show, refunded, completed.
-4. **Critical: prevent double booking** — DB transactions + inventory locking (`AvailabilityService::availableRoomCount` is the source of truth; lock rows `FOR UPDATE` inside the transaction; store room-level assignments so two reservations can never hold the same room on the same night).
-5. Migrations: `bookings` (+ per-room `booking_rooms`), guest fields on booking; state machine transitions validated in a `BookingService`.
-6. Permissions: `bookings.*` group; role map: owner/manager/front_desk manage (front_desk is the natural operator).
-7. Host UI: `/dashboard/bookings` (list + filters by state/date), create (walk-in/manual with date range + room type + quantity), state transition actions (confirm, check-in, check-out, cancel, no-show), calendar view per room type.
-8. Tests: double-booking prevention (two concurrent reservations for the last room — one must fail), state-machine guards, cancellation rules, availability math vs blocks from Phase 04, permissions.
-9. `php artisan test` must pass → update AI_PROGRESS/CHANGELOG/DATABASE/module docs → commit.
+1. New module `App\Modules\Payments` (`payments` module slug may need adding to ModuleSeeder), `payments` + `payment_events` tables; PayMongo keys via `.env` / `config/services.php`.
+2. Hook point: marketplace reservations are created `pending` by `ReservationController` → create a PayMongo checkout / payment intent for `Booking::total`, redirect the guest.
+3. Webhook route (CSRF-exempt, signature-verified) → verify payment server-side → `BookingService::transition($booking, 'confirmed')` inside `asTenantOf`. NEVER confirm from the browser redirect.
+4. Idempotency: unique PayMongo event id / payment id; duplicate webhook = no-op (no duplicate payment, no double transition — `canTransitionTo` already rejects pending→confirmed twice, but store the event first).
+5. Refund: `cancelled|no_show → refunded` transition should call PayMongo refund; failed payment → leave pending + notify.
+6. Customer portal: add Payments tab (transaction history) to `customer::partials.nav`; invoice shows paid/unpaid.
+7. Tests with `Http::fake()` for PayMongo; `php artisan test` must pass → update docs → commit.
 
 ## Last command run
 
-`_ai\run.bat php artisan test` → PASS (98 tests, 320 assertions).
+`_ai\run.bat php artisan test` → PASS (124 tests, 425 assertions).
 
 ## Last test result
 
-PASS — Phase 04 complete (24 tests). Notable bugs found & fixed during the phase: controller base missing `AuthorizesRequests` trait, missing `HasMany` import on `Property`, fixture missing `property_id`, and the route-binding-before-tenant-context architecture trap (resolved with manual tenant-scoped resolution).
+PASS. Bug found & fixed during Phase 05: `checked_out → completed` was deleting the stayed room-nights (release now happens only when leaving an occupying state). Live race (8 PHP processes, 1 room, dev DB) → exactly 1 booking, 7 clean "sold out" rejections; race tenant deleted afterwards.

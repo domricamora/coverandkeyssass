@@ -30,6 +30,7 @@ class RoleSeeder extends Seeder
                     'rooms.view', 'rooms.create', 'rooms.update', 'rooms.delete',
                     'rates.view', 'rates.manage',
                     'availability.view', 'availability.manage',
+                    'bookings.view', 'bookings.create', 'bookings.update', 'promotions.manage',
                 ],
             ],
             'manager' => [
@@ -44,6 +45,7 @@ class RoleSeeder extends Seeder
                     'rooms.view', 'rooms.create', 'rooms.update',
                     'rates.view', 'rates.manage',
                     'availability.view', 'availability.manage',
+                    'bookings.view', 'bookings.create', 'bookings.update', 'promotions.manage',
                 ],
             ],
             'front_desk' => [
@@ -54,6 +56,7 @@ class RoleSeeder extends Seeder
                     'properties.view',
                     'restaurants.view',
                     'rooms.view', 'rates.view', 'availability.view',
+                    'bookings.view', 'bookings.create', 'bookings.update',
                 ],
             ],
             'staff' => [

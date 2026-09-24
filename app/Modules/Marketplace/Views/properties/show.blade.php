@@ -168,13 +168,40 @@
                         <p class="price-breakdown__total"><span>Stay total</span> <span>Calculated on your dates</span></p>
                     </div>
 
-                    <div class="card" style="margin-top:14px;background:var(--surface-2);">
-                        <p class="muted" style="margin:0;">
-                            <strong>Reservations open with the booking engine (Phase 05).</strong>
-                            Availability will be calculated by the platform, never by the browser —
-                            so dates can never be double-sold.
-                        </p>
-                    </div>
+                    @if (! empty($reservableRoomTypes) && $reservableRoomTypes->isNotEmpty())
+                        @auth
+                            <form method="POST" action="{{ route('marketplace.properties.reserve', $p->slug) }}" style="margin-top:14px;display:grid;gap:8px;">
+                                @csrf
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                                    <label>Check-in <input class="form-input" type="date" name="check_in" value="{{ old('check_in') }}" min="{{ today()->toDateString() }}" required></label>
+                                    <label>Check-out <input class="form-input" type="date" name="check_out" value="{{ old('check_out') }}" min="{{ today()->addDay()->toDateString() }}" required></label>
+                                </div>
+                                <label>Room
+                                    <select class="form-input" name="room_type_id">
+                                        @foreach ($reservableRoomTypes as $type)
+                                            <option value="{{ $type->id }}" @selected((int) old('room_type_id') === $type->id)>{{ $type->name }} · {{ $type->priceLabel() }} · sleeps {{ $type->max_guests }}</option>
+                                        @endforeach
+                                    </select>
+                                </label>
+                                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+                                    <label>Rooms <input class="form-input" type="number" name="quantity" min="1" max="10" value="{{ old('quantity', 1) }}"></label>
+                                    <label>Adults <input class="form-input" type="number" name="adults" min="1" value="{{ old('adults', 2) }}"></label>
+                                    <label>Children <input class="form-input" type="number" name="children" min="0" value="{{ old('children', 0) }}"></label>
+                                </div>
+                                <label>Promo code <input class="form-input" name="promo_code" value="{{ old('promo_code') }}"></label>
+                                @foreach (['check_in', 'check_out', 'rooms', 'adults', 'promo_code', 'room_type_id'] as $field)
+                                    @error($field) <p class="muted" style="color:var(--danger, #b42318);margin:0;">{{ $message }}</p> @enderror
+                                @endforeach
+                                <button class="btn btn-primary btn-block" type="submit">Request to book</button>
+                            </form>
+                        @else
+                            <a class="btn btn-primary btn-block" style="margin-top:14px;" href="{{ route('login') }}">Sign in to book</a>
+                        @endauth
+                    @else
+                        <div class="card" style="margin-top:14px;background:var(--surface-2);">
+                            <p class="muted" style="margin:0;">This host is not taking online reservations yet.</p>
+                        </div>
+                    @endif
 
                     <div style="margin-top:14px;display:grid;gap:8px;">
                         @auth

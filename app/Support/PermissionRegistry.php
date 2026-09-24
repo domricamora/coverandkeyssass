@@ -63,6 +63,12 @@ class PermissionRegistry
                 'properties.publish' => 'Publish or unpublish properties',
                 'properties.staff.manage' => 'Assign property staff',
             ],
+            'bookings' => [
+                'bookings.view' => 'View bookings and the room calendar',
+                'bookings.create' => 'Create reservations and walk-ins',
+                'bookings.update' => 'Confirm, check in/out, cancel and mark no-shows',
+                'promotions.manage' => 'Create and deactivate promo codes',
+            ],
             'restaurants' => [
                 'restaurants.view' => 'View restaurant listings',
                 'restaurants.create' => 'Create restaurant listings',

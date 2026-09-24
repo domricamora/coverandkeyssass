@@ -2,8 +2,8 @@
 
 ## Current Phase
 
-Phase 04 - Property Management — **COMPLETE (verified)**
-Next: Phase 05 - Booking Engine
+Phase 06 - Customer Portal — **COMPLETE (verified)**
+Next: Phase 07 - PayMongo
 
 ## Completed
 
@@ -13,16 +13,18 @@ Next: Phase 05 - Booking Engine
 - **Bugfix (Phase 03 verification)**: `FavoriteController` typed the wish-list eager-load closure against the wrong `MorphTo` class, so a wish list containing items returned HTTP 500 — found by the new wish-list HTTP tests and fixed to `Illuminate\Database\Eloquent\Relations\MorphTo`
 - **Phase 04 — Property Management**: new `App\Modules\PropertyManagement` module extending the Marketplace `Property`; host-side profile CRUD (policies JSON, amenities sync, location, pricing), publish/unpublish with audit trail; photos + videos via additive `media.kind` (single cover with promotion); room types → rooms inventory (per-property unique room numbers, active/maintenance/inactive); rate periods with overlap rejection; availability blocks; `AvailabilityService` (`blockedRoomIds`, `availableRoomCount`) as the Phase 05 foundation; property staff assignments (business members only, audited); generic `module.active:property` gating middleware; permissions (`rooms.*`, `rates.*`, `availability.*`, `properties.staff.manage`) + extended role map; sidebar link + five management screens; `db:seed` refreshes existing tenants' roles
 - **Architecture fix (Phase 04)**: Laravel's `SubstituteBindings` runs before `tenant.context` (middleware priority), so module routes resolve `{property}`/nested params manually through tenant-scoped relations — cross-tenant rows are plain 404s (documented in ARCHITECTURE.md + module docs)
-- Tests: Pest suite — **98 passed, 320 assertions** (`php artisan test`, real MySQL), including 24 Phase 04 coverage tests
+- **Phase 05 — Booking Engine**: `App\Modules\Booking` — bookings / booking_rooms / room_nights / promotions; `BookingService` (reserve under `FOR UPDATE` lock + unique `(room_id, night)` backstop, per-night pricing with rate periods + weekend rates + min stay, promo codes, 9-state machine with date guards, hold expiry, audited transitions, inventory release); host desk (list/filters, manual/hold/walk-in/multi-room/group create with live availability, detail + actions, 14-day room calendar, promotions); marketplace "Request to book" → pending; permissions `bookings.*`, `promotions.manage`. Live 8-process race on one room → exactly 1 booking
+- **Phase 06 — Customer Portal**: `App\Modules\Customer` — `/account` dashboard, trips (upcoming/past), trip detail, invoice, guest self-cancel before check-in, verified reviews after check-out, database notifications (confirm/cancel) with mark-read; orders/payments/wallet/loyalty/coupons/messages deferred to their phases
+- Tests: Pest suite — **124 passed, 425 assertions** (Phase 05: 19, Phase 06: 7); previously **98 passed, 320 assertions** (`php artisan test`, real MySQL), including 24 Phase 04 coverage tests
 - Documentation: docs/* updated per phase; `docs/modules/{marketplace,property-management}.md` completed; CHANGELOG carries Phase 01–04 entries
 
 ## In Progress
 
-- (nothing — Phase 05 not started)
+- (nothing — Phase 07 not started)
 
 ## Pending
 
-- Phases 05–38: booking engine (double-booking prevention via transactions + inventory locking), customer system, PayMongo, host wallet/commissions, restaurant management, reservations, ordering, delivery, room service, folio, housekeeping, maintenance, staff management, inventory, POS, accounting, CRM, marketing, loyalty, reviews, messaging, notifications, SaaS billing, super admin, marketplace administration, SEO, API, security audit, performance, testing, deployment, backups, monitoring, final audit
+- Phases 07–38: PayMongo (pending bookings are the hook: confirm from verified webhook, idempotent), host wallet/commissions, restaurant management, reservations, ordering, delivery, room service, folio, housekeeping, maintenance, staff management, inventory, POS, accounting, CRM, marketing, loyalty, reviews, messaging, notifications, SaaS billing, super admin, marketplace administration, SEO, API, security audit, performance, testing, deployment, backups, monitoring, final audit
 
 ## Known Issues
 
@@ -33,14 +35,14 @@ Next: Phase 05 - Booking Engine
 
 ## Last Agent
 
-Cline (Claude)
+Claude Code (Opus)
 
 ## Last Updated
 
-2026-09-17
+2026-09-24
 
 ## Last Successful Test
 
 php artisan test
 
-Result: PASS (98 tests, 320 assertions, MySQL `hospitality_os_testing`)
+Result: PASS (124 tests, 425 assertions, MySQL `hospitality_os_testing`)

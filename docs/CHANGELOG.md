@@ -1,5 +1,26 @@
 # CHANGELOG.md
 
+## 2026-09-24 — Phase 06: Customer Portal (v0.6.0)
+
+(verified: 124 tests / 425 assertions)
+
+- New `App\Modules\Customer` module: `/account` dashboard (upcoming/past trips, wish-list/review/notification counts), trips list and detail, printable invoice, self-cancel before the check-in date, one verified review per property after check-out, and database notifications with mark-read.
+- Cross-tenant customer reads go through `Booking::forCustomer()` only; tenant relations and writes run in `BookingService::asTenantOf()`.
+- "My trips" link in both layout menus. Orders, payments, wallet, loyalty, coupons and messages are deferred to the phases that build them.
+- 7 new Pest tests.
+
+## 2026-09-24 — Phase 05: Booking Engine (v0.5.0)
+
+- New `App\Modules\Booking` module: `bookings`, `booking_rooms`, `room_nights`, `promotions`.
+- Double booking is prevented by a transaction plus `FOR UPDATE` lock on the room type's rooms, backed by a unique `(room_id, night)` index. Verified with a live race of 8 concurrent processes for one room: exactly 1 booking.
+- 9-state machine (pending, held, confirmed, checked_in, checked_out, cancelled, no_show, refunded, completed) with date guards, audited transitions, inventory release on cancel/no-show/early check-out, and auto-cancel of expired holds.
+- Pricing per night (rate periods, then weekend price, then base), minimum stay, promo codes (percent/fixed, window, min nights, max uses).
+- Host desk: list with filters, manual / hold / walk-in / multi-room / group reservations with live availability, booking detail with actions, 14-day room calendar, promotions screen.
+- Marketplace: "Request to book" widget on the property page (only when the business runs the booking module) → pending booking.
+- `AvailabilityService::freeRoomIds()` now subtracts booked nights; `availableRoomCount()` uses it.
+- Permissions `bookings.view|create|update`, `promotions.manage` (front desk gets bookings, not promotions). Host dashboard now shows real property / upcoming reservation counts.
+- 19 new Pest tests.
+
 ## 2026-09-17 — Phase 04: Property Management (v0.4.0)
 
 Host-side property management (verified: 98 tests / 320 assertions):

@@ -63,6 +63,7 @@
                         <div class="menu__panel">
                             <p class="menu__head">{{ auth()->user()->name }}<br><small>{{ auth()->user()->email }}</small></p>
                             <hr>
+                            <a href="{{ route('account.dashboard') }}">My trips</a>
                             <a href="{{ route('marketplace.favorites.index') }}">Wish list</a>
                             <a href="{{ route('dashboard') }}">Dashboard</a>
                             @if (auth()->user()->isPlatformAdmin())
