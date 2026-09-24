@@ -1,5 +1,17 @@
 # CHANGELOG.md
 
+## 2026-09-24 — Phase 07: PayMongo (v0.7.0)
+
+(verified: 136 tests / 485 assertions)
+
+- New `App\Modules\Payments`: `payments` + `payment_events` tables, `PayMongoGateway` (checkout sessions, refunds, signature verification) and `PaymentService`.
+- Checkout → webhook / return URL → **server-side session lookup** (status, amount, currency) → booking confirmed. Never confirmed from a redirect or a webhook body alone.
+- Idempotent: event ledger with unique event ids, row-locked `markPaid`, unique provider ids, reuse of an open checkout.
+- Failed payments recorded with retry; refunds go through PayMongo when a booking is marked refunded (a provider refusal vetoes the transition); a payment that lands after cancellation is recorded and flagged.
+- Signed webhook outside the web group (no CSRF/session), with a 5-minute replay window.
+- Customer portal Payments tab, payment panels on guest and host booking pages. Booking emits a new `BookingTransitioning` event.
+- 12 new Pest tests (PayMongo faked). Real-sandbox run still to do.
+
 ## 2026-09-24 — Phase 06: Customer Portal (v0.6.0)
 
 (verified: 124 tests / 425 assertions)

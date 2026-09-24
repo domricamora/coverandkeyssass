@@ -1,5 +1,11 @@
 # SECURITY.md
 
+## Payments (Phase 07)
+
+- PayMongo webhook authenticated by HMAC-SHA256 signature (constant-time compare, 5-minute timestamp window); no session/CSRF on that route only.
+- Bookings are confirmed only after a server-side PayMongo lookup confirms status, amount and currency. Redirects and webhook bodies are never trusted.
+- Idempotent processing (unique event ids, row lock, unique provider ids). Secret keys only from `.env`.
+
 ## Implemented (Phase 01)
 
 - **Authentication** — Laravel session auth (Breeze): registration, login, logout, password reset, email verification. Login throttling (5/min per email+IP) and hashed passwords (bcrypt).

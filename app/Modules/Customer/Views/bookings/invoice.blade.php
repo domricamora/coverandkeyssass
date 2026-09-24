@@ -30,7 +30,7 @@
                     <tr><td colspan="2"><strong>Total</strong></td><td class="text-right"><strong>{{ $booking->money($booking->total) }}</strong></td></tr>
                 </tbody>
             </table>
-            <p class="muted" style="margin-bottom:0;">Payment is settled with the property. Online payments arrive with PayMongo.</p>
+            <p class="muted" style="margin-bottom:0;">Payments made online are listed on the trip page and under Payments in your account.</p>
         </div>
     </div>
 </x-public-layout>

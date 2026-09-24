@@ -4,6 +4,7 @@ namespace App\Modules\Booking\Services;
 
 use App\Models\Tenant;
 use App\Models\User;
+use App\Modules\Booking\Events\BookingTransitioning;
 use App\Modules\Booking\Models\Booking;
 use App\Modules\Booking\Models\Promotion;
 use App\Modules\Booking\Notifications\BookingStatusChanged;
@@ -232,6 +233,8 @@ class BookingService
         }
 
         $from = $booking->status;
+
+        BookingTransitioning::dispatch($booking, $to);
 
         DB::transaction(function () use ($booking, $from, $to, $reason): void {
             $booking->status = $to;

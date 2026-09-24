@@ -28,6 +28,18 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    // Online payments (Phase 07). Unset secret key = online payment off;
+    // marketplace bookings then stay pending until the host confirms.
+    'paymongo' => [
+        'public_key' => env('PAYMONGO_PUBLIC_KEY'),
+        'secret_key' => env('PAYMONGO_SECRET_KEY'),
+        'webhook_secret' => env('PAYMONGO_WEBHOOK_SECRET'),
+        'base_url' => env('PAYMONGO_BASE_URL', 'https://api.paymongo.com/v1'),
+        'methods' => explode(',', env('PAYMONGO_METHODS', 'card,gcash,paymaya')),
+        // Max age of a webhook signature timestamp (replay protection).
+        'tolerance' => (int) env('PAYMONGO_WEBHOOK_TOLERANCE', 300),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

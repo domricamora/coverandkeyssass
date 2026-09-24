@@ -85,4 +85,8 @@
             </table>
         </div>
     </div>
+
+    @isset($payments)
+        @include('payments::partials.panel')
+    @endisset
 </x-app-layout>

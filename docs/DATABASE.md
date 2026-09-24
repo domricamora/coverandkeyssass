@@ -63,6 +63,13 @@ Framework tables (`cache`, `jobs`, `sessions`, …) follow the Laravel defaults;
 |---|---|---|
 | notifications | Laravel database notifications | booking confirmed/cancelled messages for customers |
 
+## Phase 07 tables (Payments / PayMongo)
+
+| Table | Purpose | Notes |
+|---|---|---|
+| payments | one PayMongo checkout attempt per row | tenant + booking FKs, optional customer; unique `checkout_session_id`, unique `provider_payment_id`, unique `refund_id`; amount/currency, status `pending/paid/failed/refunded`, method, failure reason, refund amount/time |
+| payment_events | webhook idempotency ledger | unique `event_id`, type, raw JSON payload, `processed_at` |
+
 ## Seeding
 
 `php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin` **and** a refresh of every existing tenant's system roles, so newly added catalogue permissions reach already-provisioned businesses).

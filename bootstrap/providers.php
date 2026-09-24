@@ -3,6 +3,7 @@
 use App\Modules\Booking\Providers\BookingServiceProvider;
 use App\Modules\Customer\Providers\CustomerServiceProvider;
 use App\Modules\Marketplace\Providers\MarketplaceServiceProvider;
+use App\Modules\Payments\Providers\PaymentsServiceProvider;
 use App\Modules\PropertyManagement\Providers\PropertyManagementServiceProvider;
 use App\Providers\AppServiceProvider;
 
@@ -12,5 +13,6 @@ return [
     PropertyManagementServiceProvider::class,
     BookingServiceProvider::class,
     CustomerServiceProvider::class,
+    PaymentsServiceProvider::class,
 ];
 

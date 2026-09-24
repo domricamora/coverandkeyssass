@@ -13,9 +13,13 @@
 
         @if ($booking->status === 'pending')
             <div class="card" style="padding:14px;margin-bottom:16px;background:var(--surface-2);">
-                <p class="muted" style="margin:0;">Your request is waiting for the host to confirm. The rooms are held for you in the meantime.</p>
+                <p class="muted" style="margin:0;">Not confirmed yet — the rooms are held for you until the booking is paid or the host confirms it.</p>
             </div>
         @endif
+
+        @isset($payments)
+            @include('payments::partials.panel', ['guest' => true])
+        @endisset
 
         <div class="card" style="padding:18px;margin-bottom:16px;">
             <h2 style="font-size:1.1rem;margin-top:0;">Rooms &amp; price</h2>
