@@ -5,6 +5,7 @@ use App\Modules\Customer\Providers\CustomerServiceProvider;
 use App\Modules\Marketplace\Providers\MarketplaceServiceProvider;
 use App\Modules\Payments\Providers\PaymentsServiceProvider;
 use App\Modules\PropertyManagement\Providers\PropertyManagementServiceProvider;
+use App\Modules\Wallet\Providers\WalletServiceProvider;
 use App\Providers\AppServiceProvider;
 
 return [
@@ -14,5 +15,6 @@ return [
     BookingServiceProvider::class,
     CustomerServiceProvider::class,
     PaymentsServiceProvider::class,
+    WalletServiceProvider::class,
 ];
 

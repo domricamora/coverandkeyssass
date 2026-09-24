@@ -40,6 +40,11 @@ return [
         'tolerance' => (int) env('PAYMONGO_WEBHOOK_TOLERANCE', 300),
     ],
 
+    // Platform commission (Phase 08) until the Super Admin saves a global rate.
+    'commission' => [
+        'default_rate' => (float) env('COMMISSION_DEFAULT_RATE', 10),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

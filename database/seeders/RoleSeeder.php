@@ -31,6 +31,7 @@ class RoleSeeder extends Seeder
                     'rates.view', 'rates.manage',
                     'availability.view', 'availability.manage',
                     'bookings.view', 'bookings.create', 'bookings.update', 'promotions.manage',
+                    'wallet.view', 'payouts.request',
                 ],
             ],
             'manager' => [
@@ -46,6 +47,7 @@ class RoleSeeder extends Seeder
                     'rates.view', 'rates.manage',
                     'availability.view', 'availability.manage',
                     'bookings.view', 'bookings.create', 'bookings.update', 'promotions.manage',
+                    'wallet.view',
                 ],
             ],
             'front_desk' => [

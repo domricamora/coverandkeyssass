@@ -7,6 +7,8 @@
         <div class="flex gap-2">
             <a href="{{ route('admin.users.index') }}" class="btn btn-dark btn-sm">Users</a>
             <a href="{{ route('admin.tenants.index') }}" class="btn btn-dark btn-sm">Tenants</a>
+            <a href="{{ route('admin.commissions.index') }}" class="btn btn-dark btn-sm">Commissions</a>
+            <a href="{{ route('admin.payouts.index') }}" class="btn btn-dark btn-sm">Payouts</a>
         </div>
     </div>
 

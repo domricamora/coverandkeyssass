@@ -5,33 +5,31 @@
 ## Snapshot
 
 - Date: 2026-09-24
-- Phase: **05 Booking Engine + 06 Customer Portal COMPLETE (verified)** → next **07 — PayMongo**
-- Tests: PASS — 124 tests, 425 assertions, MySQL `hospitality_os_testing`
+- Phase: **05–08 COMPLETE (verified)** → next **09 — Restaurant Management**
+- Tests: PASS — 146 tests, 560 assertions, MySQL `hospitality_os_testing`
 - Git: local `master` — gh CLI installed but NOT authenticated; if `gh auth login` runs, create private repo + push
 
 ## Environment (ready)
 
 - Windows WAMP PHP 8.3.14 (`C:\wamp64\bin\php\php8.3.14`), Composer 2.10.3, MySQL 9.1.0 (root / no password).
-- Dev DB `hospitality_os` (migrated + permissions/roles/modules re-seeded 2026-09-24), test DB `hospitality_os_testing`.
+- Dev DB `hospitality_os` (migrated through Phase 08; permissions/roles re-seeded), test DB `hospitality_os_testing`.
 - The default `php` on PATH is 7.4 — run everything via: `cmd.exe /c "cd /d C:\wamp64\www\ck && _ai\run.bat <cmd>"`.
 - Frontend build: `node node_modules/vite/bin/vite.js build` (the `&` in the path breaks npm shims).
-- Dev URL: `http://localhost/ck/public`.
-- No Python on this machine; use PHP / bash for scripting.
+- Dev URL: `http://localhost/ck/public`. No Python on this machine; use PHP / bash.
 
-## Next actions (Phase 07 — PayMongo)
+## Open items
 
-1. New module `App\Modules\Payments` (`payments` module slug may need adding to ModuleSeeder), `payments` + `payment_events` tables; PayMongo keys via `.env` / `config/services.php`.
-2. Hook point: marketplace reservations are created `pending` by `ReservationController` → create a PayMongo checkout / payment intent for `Booking::total`, redirect the guest.
-3. Webhook route (CSRF-exempt, signature-verified) → verify payment server-side → `BookingService::transition($booking, 'confirmed')` inside `asTenantOf`. NEVER confirm from the browser redirect.
-4. Idempotency: unique PayMongo event id / payment id; duplicate webhook = no-op (no duplicate payment, no double transition — `canTransitionTo` already rejects pending→confirmed twice, but store the event first).
-5. Refund: `cancelled|no_show → refunded` transition should call PayMongo refund; failed payment → leave pending + notify.
-6. Customer portal: add Payments tab (transaction history) to `customer::partials.nav`; invoice shows paid/unpaid.
-7. Tests with `Http::fake()` for PayMongo; `php artisan test` must pass → update docs → commit.
+- **PayMongo sandbox run**: the integration is verified only against `Http::fake()`. Put real `sk_test_…` + webhook `whsk_…` in `.env`, register the webhook (curl in `docs/modules/payments.md`), and pay one booking in test mode before going live.
+- Laravel Boost (requested by CLAUDE.md) is not installed — deliberately skipped so far.
+
+## Next actions (Phase 09 — Restaurant Management)
+
+1. New module `App\Modules\RestaurantManagement` extending the Marketplace `Restaurant` (like PropertyManagement extends `Property`); gate with `module.active:restaurant`; resolve params manually through tenant-scoped relations (see PropertyManagementController).
+2. Scope (master plan): restaurant profile, opening hours, menu, categories, menu items, photos, pricing, modifiers, add-ons (e.g. Burger ₱250 + Cheese ₱30 / Bacon ₱50 / Egg ₱25), availability, tables, dining areas.
+3. Permissions `restaurants.*` already exist; add `menu.*`, `tables.*` to PermissionRegistry + role map.
+4. Commission rates already support `restaurant` listings (Wallet) — restaurant payments arrive with ordering (Phase 11).
+5. Tests → `php artisan test` green → docs → commit.
 
 ## Last command run
 
-`_ai\run.bat php artisan test` → PASS (124 tests, 425 assertions).
-
-## Last test result
-
-PASS. Bug found & fixed during Phase 05: `checked_out → completed` was deleting the stayed room-nights (release now happens only when leaving an occupying state). Live race (8 PHP processes, 1 room, dev DB) → exactly 1 booking, 7 clean "sold out" rejections; race tenant deleted afterwards.
+`_ai\run.bat php artisan test` → PASS (146 tests, 560 assertions).

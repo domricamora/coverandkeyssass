@@ -69,6 +69,10 @@ class PermissionRegistry
                 'bookings.update' => 'Confirm, check in/out, cancel and mark no-shows',
                 'promotions.manage' => 'Create and deactivate promo codes',
             ],
+            'wallet' => [
+                'wallet.view' => 'View the host wallet, commissions and payouts',
+                'payouts.request' => 'Request payouts from the host wallet',
+            ],
             'restaurants' => [
                 'restaurants.view' => 'View restaurant listings',
                 'restaurants.create' => 'Create restaurant listings',

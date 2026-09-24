@@ -1,5 +1,17 @@
 # CHANGELOG.md
 
+## 2026-09-24 — Phase 08: Host Wallet & Commissions (v0.8.0)
+
+(verified: 146 tests / 560 assertions)
+
+- New `App\Modules\Wallet`: `commission_rates`, `commissions`, `wallets`, `wallet_transactions`, `payouts`; `WalletService` (row-locked, ledgered balance changes).
+- Paid payment → commission split at the resolved rate (promotional listing → promotional all → listing → global → default 10%) → host pending balance. Released to available on check-out or no-show; reversed on refund.
+- Payouts: host request (min ₱100, at most the available balance); Super Admin marks paid with a transfer reference, or rejects (credited back).
+- Super Admin commission rates (global / property / restaurant / promotional) and platform revenue totals; admin dashboard links.
+- Payments: `PaymentPaid` / `PaymentRefunded` events; the paid status, earning and booking confirmation now commit in one transaction, so a failure rolls back and the webhook retry completes it. Booking: `BookingTransitioned` event.
+- Permissions `wallet.view` (owner, manager), `payouts.request` (owner); Wallet sidebar link. PayMongo test fake moved to `tests/Support/PayMongoFake.php`.
+- 10 new Pest tests.
+
 ## 2026-09-24 — Phase 07: PayMongo (v0.7.0)
 
 (verified: 136 tests / 485 assertions)

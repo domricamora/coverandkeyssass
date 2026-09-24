@@ -70,6 +70,16 @@ Framework tables (`cache`, `jobs`, `sessions`, …) follow the Laravel defaults;
 | payments | one PayMongo checkout attempt per row | tenant + booking FKs, optional customer; unique `checkout_session_id`, unique `provider_payment_id`, unique `refund_id`; amount/currency, status `pending/paid/failed/refunded`, method, failure reason, refund amount/time |
 | payment_events | webhook idempotency ledger | unique `event_id`, type, raw JSON payload, `processed_at` |
 
+## Phase 08 tables (Wallet & Commissions)
+
+| Table | Purpose | Notes |
+|---|---|---|
+| commission_rates | platform commission rates | kind `global/listing/promotional`, nullable morph `rateable` (property/restaurant), percent `rate`, optional date window; no tenant (platform-owned) |
+| commissions | split of one paid payment | tenant + booking FKs, unique `payment_id`, rate used, gross / platform_fee / host_amount, status `pending/released/reversed` |
+| wallets | host wallet per business | unique `tenant_id`, currency, `pending_balance`, `available_balance` |
+| wallet_transactions | append-only ledger | wallet FK, type, bucket `pending/available`, signed amount, `balance_after`, optional commission / payout FK |
+| payouts | host withdrawals | wallet FK, amount, method + account, status `requested/paid/rejected`, requested_by / processed_by, reference, note |
+
 ## Seeding
 
 `php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin` **and** a refresh of every existing tenant's system roles, so newly added catalogue permissions reach already-provisioned businesses).

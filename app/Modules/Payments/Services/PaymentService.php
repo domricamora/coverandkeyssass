@@ -5,6 +5,8 @@ namespace App\Modules\Payments\Services;
 use App\Models\User;
 use App\Modules\Booking\Models\Booking;
 use App\Modules\Booking\Services\BookingService;
+use App\Modules\Payments\Events\PaymentPaid;
+use App\Modules\Payments\Events\PaymentRefunded;
 use App\Modules\Payments\Models\Payment;
 use App\Support\AuditLogger;
 use Illuminate\Http\Client\RequestException;
@@ -171,12 +173,14 @@ class PaymentService
         ])->save();
 
         $this->audit->log('payment.refunded', $payment, null, ['refund_id' => $payment->refund_id, 'amount' => $payment->amount]);
+
+        PaymentRefunded::dispatch($payment);
     }
 
     private function markPaid(Payment $payment, string $providerPaymentId, ?string $method): Payment
     {
         return $this->bookings->asTenantOf($payment, function () use ($payment, $providerPaymentId, $method) {
-            $recorded = DB::transaction(function () use ($payment, $providerPaymentId, $method): bool {
+            DB::transaction(function () use ($payment, $providerPaymentId, $method): bool {
                 $locked = Payment::query()->lockForUpdate()->findOrFail($payment->id);
 
                 if ($locked->status === Payment::PAID) {
@@ -191,27 +195,26 @@ class PaymentService
                     'failure_reason' => null,
                 ])->save();
 
+                // Same transaction: if the wallet or the confirmation fails,
+                // the payment is not marked paid and PayMongo's retry redoes
+                // all of it (a committed "paid" would make the retry a no-op).
+                $this->audit->log('payment.paid', $locked, null, ['amount' => $locked->amount, 'method' => $method]);
+
+                PaymentPaid::dispatch($locked);
+
+                $booking = $locked->booking;
+
+                if ($booking->canTransitionTo(Booking::CONFIRMED)) {
+                    $this->bookings->transition($booking, Booking::CONFIRMED);
+                } else {
+                    // e.g. cancelled while the guest was paying — host must refund.
+                    $this->audit->log('payment.paid_on_inactive_booking', $locked, null, ['booking_status' => $booking->status]);
+                }
+
                 return true;
             });
 
-            $payment->refresh();
-
-            if (! $recorded) {
-                return $payment;
-            }
-
-            $this->audit->log('payment.paid', $payment, null, ['amount' => $payment->amount, 'method' => $method]);
-
-            $booking = $payment->booking;
-
-            if ($booking->canTransitionTo(Booking::CONFIRMED)) {
-                $this->bookings->transition($booking, Booking::CONFIRMED);
-            } else {
-                // e.g. cancelled while the guest was paying — host must refund.
-                $this->audit->log('payment.paid_on_inactive_booking', $payment, null, ['booking_status' => $booking->status]);
-            }
-
-            return $payment;
+            return $payment->refresh();
         });
     }
 

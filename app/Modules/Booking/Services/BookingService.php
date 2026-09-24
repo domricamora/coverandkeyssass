@@ -4,6 +4,7 @@ namespace App\Modules\Booking\Services;
 
 use App\Models\Tenant;
 use App\Models\User;
+use App\Modules\Booking\Events\BookingTransitioned;
 use App\Modules\Booking\Events\BookingTransitioning;
 use App\Modules\Booking\Models\Booking;
 use App\Modules\Booking\Models\Promotion;
@@ -260,6 +261,8 @@ class BookingService
         });
 
         $this->audit->log('booking.'.$to, $booking, ['status' => $from], ['status' => $to, 'reason' => $reason]);
+
+        BookingTransitioned::dispatch($booking, $from, $to);
 
         if (in_array($to, [Booking::CONFIRMED, Booking::CANCELLED], true)) {
             $booking->customer?->notify(new BookingStatusChanged($booking));

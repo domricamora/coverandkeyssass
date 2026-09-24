@@ -8,6 +8,7 @@ use Illuminate\Http\Client\Request as HttpRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Tests\Support\BookingFixtures;
+use Tests\Support\PayMongoFake;
 use Tests\Support\PropertyManagementFixtures;
 
 /*
@@ -25,94 +26,14 @@ uses(Illuminate\Foundation\Testing\RefreshDatabase::class);
 
 beforeEach(function () {
     BookingFixtures::bootstrap();
-    unset($GLOBALS['paymongo'], $GLOBALS['paymongoFaked']);
-
-    config([
-        'services.paymongo.secret_key' => 'sk_test_secret',
-        'services.paymongo.webhook_secret' => 'whsk_test_secret',
-        'services.paymongo.base_url' => 'https://api.paymongo.test/v1',
-    ]);
+    PayMongoFake::configure();
 });
-
-function checkoutSession(string $id, bool $paid = false, int $amount = 1250000): array
-{
-    return ['data' => [
-        'id' => $id,
-        'type' => 'checkout_session',
-        'attributes' => [
-            'checkout_url' => 'https://checkout.paymongo.test/'.$id,
-            'payment_intent' => ['id' => 'pi_test_1'],
-            'payment_method_used' => $paid ? 'gcash' : null,
-            'payments' => $paid ? [[
-                'id' => 'pay_test_1',
-                'type' => 'payment',
-                'attributes' => ['amount' => $amount, 'currency' => 'PHP', 'status' => 'paid'],
-            ]] : [],
-        ],
-    ]];
-}
-
-/**
- * Set what the fake PayMongo answers: $paid decides what GET
- * checkout_sessions/{id} reports. (Http::fake stubs stack first-match-wins,
- * so the fake is registered once and reads this state.)
- */
-function fakePayMongo(bool $paid = false, int $amount = 1250000, int $refundStatus = 200): void
-{
-    $GLOBALS['paymongo'] = compact('paid', 'amount', 'refundStatus') + ['sessions' => $GLOBALS['paymongo']['sessions'] ?? 0];
-
-    if (! empty($GLOBALS['paymongoFaked'])) {
-        return;
-    }
-
-    $GLOBALS['paymongoFaked'] = true;
-
-    Http::fake(function (HttpRequest $request) {
-        $state = $GLOBALS['paymongo'];
-
-        return match (true) {
-            str_ends_with($request->url(), '/checkout_sessions') => Http::response(checkoutSession('cs_test_'.++$GLOBALS['paymongo']['sessions'])),
-            str_contains($request->url(), '/checkout_sessions/') => Http::response(checkoutSession(basename($request->url()), $state['paid'], $state['amount'])),
-            str_ends_with($request->url(), '/refunds') => $state['refundStatus'] === 200
-                ? Http::response(['data' => ['id' => 'ref_test_1', 'attributes' => ['status' => 'pending']]])
-                : Http::response(['errors' => [['detail' => 'Payment cannot be refunded']]], $state['refundStatus']),
-        };
-    });
-}
-
-/** Guest with a pending marketplace booking (12,500) and an open checkout. */
-function paidFlowSetup(): array
-{
-    [$owner, $tenant, $property, $type] = BookingFixtures::hotel();
-    $guest = User::factory()->create();
-    $booking = BookingFixtures::reserve($property, $type, [], Booking::SOURCE_MARKETPLACE, $guest);
-
-    fakePayMongo();
-    test()->actingAs($guest)->post(route('account.payments.pay', $booking->reference));
-
-    return [$guest, $booking, $owner, $tenant];
-}
-
-function sendWebhook(string $eventId, string $type, array $resource, ?string $signature = null)
-{
-    $body = json_encode(['data' => ['id' => $eventId, 'type' => 'event', 'attributes' => [
-        'type' => $type, 'livemode' => false, 'data' => $resource,
-    ]]]);
-
-    $t = time();
-    $signature ??= 't='.$t.',te='.hash_hmac('sha256', $t.'.'.$body, 'whsk_test_secret').',li=';
-
-    return test()->call('POST', route('payments.webhook'), [], [], [], [
-        'CONTENT_TYPE' => 'application/json',
-        'HTTP_PAYMONGO_SIGNATURE' => $signature,
-    ], $body);
-}
 
 it('sends the guest to a PayMongo checkout for the booking total and reuses it', function () {
     [$owner, $tenant, $property, $type] = BookingFixtures::hotel();
     $guest = User::factory()->create();
     $booking = BookingFixtures::reserve($property, $type, [], Booking::SOURCE_MARKETPLACE, $guest);
-    fakePayMongo();
+    PayMongoFake::fake();
 
     $this->actingAs($guest)
         ->get(route('account.bookings.show', $booking->reference))
@@ -144,13 +65,13 @@ it('offers no online payment when PayMongo is not configured', function () {
 });
 
 it('rejects webhooks with a bad or stale signature', function () {
-    [, $booking] = paidFlowSetup();
-    fakePayMongo(paid: true);
+    [, $booking] = PayMongoFake::pendingPaidFlow();
+    PayMongoFake::fake(paid: true);
 
-    sendWebhook('evt_1', 'checkout_session.payment.paid', ['id' => 'cs_test_1'], 't='.time().',te=forged,li=')->assertStatus(400);
+    PayMongoFake::webhook('evt_1', 'checkout_session.payment.paid', ['id' => 'cs_test_1'], 't='.time().',te=forged,li=')->assertStatus(400);
 
     $old = time() - 3600;
-    sendWebhook('evt_1', 'checkout_session.payment.paid', ['id' => 'cs_test_1'],
+    PayMongoFake::webhook('evt_1', 'checkout_session.payment.paid', ['id' => 'cs_test_1'],
         't='.$old.',te='.hash_hmac('sha256', $old.'.x', 'whsk_test_secret'))->assertStatus(400);
 
     expect($booking->refresh()->status)->toBe(Booking::PENDING)
@@ -158,10 +79,10 @@ it('rejects webhooks with a bad or stale signature', function () {
 });
 
 it('confirms the booking once PayMongo reports the payment paid, exactly once', function () {
-    [$guest, $booking] = paidFlowSetup();
-    fakePayMongo(paid: true);
+    [$guest, $booking] = PayMongoFake::pendingPaidFlow();
+    PayMongoFake::fake(paid: true);
 
-    sendWebhook('evt_1', 'checkout_session.payment.paid', ['id' => 'cs_test_1'])->assertOk();
+    PayMongoFake::webhook('evt_1', 'checkout_session.payment.paid', ['id' => 'cs_test_1'])->assertOk();
 
     expect($booking->refresh()->status)->toBe(Booking::CONFIRMED)
         ->and(Payment::forCustomer($guest)->sole())
@@ -170,8 +91,8 @@ it('confirms the booking once PayMongo reports the payment paid, exactly once', 
         ->method->toBe('gcash');
 
     // Replayed event, and PayMongo re-sending under a new event id.
-    sendWebhook('evt_1', 'checkout_session.payment.paid', ['id' => 'cs_test_1'])->assertOk()->assertSee('Already processed');
-    sendWebhook('evt_2', 'checkout_session.payment.paid', ['id' => 'cs_test_1'])->assertOk();
+    PayMongoFake::webhook('evt_1', 'checkout_session.payment.paid', ['id' => 'cs_test_1'])->assertOk()->assertSee('Already processed');
+    PayMongoFake::webhook('evt_2', 'checkout_session.payment.paid', ['id' => 'cs_test_1'])->assertOk();
 
     expect(Payment::forCustomer($guest)->count())->toBe(1)
         ->and($guest->notifications()->count())->toBe(1)
@@ -180,40 +101,40 @@ it('confirms the booking once PayMongo reports the payment paid, exactly once', 
 });
 
 it('does not trust the webhook body: an unpaid session confirms nothing', function () {
-    [, $booking] = paidFlowSetup();
-    fakePayMongo(paid: false);
+    [, $booking] = PayMongoFake::pendingPaidFlow();
+    PayMongoFake::fake(paid: false);
 
-    sendWebhook('evt_1', 'checkout_session.payment.paid', ['id' => 'cs_test_1', 'attributes' => ['payments' => [['attributes' => ['status' => 'paid']]]]])->assertOk();
+    PayMongoFake::webhook('evt_1', 'checkout_session.payment.paid', ['id' => 'cs_test_1', 'attributes' => ['payments' => [['attributes' => ['status' => 'paid']]]]])->assertOk();
 
     expect($booking->refresh()->status)->toBe(Booking::PENDING);
 });
 
 it('refuses a payment whose amount does not match the booking', function () {
-    [, $booking] = paidFlowSetup();
-    fakePayMongo(paid: true, amount: 100);
+    [, $booking] = PayMongoFake::pendingPaidFlow();
+    PayMongoFake::fake(paid: true, amount: 100);
 
-    sendWebhook('evt_1', 'checkout_session.payment.paid', ['id' => 'cs_test_1'])->assertOk();
+    PayMongoFake::webhook('evt_1', 'checkout_session.payment.paid', ['id' => 'cs_test_1'])->assertOk();
 
     expect($booking->refresh()->status)->toBe(Booking::PENDING)
         ->and(AuditLog::query()->where('action', 'payment.amount_mismatch')->exists())->toBeTrue();
 });
 
 it('verifies the return URL with PayMongo instead of trusting the redirect', function () {
-    [$guest, $booking] = paidFlowSetup();
+    [$guest, $booking] = PayMongoFake::pendingPaidFlow();
 
-    fakePayMongo(paid: false);
+    PayMongoFake::fake(paid: false);
     $this->get(route('account.payments.return', $booking->reference))->assertSessionHas('warning');
     expect($booking->refresh()->status)->toBe(Booking::PENDING);
 
-    fakePayMongo(paid: true);
+    PayMongoFake::fake(paid: true);
     $this->get(route('account.payments.return', $booking->reference))->assertSessionHas('success');
     expect($booking->refresh()->status)->toBe(Booking::CONFIRMED);
 });
 
 it('records a failed payment and lets the guest try again', function () {
-    [$guest, $booking] = paidFlowSetup();
+    [$guest, $booking] = PayMongoFake::pendingPaidFlow();
 
-    sendWebhook('evt_f', 'payment.failed', ['id' => 'pay_x', 'attributes' => [
+    PayMongoFake::webhook('evt_f', 'payment.failed', ['id' => 'pay_x', 'attributes' => [
         'payment_intent_id' => 'pi_test_1', 'failed_message' => 'Card declined',
     ]])->assertOk();
 
@@ -222,16 +143,16 @@ it('records a failed payment and lets the guest try again', function () {
         ->failure_reason->toBe('Card declined')
         ->and($booking->refresh()->status)->toBe(Booking::PENDING);
 
-    fakePayMongo();
+    PayMongoFake::fake();
     $this->post(route('account.payments.pay', $booking->reference))->assertRedirect();
 
     expect(Payment::forCustomer($guest)->where('status', Payment::PENDING)->count())->toBe(1);
 });
 
 it('refunds through PayMongo when the host marks a cancelled booking refunded', function () {
-    [$guest, $booking, $owner, $tenant] = paidFlowSetup();
-    fakePayMongo(paid: true);
-    sendWebhook('evt_1', 'checkout_session.payment.paid', ['id' => 'cs_test_1']);
+    [$guest, $booking, $owner, $tenant] = PayMongoFake::pendingPaidFlow();
+    PayMongoFake::fake(paid: true);
+    PayMongoFake::webhook('evt_1', 'checkout_session.payment.paid', ['id' => 'cs_test_1']);
 
     PropertyManagementFixtures::login($owner, $tenant);
     $this->post(route('bookings.transition', $booking->reference), ['status' => 'cancelled'])->assertSessionHasNoErrors();
@@ -248,14 +169,14 @@ it('refunds through PayMongo when the host marks a cancelled booking refunded', 
 });
 
 it('keeps the booking unrefunded when PayMongo refuses the refund', function () {
-    [$guest, $booking, $owner, $tenant] = paidFlowSetup();
-    fakePayMongo(paid: true);
-    sendWebhook('evt_1', 'checkout_session.payment.paid', ['id' => 'cs_test_1']);
+    [$guest, $booking, $owner, $tenant] = PayMongoFake::pendingPaidFlow();
+    PayMongoFake::fake(paid: true);
+    PayMongoFake::webhook('evt_1', 'checkout_session.payment.paid', ['id' => 'cs_test_1']);
 
     PropertyManagementFixtures::login($owner, $tenant);
     $this->post(route('bookings.transition', $booking->reference), ['status' => 'cancelled']);
 
-    fakePayMongo(paid: true, refundStatus: 400);
+    PayMongoFake::fake(paid: true, refundStatus: 400);
     $this->post(route('bookings.transition', $booking->reference), ['status' => 'refunded'])
         ->assertSessionHasErrors('payment');
 
@@ -264,13 +185,13 @@ it('keeps the booking unrefunded when PayMongo refuses the refund', function () 
 });
 
 it('records a payment that lands after cancellation without reviving the booking', function () {
-    [$guest, $booking, $owner, $tenant] = paidFlowSetup();
+    [$guest, $booking, $owner, $tenant] = PayMongoFake::pendingPaidFlow();
 
     PropertyManagementFixtures::login($owner, $tenant);
     $this->post(route('bookings.transition', $booking->reference), ['status' => 'cancelled']);
 
-    fakePayMongo(paid: true);
-    sendWebhook('evt_1', 'checkout_session.payment.paid', ['id' => 'cs_test_1'])->assertOk();
+    PayMongoFake::fake(paid: true);
+    PayMongoFake::webhook('evt_1', 'checkout_session.payment.paid', ['id' => 'cs_test_1'])->assertOk();
 
     expect($booking->refresh()->status)->toBe(Booking::CANCELLED)
         ->and(Payment::forCustomer($guest)->sole()->status)->toBe(Payment::PAID)
@@ -278,7 +199,7 @@ it('records a payment that lands after cancellation without reviving the booking
 });
 
 it('lists a guest their own payments only', function () {
-    [$guest, $booking] = paidFlowSetup();
+    [$guest, $booking] = PayMongoFake::pendingPaidFlow();
     $other = User::factory()->create();
 
     $this->actingAs($guest)->get(route('account.payments.index'))->assertOk()->assertSee($booking->reference);
