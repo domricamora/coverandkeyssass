@@ -189,24 +189,9 @@ class PropertyController extends PropertyManagementController
 
         $this->authorize('update', $property);
 
-        $validated = $request->validate([
-            'url' => ['required', 'url', 'max:500'],
-            'kind' => ['required', 'in:image,video'],
-            'alt' => ['nullable', 'string', 'max:200'],
-        ]);
+        $added = \App\Support\MediaUploads::store($request, $property, 'media/properties');
 
-        $isFirst = $property->media()->count() === 0;
-
-        $property->media()->create([
-            'disk' => 'public',
-            'path' => $validated['url'],
-            'kind' => $validated['kind'],
-            'alt' => $validated['alt'] ?? null,
-            'is_cover' => $isFirst && $validated['kind'] === 'image',
-            'sort_order' => $property->media()->count() + 1,
-        ]);
-
-        return back()->with('success', $validated['kind'] === 'video' ? 'Video added.' : 'Photo added.');
+        return back()->with('success', $request->input('kind') === 'video' ? 'Video added.' : ($added === 1 ? 'Photo added.' : $added.' photos added.'));
     }
 
     public function setCover(Request $request, string $property, string $media)

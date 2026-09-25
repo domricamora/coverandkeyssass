@@ -1,5 +1,17 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Dashboard rebuild, step 1: React front desk + photo tours (in progress)
+
+- **Front desk (React + Inertia):** `/dashboard/front-desk`. It shows today's arrivals, departures and in-house guests with one-click check-in and check-out; settling a balance comes before check-out. KPIs cover occupancy, dirty rooms and out-of-order rooms. A 14-day room tape chart lets staff drag a stay to another room (`BookingService::moveRoom` moves the remaining nights; the unique index catches conflicts), and a booking drawer holds the folio, quick payment and charges.
+- **Stack:** Inertia v3, React 19, @vitejs/plugin-react. `resources/css/react.css` scopes Tailwind preflight to the React screens. Palette v3 "Lagoon & Coral" (light, fresh) is in use on the React dashboard.
+- **Navigation:** `App\Support\DashboardNav` is one grouped, permission-filtered sidebar (Hotel / Restaurant / Guests / Team & money / Settings) used by both the Blade and React shells.
+- **Fix:** the notifications page no longer hides the business sidebar. It now uses `tenant.context:optional`.
+- **Photo tours:**
+  - Hosts upload several photos at once, each tagged with a tour area (`media.caption`).
+  - Uploads are re-encoded to WebP with GD: at most 2000 px, EXIF rotation respected, metadata stripped (`App\Support\MediaUploads`).
+  - 55 curated Unsplash tour photos are in `public/img/demo/tour/`, with credits in CREDITS.md.
+- **Tests:** FrontDeskTest (6) plus a WebP upload test.
+
 ## 2026-09-26 — Phase 38: Final system audit (v0.38.0)
 
 (verified: 305 tests / 1965 assertions; 34/34 pages pass browser QA; `composer audit` and `npm audit` clean; live backup restore; live API sweep)

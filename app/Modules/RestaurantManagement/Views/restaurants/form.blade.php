@@ -119,7 +119,8 @@
                 <div class="flex items-center gap-3 mt-3">
                     <img src="{{ $photo->url() }}" alt="{{ $photo->alt ?? 'Photo' }}" style="width:96px;height:64px;object-fit:cover" class="rounded" />
                     <div class="flex-1 text-sm" style="color:var(--text-2)">
-                        {{ $photo->alt ?? $photo->path }}
+                        <span class="badge badge-gray">{{ $photo->caption ?: 'Gallery' }}</span>
+                        {{ $photo->alt ?? basename($photo->path) }}
                         @if ($photo->is_cover) <span class="badge badge-green">Cover</span> @endif
                     </div>
                     @unless ($photo->is_cover)
@@ -137,15 +138,7 @@
             @empty
                 <p class="mt-2 text-sm" style="color:var(--text-3)">No photos yet.</p>
             @endforelse
-            <form method="POST" action="{{ route('restaurants.media.store', $restaurant) }}" class="mt-4 flex gap-2 items-end">
-                @csrf
-                <div class="flex-1">
-                    <label for="photo_url" class="form-label">Add photo (URL)</label>
-                    <input id="photo_url" name="url" type="url" required class="form-input" placeholder="https://…" />
-                    <x-input-error :messages="$errors->get('url')" />
-                </div>
-                <button type="submit" class="btn btn-primary">Add photo</button>
-            </form>
+            @include('partials.media-upload', ['action' => route('restaurants.media.store', $restaurant), 'areas' => \App\Support\MediaUploads::AREAS['restaurant'], 'listId' => 'restaurant-media'])
         </div>
     @endif
 </x-app-layout>

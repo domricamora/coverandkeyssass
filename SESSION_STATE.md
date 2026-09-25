@@ -5,8 +5,8 @@
 ## Snapshot
 
 - Date: 2026-09-26
-- Phase: **38 COMPLETE (verified) — all master-plan phases done.** Remaining: the INCOMPLETE items in `docs/FINAL_AUDIT.md`
-- Tests: PASS — 305 tests, 1965 assertions, MySQL `hospitality_os_testing`
+- Phase: **38 COMPLETE + post-audit owner queue (see Next actions)** Remaining: the INCOMPLETE items in `docs/FINAL_AUDIT.md`
+- Tests: PASS — 316 tests (full suite 314 + 2 new, verified 2026-09-26), MySQL `hospitality_os_testing`
 - Git: `master` → origin <https://github.com/domricamora/coverandkeyssass.git> — **not pushed yet**: the auto-mode classifier blocks `git push` from the agent; the owner runs `git push -u origin master:main` (or adds a Bash permission rule)
 
 ## Environment (ready)
@@ -27,7 +27,23 @@
 
 ## Next actions
 
-0. **CURRENT WORK (2026-09-26): rebuild the dashboard in React + Tailwind via Inertia.js** — owner found the Blade dashboard half-baked (missing real hotel/restaurant workflows, confusing nav, layout issues). Decided: React (not Vue), Laravel stays back end (reuse services, permissions, tenant isolation, tests). Order: (1) Front desk — today view (arrivals/departures/in-house), drag-and-drop room tape chart, one-screen check-in/out with folio + payment; (2) Restaurant floor — live floor plan, fast POS with modifiers, kitchen display, reservations book; (3) Housekeeping & ops — mobile-first room board, maintenance queue, rota; (4) Owner overview — occupancy/ADR/RevPAR/covers/revenue charts. Full-screen shell already live (commit 3db6892). Start: `composer require inertiajs/inertia-laravel`, npm `@inertiajs/react react react-dom @vitejs/plugin-react` (run npm via `node "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js"`), add `HandleInertiaRequests` middleware + `resources/views/app-react.blade.php` root, migrate screens one by one behind the existing routes.
+**OWNER QUEUE (2026-09-26, in this order — resume here):**
+
+- a. **Photo tour, public side (half done).**
+  - Done: upload (multi-file, converted to WebP, tagged with a tour area in `media.caption`), `App\Support\MediaUploads`, and the tour photos in `public/img/demo/tour/{area}-{n}-{id}.jpg`. Areas: room, bath, lobby, pool, breakfast, spa, dining, dish, bar, kitchen, terrace.
+  - To do:
+    - Seed the tour photos in `MarketplaceDemoSeeder`: an idempotent `attachTour()` giving each property about 10 photos (Rooms / Bathrooms / Lobby / Pool / Breakfast / Spa) and each restaurant about 8 (Dining room / Dishes / Bar / Kitchen / Terrace), with caption = area, rotated by listing index.
+    - Build the "Take the tour" section on `marketplace::properties/show` and `restaurants/show`: area chips, a grid, and a fullscreen lightbox (arrow keys, Esc, counter, captions).
+    - Run `php artisan storage:link` locally; `public/storage` is missing, so uploaded files 404 until then.
+- b. **Seed a fully running platform.** All employees, not just one: every role per business, rota, tasks and performance data across all businesses and properties, so performance and management of every business can be reviewed.
+- c. **Marketing site redesign in Tailwind:** full width (not boxed), light and fresh "Lagoon & Coral" palette across the whole platform (canvas #F7FAF9, lagoon #0E6461, coral #D9603F/#B84A2C, ink #10252A), less generic; use the marketing skills. Then retheme the Blade dashboard to the same light palette (tokens in `resources/css/app.css` `.dash-body`).
+- d. **Research Booking.com, Agoda and Airbnb and implement their best features** (owner: "do a research first then implement what is best to make our platform stand out").
+- e. **Continue the React rebuild:** Restaurant floor, then Housekeeping & ops, then Owner overview.
+
+Done this session: the React Front desk (12f407e), grouped nav, the notifications sidebar fix, the WebP multi-upload and tour photos.
+QA tip: `qa.mjs` paths are relative to `/ck/public` (pass `/dashboard/front-desk`, not `/ck/public/...`).
+
+0. **(Front desk DONE)** Rebuild the dashboard in React + Tailwind via Inertia.js. — owner found the Blade dashboard half-baked (missing real hotel/restaurant workflows, confusing nav, layout issues). Decided: React (not Vue), Laravel stays back end (reuse services, permissions, tenant isolation, tests). Order: (1) Front desk — today view (arrivals/departures/in-house), drag-and-drop room tape chart, one-screen check-in/out with folio + payment; (2) Restaurant floor — live floor plan, fast POS with modifiers, kitchen display, reservations book; (3) Housekeeping & ops — mobile-first room board, maintenance queue, rota; (4) Owner overview — occupancy/ADR/RevPAR/covers/revenue charts. Full-screen shell already live (commit 3db6892). Start: `composer require inertiajs/inertia-laravel`, npm `@inertiajs/react react react-dom @vitejs/plugin-react` (run npm via `node "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js"`), add `HandleInertiaRequests` middleware + `resources/views/app-react.blade.php` root, migrate screens one by one behind the existing routes.
    Since the audit: fixed Guests page crash (CRM watermark cached as object, d59e594), richer demo data (983db2a), Semaphore/Twilio SMS drivers (054656b) — SMS no longer INCOMPLETE.
 
 1. Design pass + follow-ups DONE (2026-09-26): cinematic video hero; browser QA of 33 pages at 390/768/1440 (no console errors, no 4xx/5xx, no overflow); responsive module grids; live demo operations (`DemoOperationsSeeder`, covered by `DemoSeedTest`).

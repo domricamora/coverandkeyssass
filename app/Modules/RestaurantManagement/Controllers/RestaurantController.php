@@ -132,23 +132,9 @@ class RestaurantController extends RestaurantManagementController
         $this->authorizeTo($request, 'restaurants.update');
         $restaurant = $this->resolveRestaurant($restaurant);
 
-        $validated = $request->validate([
-            'url' => ['required', 'url', 'max:500'],
-            'alt' => ['nullable', 'string', 'max:200'],
-        ]);
+        $added = \App\Support\MediaUploads::store($request, $restaurant, 'media/restaurants', allowVideo: false);
 
-        $count = $restaurant->media()->count();
-
-        $restaurant->media()->create([
-            'disk' => 'public',
-            'path' => $validated['url'],
-            'kind' => 'image',
-            'alt' => $validated['alt'] ?? null,
-            'is_cover' => $count === 0,
-            'sort_order' => $count + 1,
-        ]);
-
-        return back()->with('success', 'Photo added.');
+        return back()->with('success', $added === 1 ? 'Photo added.' : $added.' photos added.');
     }
 
     public function setCover(Request $request, string $restaurant, string $media)

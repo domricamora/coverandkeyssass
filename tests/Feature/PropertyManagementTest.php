@@ -512,3 +512,29 @@ it('refuses staff who are not active members of the business', function () {
 
 
 
+
+it('uploads several tour photos at once and stores them as WebP', function () {
+    \Illuminate\Support\Facades\Storage::fake('public');
+    [$owner, $tenant] = PropertyManagementFixtures::businessWithModule();
+    $property = PropertyManagementFixtures::property($tenant, $owner);
+
+    $this->post(route('properties.media.store', $property), [
+        'photos' => [
+            \Illuminate\Http\UploadedFile::fake()->image('pool.jpg', 2400, 1600),
+            \Illuminate\Http\UploadedFile::fake()->image('deck.png', 800, 600),
+        ],
+        'caption' => 'Pool',
+    ])->assertRedirect()->assertSessionHas('success', '2 photos added.');
+
+    $photos = $property->media()->orderBy('sort_order')->get();
+    $stored = \Illuminate\Support\Facades\Storage::disk('public');
+    [$w] = getimagesizefromstring($stored->get($photos[0]->path));
+
+    expect($photos)->toHaveCount(2)
+        ->and($photos->pluck('caption')->unique()->all())->toBe(['Pool'])
+        ->and($photos->every(fn ($m) => str_ends_with($m->path, '.webp') && $stored->exists($m->path)))->toBeTrue()
+        ->and($w)->toBe(2000)
+        ->and($photos[0]->is_cover)->toBeTrue();
+
+    $this->post(route('properties.media.store', $property), ['caption' => 'Pool'])->assertSessionHasErrors('photos');
+});
