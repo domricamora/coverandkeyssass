@@ -47,7 +47,16 @@ return [
 
     // Marketing SMS (Phase 22): log | array. Add a carrier driver before sending real SMS.
     'sms' => [
-        'driver' => env('SMS_DRIVER', 'log'),
+        'driver' => env('SMS_DRIVER', 'log'), // log | array | semaphore | twilio
+        'semaphore' => [
+            'key' => env('SEMAPHORE_API_KEY'),
+            'sender' => env('SEMAPHORE_SENDER'),
+        ],
+        'twilio' => [
+            'sid' => env('TWILIO_SID'),
+            'token' => env('TWILIO_TOKEN'),
+            'from' => env('TWILIO_FROM'),
+        ],
     ],
 
     'slack' => [
