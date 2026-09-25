@@ -7,6 +7,7 @@ use App\Modules\Booking\Models\Booking;
 use App\Modules\Booking\Services\BookingService;
 use App\Modules\Ordering\Models\Order;
 use App\Modules\Ordering\Services\OrderService;
+use App\Modules\Payments\Events\PaymentFailed;
 use App\Modules\Payments\Events\PaymentPaid;
 use App\Modules\Payments\Events\PaymentRefunded;
 use App\Modules\Payments\Models\Payment;
@@ -178,6 +179,8 @@ class PaymentService
         $payment->forceFill(['status' => Payment::FAILED, 'failure_reason' => Str::limit($reason ?: 'Payment failed', 250)])->save();
 
         $this->audit->log('payment.failed', $payment, null, ['reason' => $payment->failure_reason], $payment->tenant_id);
+
+        PaymentFailed::dispatch($payment);
     }
 
     /**

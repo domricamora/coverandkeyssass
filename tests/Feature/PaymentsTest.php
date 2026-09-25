@@ -95,7 +95,8 @@ it('confirms the booking once PayMongo reports the payment paid, exactly once', 
     PayMongoFake::webhook('evt_2', 'checkout_session.payment.paid', ['id' => 'cs_test_1'])->assertOk();
 
     expect(Payment::forCustomer($guest)->count())->toBe(1)
-        ->and($guest->notifications()->count())->toBe(1)
+        ->and($guest->notifications()->count())->toBe(2) // booking confirmed + payment receipt (Phase 26)
+        ->and($guest->notifications()->where('type', \App\Modules\Notify\Notifications\PaymentReceived::class)->count())->toBe(1)
         ->and(AuditLog::query()->where('action', 'payment.paid')->count())->toBe(1)
         ->and(AuditLog::query()->where('action', 'booking.confirmed')->count())->toBe(1);
 });

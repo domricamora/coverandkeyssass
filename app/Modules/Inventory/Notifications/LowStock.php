@@ -3,23 +3,30 @@
 namespace App\Modules\Inventory\Notifications;
 
 use App\Modules\Inventory\Models\InventoryItem;
-use Illuminate\Notifications\Notification;
+use App\Modules\Notify\ChannelNotification;
 
 /** An item's total stock fell to or below its reorder level. */
-class LowStock extends Notification
+class LowStock extends ChannelNotification
 {
     public function __construct(private readonly InventoryItem $item, private readonly float $total) {}
 
-    public function via(object $notifiable): array
+    public function event(): string
     {
-        return ['database'];
+        return 'low_stock';
     }
 
-    public function toArray(object $notifiable): array
+    public function message(): string
     {
-        return [
-            'inventory_item_id' => $this->item->id,
-            'message' => 'Low stock: '.$this->item->name.' is at '.$this->item->qty($this->total).' (reorder at '.$this->item->qty($this->item->reorder_level).').',
-        ];
+        return 'Low stock: '.$this->item->name.' is at '.$this->item->qty($this->total).' (reorder at '.$this->item->qty($this->item->reorder_level).').';
+    }
+
+    public function link(): ?string
+    {
+        return route('inventory.items.show', $this->item->id);
+    }
+
+    public function data(): array
+    {
+        return ['inventory_item_id' => $this->item->id];
     }
 }

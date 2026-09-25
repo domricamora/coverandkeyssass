@@ -1,5 +1,19 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Phase 26: Notifications (v0.26.0)
+
+(verified: 251 tests / 1519 assertions)
+
+- New `App\Modules\Notify`. Every notification now extends `ChannelNotification`, which always sends in-app and adds email, SMS or push depending on the user's per-event preference or the event's default. SMS and push also need a phone number or a registered device. Push is written to a `push_messages` outbox for a future mobile sender.
+- The 8 existing notifications (booking, order, reservation, task, ticket, message, review reply, low stock) moved onto the new base. Their payload keys are unchanged, and each now also carries `event` and `link`.
+- New notifications:
+  - Payment received and payment failed (new `PaymentFailed` event, dispatched from `markFailed`).
+  - New online order, sent to staff with `orders.view` (new `OrderPlaced` event).
+  - Module trial ending, sent to owners by `php artisan notifications:trials`, once a day.
+- Staff notification centre `/dashboard/notifications`, with a sidebar badge and click-through that marks the notification read. The guest notification list also follows the link. New settings page `/account/notification-settings`, and push device registration routes for the mobile app.
+- A paid booking now leaves two guest notifications (confirmation + receipt). The PaymentsTest assertion was updated to match.
+- 6 new Pest tests.
+
 ## 2026-09-26 — Phase 25: Messaging (v0.25.0)
 
 (verified: 245 tests / 1477 assertions)

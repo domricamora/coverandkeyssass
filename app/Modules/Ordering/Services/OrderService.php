@@ -13,6 +13,7 @@ use App\Modules\Delivery\Models\DeliveryZone;
 use App\Modules\Delivery\Models\Driver;
 use App\Modules\Marketplace\Models\Restaurant;
 use App\Modules\Ordering\Events\OrderLinesAdded;
+use App\Modules\Ordering\Events\OrderPlaced;
 use App\Modules\Ordering\Events\OrderTransitioned;
 use App\Modules\RestaurantManagement\Models\RestaurantTable;
 use App\Modules\Ordering\Events\OrderTransitioning;
@@ -189,6 +190,8 @@ class OrderService
             'total' => $order->total,
             'payment_method' => $order->payment_method,
         ]);
+
+        OrderPlaced::dispatch($order);
 
         return $order;
     }

@@ -61,6 +61,12 @@
             Inventory
         </a>
     @endif
+    @php($unreadNotifications = auth()->user()?->unreadNotifications()->count() ?? 0)
+    <a class="{{ str_starts_with((string) $route, 'notifications.') ? 'is-active' : '' }}" href="{{ route('notifications.index') }}">
+        <svg class="side-nav__icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0a3 3 0 11-6 0"/></svg>
+        Notifications
+        @if ($unreadNotifications)<span class="badge badge-amber" aria-label="{{ $unreadNotifications }} unread">{{ $unreadNotifications }}</span>@endif
+    </a>
     <a class="{{ str_starts_with((string) $route, 'messages.') ? 'is-active' : '' }}" href="{{ route('messages.index') }}">
         <svg class="side-nav__icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l9 6 9-6M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
         Messages

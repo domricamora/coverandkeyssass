@@ -238,6 +238,14 @@ The unique `(user_id, reviewable_type, reviewable_id)` becomes a plain index, so
 | message_participants | members + read status | thread + user unique, side, last_read_at |
 | messages | messages | thread, nullable author, side, body; attachments are `media` rows (disk `local`) |
 
+## Phase 26 tables (Notifications)
+
+| Table | Purpose | Notes |
+|---|---|---|
+| notification_preferences | per-user channel choices | user, event, channel `mail/sms/push`, enabled; unique (user, event, channel). A missing row means the event's default applies |
+| push_devices | registered mobile / browser devices | user, platform `ios/android/web`, token unique, last_seen_at |
+| push_messages | push outbox | user, event, title, body, data json, sent_at (null = not delivered yet) |
+
 ## Seeding
 
 `php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin` **and** a refresh of every existing tenant's system roles, so newly added catalogue permissions reach already-provisioned businesses).

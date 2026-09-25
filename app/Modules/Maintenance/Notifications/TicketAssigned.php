@@ -3,24 +3,31 @@
 namespace App\Modules\Maintenance\Notifications;
 
 use App\Modules\Maintenance\Models\MaintenanceTicket;
-use Illuminate\Notifications\Notification;
+use App\Modules\Notify\ChannelNotification;
 
 /** Tells a technician a maintenance ticket is theirs. */
-class TicketAssigned extends Notification
+class TicketAssigned extends ChannelNotification
 {
     public function __construct(private readonly MaintenanceTicket $ticket) {}
 
-    public function via(object $notifiable): array
+    public function event(): string
     {
-        return ['database'];
+        return 'ticket_assigned';
     }
 
-    public function toArray(object $notifiable): array
+    public function message(): string
     {
-        return [
-            'maintenance_ticket' => $this->ticket->reference,
-            'message' => 'Maintenance '.$this->ticket->reference.' ('.$this->ticket->priority.'): '.$this->ticket->title
-                .($this->ticket->room ? ' · room '.$this->ticket->room->room_number : '').'.',
-        ];
+        return 'Maintenance '.$this->ticket->reference.' ('.$this->ticket->priority.'): '.$this->ticket->title
+            .($this->ticket->room ? ' · room '.$this->ticket->room->room_number : '').'.';
+    }
+
+    public function link(): ?string
+    {
+        return route('maintenance.show', $this->ticket->reference);
+    }
+
+    public function data(): array
+    {
+        return ['maintenance_ticket' => $this->ticket->reference];
     }
 }

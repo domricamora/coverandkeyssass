@@ -3,24 +3,31 @@
 namespace App\Modules\Housekeeping\Notifications;
 
 use App\Modules\Housekeeping\Models\HousekeepingTask;
-use Illuminate\Notifications\Notification;
+use App\Modules\Notify\ChannelNotification;
 
 /** Tells a housekeeper a room was assigned to them. */
-class TaskAssigned extends Notification
+class TaskAssigned extends ChannelNotification
 {
     public function __construct(private readonly HousekeepingTask $task) {}
 
-    public function via(object $notifiable): array
+    public function event(): string
     {
-        return ['database'];
+        return 'task_assigned';
     }
 
-    public function toArray(object $notifiable): array
+    public function message(): string
     {
-        return [
-            'housekeeping_task_id' => $this->task->id,
-            'message' => $this->task->typeLabel().' · room '.$this->task->room?->room_number
-                .' · due '.$this->task->due_on->format('M j').($this->task->priority === 'high' ? ' (high priority)' : '').'.',
-        ];
+        return $this->task->typeLabel().' · room '.$this->task->room?->room_number
+            .' · due '.$this->task->due_on->format('M j').($this->task->priority === 'high' ? ' (high priority)' : '').'.';
+    }
+
+    public function link(): ?string
+    {
+        return route('housekeeping.index', ['mine' => 1]);
+    }
+
+    public function data(): array
+    {
+        return ['housekeeping_task_id' => $this->task->id];
     }
 }
