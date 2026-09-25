@@ -1521,3 +1521,57 @@ h2,
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
 }
+
+/* ------------------------------------------ full-screen dashboard shell --- */
+/* Owner request: the dashboard fills the screen instead of a centred box. */
+.dash-body .site-header .container {
+    max-width: none;
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+.dash-body .dash {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    gap: 0;
+    grid-template-columns: 256px minmax(0, 1fr);
+    min-height: calc(100dvh - 64px);
+}
+
+.dash-body .dash__side {
+    position: sticky;
+    top: 64px;
+    align-self: start;
+    height: calc(100dvh - 64px);
+    overflow-y: auto;
+    padding: 20px 12px 32px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+}
+
+.dash-body .dash__side .side-nav {
+    position: static;
+}
+
+.dash-body .dash__main {
+    padding: 28px 40px 64px;
+}
+
+@media (max-width: 900px) {
+    .dash-body .dash {
+        grid-template-columns: 1fr;
+        min-height: 0;
+    }
+
+    .dash-body .dash__side {
+        position: static;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .dash-body .dash__main {
+        padding: 20px 16px 48px;
+    }
+}
