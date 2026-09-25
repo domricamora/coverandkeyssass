@@ -1,5 +1,17 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Phase 18: Inventory (v0.18.0)
+
+(verified: 209 tests / 1122 assertions)
+
+- New `App\Modules\Inventory` (inventory module): categories, units with conversion, suppliers, stock locations, items (SKU, weighted-average cost, reorder level), per-location levels and an append-only movement ledger with running balances.
+- Moves lock the item row, then the level row. Receive, issue, waste (reason required), stock count (adjustment) and transfer. No negative stock except for sales.
+- Low-stock alerts: a notification to managers when an item crosses its reorder level, plus a low-stock filter.
+- Purchase orders: draft → ordered → partially received → received at the ordered cost. Over-receipt is blocked. Cancel only before receiving.
+- Menu recipes with unit conversion (150 g → 0.15 kg). An accepted food order deducts its ingredients from the restaurant's kitchen location, idempotently. Cancelling an accepted order restores them.
+- Screens: stock list, item ledger with movement form, purchase orders, recipes. Permissions `inventory.view/manage`, `purchasing.manage`.
+- 6 new Pest tests.
+
 ## 2026-09-26 — Phase 17: Staff Management (v0.17.0)
 
 (verified: 203 tests / 1066 assertions)

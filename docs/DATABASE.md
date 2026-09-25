@@ -153,6 +153,19 @@ Changes to existing tables: `payments.booking_id` and `commissions.booking_id` a
 | attendances | clock records | tenant, employee, nullable shift, clock_in_at / clock_out_at, minutes_worked, late_minutes, recorded_by |
 | leave_requests | time off | tenant, employee, type, starts_on / ends_on (inclusive), reason, status, decided_by / decided_at / decision_note |
 
+## Phase 18 tables (Inventory)
+
+| Table | Purpose | Notes |
+|---|---|---|
+| inventory_categories / stock_locations / suppliers | catalogue | tenant, unique name per tenant (locations: nullable property) |
+| inventory_items | stock items | tenant, nullable category, unique `(tenant_id, sku)`, unit, cost_per_unit (weighted avg, 4 dp), reorder_level, is_active |
+| stock_levels | on hand | item + location unique, quantity (14,3) |
+| stock_movements | ledger | item, location, type, signed quantity, balance_after, unit_cost, reference, unique nullable `source_key`, notes, user |
+| purchase_orders / purchase_order_lines | purchasing | supplier + location (restrict), unique reference, status, expected_on, total; lines: item, quantity, received_quantity, unit_cost |
+| menu_item_ingredients | recipes | menu item + stock item unique, quantity (stock unit), entered_unit / entered_quantity |
+
+`restaurants` gains `stock_location_id` (nullOnDelete): the kitchen that food sales consume from.
+
 ## Seeding
 
 `php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin` **and** a refresh of every existing tenant's system roles, so newly added catalogue permissions reach already-provisioned businesses).

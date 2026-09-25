@@ -55,6 +55,12 @@
             Maintenance
         </a>
     @endif
+    @if (auth()->user()?->hasPermissionTo('inventory.view'))
+        <a class="{{ str_starts_with((string) $route, 'inventory.') ? 'is-active' : '' }}" href="{{ route('inventory.index') }}">
+            <svg class="side-nav__icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            Inventory
+        </a>
+    @endif
     @if (auth()->user()?->hasPermissionTo('wallet.view'))
         <a class="{{ str_starts_with((string) $route, 'wallet.') ? 'is-active' : '' }}" href="{{ route('wallet.index') }}">
             <svg class="side-nav__icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7h16a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7zm0 0l2-3h12M16 13h.01"/></svg>

@@ -91,6 +91,11 @@ class PermissionRegistry
                 'attendance.manage' => 'Clock staff in and out',
                 'leave.approve' => 'Approve or reject leave',
             ],
+            'stock' => [
+                'inventory.view' => 'View stock, movements, purchase orders and recipes',
+                'inventory.manage' => 'Manage items, move stock, receive deliveries and edit recipes',
+                'purchasing.manage' => 'Manage suppliers and purchase orders',
+            ],
             'wallet' => [
                 'wallet.view' => 'View the host wallet, commissions and payouts',
                 'payouts.request' => 'Request payouts from the host wallet',
