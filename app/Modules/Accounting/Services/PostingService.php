@@ -44,6 +44,20 @@ class PostingService
         $this->wallet();
         $this->stock();
         $this->maintenance();
+        $this->giftCards();
+    }
+
+    /** Sold cards are prepaid (liability); credits are a loyalty cost; voided balances are released. */
+    private function giftCards(): void
+    {
+        \App\Modules\Loyalty\Models\GiftCard::query()->orderBy('id')->each(function (\App\Modules\Loyalty\Models\GiftCard $card): void {
+            $debit = $card->kind === 'gift' ? ($card->sold_via === 'cash' ? 'cash' : 'bank') : 'loyalty_expense';
+            $this->ledger->post($card->created_at->toDateString(), ($card->kind === 'gift' ? 'Gift card sold ' : 'Store credit ').$card->code, [[$debit, (float) $card->initial_value, 0], ['gift_card_liability', 0, (float) $card->initial_value]], 'giftcard:'.$card->id, $card->code);
+
+            foreach ($card->redemptions()->where('reference', 'VOID')->get() as $void) {
+                $this->ledger->post($void->created_at->toDateString(), 'Voided card '.$card->code, [['gift_card_liability', (float) $void->amount, 0], [$card->kind === 'gift' ? 'other_revenue' : 'loyalty_expense', 0, (float) $void->amount]], 'giftcard:'.$card->id.':void', $card->code);
+            }
+        });
     }
 
     private function folios(): void
@@ -106,7 +120,7 @@ class PostingService
 
         if ($o->payment_method === Order::PAY_POS) {
             return PosPayment::query()->where('order_id', $o->id)->where('amount', '>', 0)->get()
-                ->groupBy(fn ($p) => $p->method === 'cash' ? 'cash' : 'bank')
+                ->groupBy(fn ($p) => match ($p->method) { 'cash' => 'cash', 'gift_card' => 'gift_card_liability', default => 'bank' })
                 ->map(fn ($rows) => round((float) $rows->sum('amount'), 2))->all();
         }
 
@@ -176,6 +190,7 @@ class PostingService
         return match ($method) {
             'online' => 'platform_wallet',
             'cash' => 'cash',
+            'gift_card' => 'gift_card_liability',
             default => 'bank',
         };
     }

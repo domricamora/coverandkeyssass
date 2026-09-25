@@ -205,6 +205,18 @@ Changes to existing tables: `payments.booking_id` and `commissions.booking_id` a
 | saved_carts | abandoned-cart source | tenant, user + restaurant unique, lines JSON |
 | marketing_automations | follow-up settings | tenant + type unique, enabled, delay_hours, subject, body, nullable promotion |
 
+## Phase 23 tables (Loyalty)
+
+| Table | Purpose | Notes |
+|---|---|---|
+| loyalty_programs | per-business settings | unique tenant, enabled, pesos_per_point, referral_points |
+| loyalty_accounts | members | tenant + contact unique, points_balance, lifetime_points, tier, unique referral_code per tenant, nullable referred_by (self FK) |
+| loyalty_transactions | points ledger | account, type `earn/reversal/redeem/referral/adjust`, signed points, balance_after, description, unique `(tenant_id, source_key)`, user |
+| loyalty_rewards | what points buy | name, points_cost, kind `coupon/credit`, nullable promotion, credit_amount, is_active |
+| gift_cards / gift_card_redemptions | prepaid balances | unique code per tenant, kind `gift/credit`, nullable contact, initial_value, balance, sold_via, expires_on, status; redemptions: amount, reference (`VOID` = breakage) |
+
+Also: the POS tender `gift_card` (refunds excluded), the folio payment method `gift_card`, and the ledger accounts `2200 Gift cards & store credit` and `6300 Loyalty rewards & credits`.
+
 ## Seeding
 
 `php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin` **and** a refresh of every existing tenant's system roles, so newly added catalogue permissions reach already-provisioned businesses).

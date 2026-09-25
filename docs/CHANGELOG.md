@@ -1,5 +1,16 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Phase 23: Loyalty (v0.23.0)
+
+(verified: 237 tests / 1381 assertions)
+
+- New `App\Modules\Loyalty` (crm module): points programme (₱100 = 1 point by default, off until enabled), earned when stays check out and orders complete. Event-driven plus sync, idempotent, reversed on refund. Append-only locked ledger.
+- Tiers Bronze / Silver / Gold / Platinum on lifetime points. Referral codes pay both guests once, on the new guest's first earning.
+- Rewards: points → personal coupon (Phase 22) or store credit.
+- Gift cards and store credit in one locked balance mechanism: sold or issued, spent as a POS tender and a folio payment, void with breakage. Posted to accounting as a gift-card liability and a loyalty expense.
+- Guest "Rewards" tab (memberships at every business, referral code entry, balances). Host loyalty screens. Permissions `loyalty.view/manage`.
+- 6 new Pest tests.
+
 ## 2026-09-26 — Phase 22: Marketing (v0.22.0)
 
 (verified: 231 tests / 1336 assertions)

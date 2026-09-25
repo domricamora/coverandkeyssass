@@ -43,11 +43,11 @@
                     <h2 class="text-lg">Record a payment</h2>
                     <select name="method" class="form-input" aria-label="Method">
                         @foreach (\App\Modules\Folio\Models\FolioEntry::PAYMENT_METHODS as $method)
-                            <option value="{{ $method }}">{{ ucfirst($method) }}</option>
+                            <option value="{{ $method }}">{{ \Illuminate\Support\Str::headline($method) }}</option>
                         @endforeach
                     </select>
                     <input name="amount" type="number" step="0.01" min="0.01" required class="form-input" value="{{ $totals['balance'] > 0 ? $totals['balance'] : '' }}" aria-label="Amount" />
-                    <input name="reference" type="text" class="form-input" placeholder="Reference (optional)" aria-label="Reference" />
+                    <input name="reference" type="text" class="form-input" placeholder="Reference / gift card code" aria-label="Reference" />
                     <button type="submit" class="btn btn-primary w-full">Record payment</button>
                 </form>
 
@@ -55,8 +55,8 @@
                     @csrf
                     <h2 class="text-lg">Refund at the desk</h2>
                     <select name="method" class="form-input" aria-label="Refund method">
-                        @foreach (\App\Modules\Folio\Models\FolioEntry::PAYMENT_METHODS as $method)
-                            <option value="{{ $method }}">{{ ucfirst($method) }}</option>
+                        @foreach (array_diff(\App\Modules\Folio\Models\FolioEntry::PAYMENT_METHODS, ['gift_card']) as $method)
+                            <option value="{{ $method }}">{{ \Illuminate\Support\Str::headline($method) }}</option>
                         @endforeach
                     </select>
                     <input name="amount" type="number" step="0.01" min="0.01" required class="form-input" placeholder="Amount ₱" aria-label="Refund amount" />

@@ -4,6 +4,7 @@
         ['account.bookings.index', 'Trips'],
         ['account.reservations.index', 'Tables'],
         ['account.orders.index', 'Orders'],
+        ['account.loyalty', 'Rewards'],
         ['account.payments.index', 'Payments'],
         ['marketplace.favorites.index', 'Wish list'],
         ['account.reviews', 'Reviews'],

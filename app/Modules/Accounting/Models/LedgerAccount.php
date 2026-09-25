@@ -26,6 +26,7 @@ class LedgerAccount extends Model
         'vat_input' => ['1300', 'Input VAT', 'asset'],
         'payables' => ['2000', 'Accounts payable', 'liability'],
         'vat_output' => ['2100', 'Output VAT', 'liability'],
+        'gift_card_liability' => ['2200', 'Gift cards & store credit', 'liability'],
         'equity' => ['3000', 'Owner equity', 'equity'],
         'room_revenue' => ['4000', 'Room revenue', 'revenue'],
         'fnb_revenue' => ['4100', 'Food & beverage revenue', 'revenue'],
@@ -35,6 +36,7 @@ class LedgerAccount extends Model
         'commission_expense' => ['6000', 'Platform commissions', 'expense'],
         'maintenance_expense' => ['6100', 'Repairs & maintenance', 'expense'],
         'supplies_expense' => ['6200', 'Operating supplies', 'expense'],
+        'loyalty_expense' => ['6300', 'Loyalty rewards & credits', 'expense'],
         'general_expense' => ['6900', 'General expenses', 'expense'],
     ];
 

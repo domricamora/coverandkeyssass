@@ -67,11 +67,11 @@
                         @csrf
                         <h2 class="text-lg">Take payment</h2>
                         <select name="method" x-model="method" class="form-input" aria-label="Payment method">
-                            <option value="cash">Cash</option><option value="card">Card</option><option value="ewallet">GCash / Maya</option>
+                            <option value="cash">Cash</option><option value="card">Card</option><option value="ewallet">GCash / Maya</option><option value="gift_card">Gift card / credit</option>
                         </select>
                         <input name="tendered" x-show="method === 'cash'" type="number" step="0.01" min="0.01" value="{{ $due > 0 ? $due : '' }}" class="form-input" placeholder="Cash tendered" aria-label="Cash tendered" />
                         <input name="amount" x-show="method !== 'cash'" type="number" step="0.01" min="0.01" value="{{ $due > 0 ? $due : '' }}" class="form-input" placeholder="Amount" aria-label="Amount" />
-                        <input name="reference" x-show="method !== 'cash'" type="text" class="form-input" placeholder="Approval / reference" aria-label="Reference" />
+                        <input name="reference" x-show="method !== 'cash'" type="text" class="form-input" :placeholder="method === 'gift_card' ? 'Gift card code (GC-XXXX-XXXX)' : 'Approval / reference'" aria-label="Reference" />
                         <button type="submit" class="btn btn-primary w-full">Pay</button>
                     </form>
 

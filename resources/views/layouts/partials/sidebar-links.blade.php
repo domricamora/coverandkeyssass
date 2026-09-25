@@ -67,6 +67,12 @@
             Guests
         </a>
     @endif
+    @if (auth()->user()?->hasPermissionTo('loyalty.view'))
+        <a class="{{ str_starts_with((string) $route, 'loyalty.') ? 'is-active' : '' }}" href="{{ route('loyalty.index') }}">
+            <svg class="side-nav__icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l2.7 5.5 6 .9-4.35 4.2 1 6-5.35-2.8-5.35 2.8 1-6L3.3 9.4l6-.9L12 3z"/></svg>
+            Loyalty
+        </a>
+    @endif
     @if (auth()->user()?->hasPermissionTo('marketing.view'))
         <a class="{{ str_starts_with((string) $route, 'marketing.') ? 'is-active' : '' }}" href="{{ route('marketing.index') }}">
             <svg class="side-nav__icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5L6 9H2v6h4l5 4V5zM15.5 8.5a5 5 0 010 7M19 5a10 10 0 010 14"/></svg>

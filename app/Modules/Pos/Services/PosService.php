@@ -76,6 +76,12 @@ class PosService
                 $this->fail('amount', 'Enter an amount up to the balance due (₱'.number_format($due, 2).').');
             }
 
+            // Gift card / store credit (Phase 23): the code is the reference; the card must cover the amount.
+            if ($method === 'gift_card') {
+                app(\App\Modules\Loyalty\Services\GiftCardService::class)->redeem((string) $reference, $applied, $order->reference);
+                $reference = strtoupper(trim((string) $reference));
+            }
+
             $payment = PosPayment::create([
                 'order_id' => $order->id,
                 'pos_session_id' => $session->id,
@@ -144,7 +150,7 @@ class PosService
     /** Full refund of a settled register ticket, paid out of the open drawer. */
     public function refund(Order $order, string $method, string $reason, User $by): Order
     {
-        if (! in_array($method, PosPayment::METHODS, true)) {
+        if (! in_array($method, PosPayment::REFUND_METHODS, true)) {
             $this->fail('method', 'Pick how the money goes back.');
         }
 

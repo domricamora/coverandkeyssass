@@ -131,7 +131,7 @@ class PosController extends RestaurantManagementController
             'method' => ['required', Rule::in(PosPayment::METHODS)],
             'amount' => ['nullable', 'numeric', 'min:0.01', 'required_unless:method,cash'],
             'tendered' => ['nullable', 'numeric', 'min:0.01', 'required_if:method,cash'],
-            'reference' => ['nullable', 'string', 'max:120'],
+            'reference' => ['nullable', 'string', 'max:120', 'required_if:method,gift_card'],
         ]);
 
         $payment = $this->pos->pay($this->ticket($restaurant, $ticket), $validated['method'], (float) ($validated['amount'] ?? $validated['tendered']), $request->user(), isset($validated['tendered']) ? (float) $validated['tendered'] : null, $validated['reference'] ?? null);
@@ -178,7 +178,7 @@ class PosController extends RestaurantManagementController
     {
         $this->authorizeTo($request, 'pos.refund');
         $restaurant = $this->resolveRestaurant($restaurant);
-        $validated = $request->validate(['method' => ['required', Rule::in(PosPayment::METHODS)], 'reason' => ['required', 'string', 'max:160']]);
+        $validated = $request->validate(['method' => ['required', Rule::in(PosPayment::REFUND_METHODS)], 'reason' => ['required', 'string', 'max:160']]);
 
         $this->pos->refund($this->ticket($restaurant, $ticket), $validated['method'], $validated['reason'], $request->user());
 

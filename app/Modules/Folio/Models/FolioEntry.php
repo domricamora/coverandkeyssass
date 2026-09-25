@@ -32,7 +32,7 @@ class FolioEntry extends Model
     /** Categories staff can post by hand — room nights and room service come from their records. */
     public const MANUAL_CHARGE_CATEGORIES = ['food', 'laundry', 'minibar', 'activities', 'transport', 'other'];
 
-    public const PAYMENT_METHODS = ['cash', 'card', 'transfer', 'ewallet'];
+    public const PAYMENT_METHODS = ['cash', 'card', 'transfer', 'ewallet', 'gift_card'];
 
     protected function casts(): array
     {

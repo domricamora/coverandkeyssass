@@ -114,6 +114,10 @@ class PermissionRegistry
                 'marketing.view' => 'View campaigns, automations and promotions',
                 'marketing.manage' => 'Create and send campaigns, configure automations',
             ],
+            'loyalty' => [
+                'loyalty.view' => 'View loyalty members, rewards and gift cards',
+                'loyalty.manage' => 'Run the programme, redeem rewards, sell and void gift cards',
+            ],
             'wallet' => [
                 'wallet.view' => 'View the host wallet, commissions and payouts',
                 'payouts.request' => 'Request payouts from the host wallet',

@@ -15,7 +15,10 @@ class PosPayment extends Model
 {
     use BelongsToTenant;
 
-    public const METHODS = ['cash', 'card', 'ewallet'];
+    public const METHODS = ['cash', 'card', 'ewallet', 'gift_card'];
+
+    /** How money can go back out of the drawer. */
+    public const REFUND_METHODS = ['cash', 'card', 'ewallet'];
 
     protected function casts(): array
     {

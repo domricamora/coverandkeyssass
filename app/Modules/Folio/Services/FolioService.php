@@ -79,7 +79,13 @@ class FolioService
             $this->fail('method', 'Pick a payment method.');
         }
 
-        return $this->postManual($booking, FolioEntry::PAYMENT, $method, 'Payment ('.$method.')', $amount, 1, $by, $reference);
+        // Gift card / store credit (Phase 23): the code is the reference.
+        if ($method === 'gift_card') {
+            app(\App\Modules\Loyalty\Services\GiftCardService::class)->redeem((string) $reference, $amount, $booking->reference);
+            $reference = strtoupper(trim((string) $reference));
+        }
+
+        return $this->postManual($booking, FolioEntry::PAYMENT, $method, 'Payment ('.str_replace('_', ' ', $method).')', $amount, 1, $by, $reference);
     }
 
     /** Money handed back at the desk; never more than was paid (net of earlier refunds). */

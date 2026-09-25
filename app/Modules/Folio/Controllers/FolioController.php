@@ -60,7 +60,7 @@ class FolioController extends Controller
         $validated = $request->validate([
             'method' => ['required', Rule::in(FolioEntry::PAYMENT_METHODS)],
             'amount' => ['required', 'numeric', 'min:0.01', 'max:9999999'],
-            'reference' => ['nullable', 'string', 'max:120'],
+            'reference' => ['nullable', 'string', 'max:120', 'required_if:method,gift_card'],
         ]);
 
         $this->folio->recordPayment($booking, $validated['method'], (float) $validated['amount'], $request->user(), $validated['reference'] ?? null);
@@ -73,7 +73,7 @@ class FolioController extends Controller
         $booking = $this->hostBooking($request, 'folio.manage', $booking);
 
         $validated = $request->validate([
-            'method' => ['required', Rule::in(FolioEntry::PAYMENT_METHODS)],
+            'method' => ['required', Rule::in(array_diff(FolioEntry::PAYMENT_METHODS, ['gift_card']))],
             'amount' => ['required', 'numeric', 'min:0.01', 'max:9999999'],
             'reason' => ['nullable', 'string', 'max:200'],
         ]);
