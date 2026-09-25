@@ -24,6 +24,12 @@
             Properties
         </a>
     @endif
+    @if (auth()->user()?->hasPermissionTo('restaurants.view'))
+        <a class="{{ str_starts_with((string) $route, 'restaurants.') ? 'is-active' : '' }}" href="{{ route('restaurants.index') }}">
+            <svg class="side-nav__icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M7 3v8a2 2 0 002 2v8M5 3v5M9 3v5M17 21V3c-2 1-3 4-3 7h3"/></svg>
+            Restaurants
+        </a>
+    @endif
     @if (auth()->user()?->hasPermissionTo('bookings.view'))
         <a class="{{ str_starts_with((string) $route, 'bookings.') ? 'is-active' : '' }}" href="{{ route('bookings.index') }}">
             <svg class="side-nav__icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1z"/></svg>

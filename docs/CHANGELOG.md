@@ -1,5 +1,17 @@
 # CHANGELOG.md
 
+## 2026-09-25 — Phase 09: Restaurant Management (v0.9.0)
+
+(verified: 156 tests / 621 assertions)
+
+- New `App\Modules\RestaurantManagement` (gated by `module.active:restaurant`): host profile CRUD, opening hours per day, cuisines, contact details, reservations/delivery flags, photos with cover, audited publish/unpublish.
+- Menu builder: `menu_categories` → `menu_items` (price, photo, availability) → `modifier_groups` (min/max rules: required modifiers or optional add-ons) → `modifier_options` (price delta).
+- `MenuItem::priceWith(optionIds)` is the server-side price calculation that ordering will use. It enforces group rules, option availability and option ownership.
+- Floor plan: `dining_areas` and `restaurant_tables` (label unique per restaurant, seats, active/inactive).
+- The public `/restaurant/{slug}` page shows the menu, with "Sold out" items and add-on prices.
+- Permissions `menu.view/manage` and `tables.view/manage` (owner and manager manage; front desk views). Restaurants link in the sidebar.
+- 10 new Pest tests.
+
 ## 2026-09-24 — Phase 08: Host Wallet & Commissions (v0.8.0)
 
 (verified: 146 tests / 560 assertions)

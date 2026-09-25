@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -92,6 +93,41 @@ class Restaurant extends Model
     public function favorites(): MorphMany
     {
         return $this->morphMany(Favorite::class, 'favoritable');
+    }
+
+    // Restaurant Management (Phase 09) — menu and floor plan
+
+    public function menuCategories(): HasMany
+    {
+        return $this->hasMany(\App\Modules\RestaurantManagement\Models\MenuCategory::class)->orderBy('sort_order')->orderBy('name');
+    }
+
+    public function menuItems(): HasMany
+    {
+        return $this->hasMany(\App\Modules\RestaurantManagement\Models\MenuItem::class);
+    }
+
+    public function diningAreas(): HasMany
+    {
+        return $this->hasMany(\App\Modules\RestaurantManagement\Models\DiningArea::class)->orderBy('sort_order')->orderBy('name');
+    }
+
+    public function tables(): HasMany
+    {
+        return $this->hasMany(\App\Modules\RestaurantManagement\Models\RestaurantTable::class)->orderBy('label');
+    }
+
+    public function publish(): void
+    {
+        $this->forceFill([
+            'status' => self::STATUS_PUBLISHED,
+            'published_at' => $this->published_at ?? now(),
+        ])->save();
+    }
+
+    public function unpublish(): void
+    {
+        $this->forceFill(['status' => self::STATUS_DRAFT])->save();
     }
 
     public function scopePublished(Builder $query): Builder

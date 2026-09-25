@@ -80,6 +80,19 @@ Framework tables (`cache`, `jobs`, `sessions`, …) follow the Laravel defaults;
 | wallet_transactions | append-only ledger | wallet FK, type, bucket `pending/available`, signed amount, `balance_after`, optional commission / payout FK |
 | payouts | host withdrawals | wallet FK, amount, method + account, status `requested/paid/rejected`, requested_by / processed_by, reference, note |
 
+## Phase 09 tables (Restaurant Management)
+
+| Table | Purpose | Notes |
+|---|---|---|
+| menu_categories | menu sections | tenant + restaurant FKs, unique `(restaurant_id, name)`, `is_active`, sort_order |
+| menu_items | dishes / drinks | category FK (restrict), price decimal(12,2), currency, photo_url, `is_available`, sort_order |
+| modifier_groups | modifiers / add-ons per item | item FK (cascade), `min_select`, nullable `max_select` (null = unlimited) |
+| modifier_options | choices in a group | group FK (cascade), price delta, `is_available` |
+| dining_areas | floor sections | unique `(restaurant_id, name)` |
+| restaurant_tables | physical tables | nullable area FK (nullOnDelete), unique `(restaurant_id, label)`, seats, status `active/inactive` |
+
+Opening hours reuse `restaurants.opening_hours` (JSON `{day: "11:00–22:00"}`).
+
 ## Seeding
 
 `php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin` **and** a refresh of every existing tenant's system roles, so newly added catalogue permissions reach already-provisioned businesses).

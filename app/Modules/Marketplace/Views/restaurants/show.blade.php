@@ -59,6 +59,33 @@
                     </div>
                 @endif
 
+                @php($menu = $r->relationLoaded('menuCategories') ? $r->menuCategories->filter(fn ($c) => $c->items->isNotEmpty()) : collect())
+                @if ($menu->isNotEmpty())
+                    <div class="listing-block">
+                        <h2>Menu</h2>
+                        @foreach ($menu as $category)
+                            <h3 style="margin:1rem 0 .5rem;">{{ $category->name }}</h3>
+                            <ul class="menu-list" style="list-style:none;padding:0;margin:0;">
+                                @foreach ($category->items as $item)
+                                    <li style="padding:.5rem 0;border-bottom:1px solid var(--border);{{ $item->is_available ? '' : 'opacity:.55;' }}">
+                                        <div style="display:flex;justify-content:space-between;gap:1rem;">
+                                            <strong>{{ $item->name }}</strong>
+                                            <span>{{ $item->is_available ? $item->priceLabel() : 'Sold out' }}</span>
+                                        </div>
+                                        @if ($item->description)<p class="muted" style="margin:.25rem 0 0;">{{ $item->description }}</p>@endif
+                                        @foreach ($item->modifierGroups->filter(fn ($g) => $g->options->isNotEmpty()) as $group)
+                                            <p class="muted" style="margin:.25rem 0 0;font-size:.9rem;">
+                                                {{ $group->name }}:
+                                                {{ $group->options->map(fn ($o) => $o->name.((float) $o->price > 0 ? ' +'.\App\Modules\RestaurantManagement\Models\MenuItem::money((float) $o->price, $item->currency) : ''))->implode(', ') }}
+                                            </p>
+                                        @endforeach
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @endforeach
+                    </div>
+                @endif
+
                 @if ($hours !== [])
                     <div class="listing-block">
                         <h2>Opening hours</h2>

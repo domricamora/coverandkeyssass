@@ -38,6 +38,15 @@ class RestaurantController extends Controller
     {
         $listing = Restaurant::publicQuery()
             ->with(['reviews' => fn ($q) => $q->published()->with('user')->limit(6)])
+            // Menu rows are tenant-owned; the parent listing is already
+            // restricted to published, so dropping the scope per level is
+            // bounded to this restaurant's menu.
+            ->with([
+                'menuCategories' => fn ($q) => $q->withoutGlobalScope('tenant')->where('is_active', true),
+                'menuCategories.items' => fn ($q) => $q->withoutGlobalScope('tenant'),
+                'menuCategories.items.modifierGroups' => fn ($q) => $q->withoutGlobalScope('tenant'),
+                'menuCategories.items.modifierGroups.options' => fn ($q) => $q->withoutGlobalScope('tenant')->where('is_available', true),
+            ])
             ->where('slug', $restaurant)
             ->firstOrFail();
 

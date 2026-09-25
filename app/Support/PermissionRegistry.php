@@ -79,6 +79,10 @@ class PermissionRegistry
                 'restaurants.update' => 'Update restaurant listings',
                 'restaurants.delete' => 'Delete restaurant listings',
                 'restaurants.publish' => 'Publish or unpublish restaurant listings',
+                'menu.view' => 'View the menu',
+                'menu.manage' => 'Edit menu categories, items, prices and modifiers',
+                'tables.view' => 'View dining areas and tables',
+                'tables.manage' => 'Edit dining areas and tables',
             ],
         ];
     }
