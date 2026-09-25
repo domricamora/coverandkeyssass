@@ -2,8 +2,8 @@
 
 ## Current Phase
 
-Phase 36 - Backups — **COMPLETE (verified)**
-Next: Phase 37 - Monitoring
+Phase 37 - Monitoring — **COMPLETE (verified)**
+Next: Phase 38 - Final system audit
 
 ## Completed
 
@@ -46,12 +46,13 @@ Next: Phase 37 - Monitoring
 - **Phase 34 — Testing**: critical-scenario → test map + per-module matrix in docs/TESTING.md; added cross-tenant tests for loyalty/marketing and DB-free unit tests for the booking/order state machines
 - **Phase 35 — Production deployment**: root .htaccess safety net (fixed .env/.git/vendor exposure when the repo root is the web root), full production schedule incl. cPanel queue worker, tenant-aware queued notifications (RestoreTenantContext), .env.production.example, deploy.sh, DEPLOYMENT.md runbook
 - **Phase 36 — Backups**: BackupManager + backup:run/verify/restore (consistent dump, files, AES-encrypted .env, checksummed manifest, rotation, off-site disk), weekly scheduled restore test, docs/BACKUPS.md restore procedure
-- Tests: Pest suite — **302 passed, 1952 assertions** (Phase 36: 3, Phase 35: 2, Phase 34: 11, Phase 33: 2, Phase 32: 4, Phase 31: 4, demo seed: 1, Phase 30: 6, Phase 29: 4, Phase 28: 6, Phase 27: 8, Phase 26: 6, Phase 25: 4, Phase 24: 4, Phase 23: 6, Phase 22: 7, Phase 21: 4, Phase 20: 6, Phase 19: 5, Phase 18: 6, Phase 17: 6, Phase 16: 4, Phase 15: 5, Phase 14: 7, Phase 13: 5, Phase 12: 6, Phase 11: 8, Phase 10: 6, Phase 09: 10, Phase 05: 19, Phase 06: 7, Phase 07: 12, Phase 08: 10); previously **98 passed, 320 assertions** (`php artisan test`, real MySQL), including 24 Phase 04 coverage tests
+- **Phase 37 — Monitoring**: `ops` + `security` log channels; audit trail mirrored to ops (who/where/what, no PII); login / lockout / API token / webhook signature logging; tenant+user context on errors; docs/MONITORING.md
+- Tests: Pest suite — **305 passed, 1965 assertions** (Phase 37: 3, Phase 36: 3, Phase 35: 2, Phase 34: 11, Phase 33: 2, Phase 32: 4, Phase 31: 4, demo seed: 1, Phase 30: 6, Phase 29: 4, Phase 28: 6, Phase 27: 8, Phase 26: 6, Phase 25: 4, Phase 24: 4, Phase 23: 6, Phase 22: 7, Phase 21: 4, Phase 20: 6, Phase 19: 5, Phase 18: 6, Phase 17: 6, Phase 16: 4, Phase 15: 5, Phase 14: 7, Phase 13: 5, Phase 12: 6, Phase 11: 8, Phase 10: 6, Phase 09: 10, Phase 05: 19, Phase 06: 7, Phase 07: 12, Phase 08: 10); previously **98 passed, 320 assertions** (`php artisan test`, real MySQL), including 24 Phase 04 coverage tests
 - Documentation: docs/* updated per phase; `docs/modules/{marketplace,property-management}.md` completed; CHANGELOG carries Phase 01–08 entries
 
 ## In Progress
 
-- (nothing — Phase 37 not started)
+- (nothing — Phase 38 not started)
 
 ## Pending
 
@@ -76,4 +77,4 @@ Claude Code (Opus)
 
 php artisan test
 
-Result: PASS (302 tests, 1952 assertions, MySQL `hospitality_os_testing`)
+Result: PASS (305 tests, 1965 assertions, MySQL `hospitality_os_testing`)

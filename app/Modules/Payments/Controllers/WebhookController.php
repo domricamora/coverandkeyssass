@@ -33,6 +33,9 @@ class WebhookController extends Controller
         $payload = $request->getContent();
 
         if (! $this->gateway->validSignature($payload, $request->header('Paymongo-Signature'))) {
+            // Forged, replayed or misconfigured secret: a security signal, not noise.
+            \Illuminate\Support\Facades\Log::channel('security')->warning('webhook.paymongo.invalid_signature', ['ip' => $request->ip(), 'bytes' => strlen($payload)]);
+
             return response('Invalid signature', 400);
         }
 
@@ -41,8 +44,12 @@ class WebhookController extends Controller
         $resource = (array) $request->input('data.attributes.data', []);
 
         if ($eventId === '' || $type === '') {
+            \Illuminate\Support\Facades\Log::channel('ops')->warning('webhook.paymongo.malformed', ['ip' => $request->ip()]);
+
             return response('Malformed event', 400);
         }
+
+        \Illuminate\Support\Facades\Log::channel('ops')->info('webhook.paymongo.received', ['event_id' => $eventId, 'type' => $type]);
 
         DB::table('payment_events')->insertOrIgnore([
             'event_id' => $eventId,
@@ -53,6 +60,8 @@ class WebhookController extends Controller
         ]);
 
         if (DB::table('payment_events')->where('event_id', $eventId)->whereNotNull('processed_at')->exists()) {
+            \Illuminate\Support\Facades\Log::channel('ops')->info('webhook.paymongo.duplicate', ['event_id' => $eventId, 'type' => $type]);
+
             return response('Already processed', 200);
         }
 

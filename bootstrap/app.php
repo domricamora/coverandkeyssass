@@ -23,6 +23,13 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Phase 37: every logged error says which business and user it hit.
+        $exceptions->context(fn () => array_filter([
+            'tenant_id' => app(\App\Support\TenantContext::class)->id(),
+            'user_id' => auth()->id(),
+            'url' => app()->runningInConsole() ? null : request()->fullUrl(),
+        ]));
+
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );

@@ -37,6 +37,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->hardenForProduction();
         $this->tracePerformance();
+        $this->logAuthentication();
 
         // Model policies.
         Gate::policy(Tenant::class, TenantPolicy::class);
@@ -53,6 +54,32 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(function (User $user, string $ability) {
             return $user->isPlatformAdmin() ? true : null;
         });
+    }
+
+    /**
+     * Phase 37: login attempts to the `security` log. Emails only (lower-cased),
+     * never passwords; lockouts are alerts (brute force being throttled).
+     */
+    private function logAuthentication(): void
+    {
+        $security = fn () => \Illuminate\Support\Facades\Log::channel('security');
+
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Failed::class, fn ($e) => $security()->warning('auth.login_failed', [
+            'email' => mb_strtolower((string) ($e->credentials['email'] ?? '')),
+            'known_user' => $e->user !== null,
+            'ip' => request()->ip(),
+        ]));
+
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Lockout::class, fn ($e) => $security()->alert('auth.lockout', [
+            'email' => mb_strtolower((string) $e->request->input('email')),
+            'ip' => $e->request->ip(),
+        ]));
+
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Login::class, fn ($e) => $security()->info('auth.login', [
+            'user_id' => $e->user->getAuthIdentifier(),
+            'guard' => $e->guard,
+            'ip' => request()->ip(),
+        ]));
     }
 
     /**

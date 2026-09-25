@@ -25,6 +25,8 @@ class AuthController extends Controller
 
         // One message for unknown email and wrong password: no account probing.
         if (! $user || ! Hash::check($data['password'], $user->password)) {
+            \Illuminate\Support\Facades\Log::channel('security')->warning('api.token_failed', ['email' => mb_strtolower($data['email']), 'known_user' => $user !== null, 'ip' => $request->ip()]);
+
             throw ValidationException::withMessages(['email' => 'These credentials do not match our records.']);
         }
 

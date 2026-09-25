@@ -1,5 +1,20 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Phase 37: Monitoring (v0.37.0)
+
+(verified: 305 tests / 1965 assertions)
+
+- Two new daily log channels: `ops` (business events, 30 days) and `security` (auth and attack signals, 90 days).
+- `AuditLogger` mirrors every audit entry to `ops` with who, where and what only. That covers bookings, orders, payments, refunds, payouts, subscription and billing changes, and admin actions. Levels come from the action: failures and mismatches are warnings; refunds, cancellations and voids are notices. Old and new values (possible personal data) stay in the database.
+- Login monitoring in `security`:
+  - `auth.login`
+  - `auth.login_failed` (email and whether the account exists, never the password)
+  - `auth.lockout` (alert)
+  - `api.token_failed`
+- PayMongo webhook logging, which didn't exist before: received, duplicate and malformed events go to `ops`; invalid signatures go to `security`.
+- Every logged exception carries `tenant_id`, `user_id` and the URL.
+- `docs/MONITORING.md`: the streams, the coverage matrix against the master plan, and what to alert on in production.
+- 3 new tests (`MonitoringTest`) that read the real log files.
 ## 2026-09-26 — Phase 36: Backups (v0.36.0)
 
 (verified: 302 tests / 1952 assertions; live `backup:verify` restored 120 tables / 2,725 rows from the dev database)

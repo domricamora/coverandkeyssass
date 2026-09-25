@@ -58,6 +58,27 @@ return [
             'ignore_exceptions' => false,
         ],
 
+        // Phase 37 — business events (bookings, orders, payments, refunds,
+        // payouts, subscriptions, admin actions, webhooks), mirrored from the
+        // audit trail. One line per event.
+        'ops' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/ops.log'),
+            'level' => env('LOG_OPS_LEVEL', 'info'),
+            'days' => (int) env('LOG_OPS_DAYS', 30),
+            'replace_placeholders' => true,
+        ],
+
+        // Phase 37 — authentication and attack signals: failed logins,
+        // lockouts, failed API token requests, bad webhook signatures.
+        'security' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/security.log'),
+            'level' => 'info',
+            'days' => (int) env('LOG_SECURITY_DAYS', 90),
+            'replace_placeholders' => true,
+        ],
+
         'single' => [
             'driver' => 'single',
             'path' => storage_path('logs/laravel.log'),
