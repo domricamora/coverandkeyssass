@@ -2,8 +2,8 @@
 
 ## Current Phase
 
-Phase 33 - Performance — **COMPLETE (verified)**
-Next: Phase 34 - Testing
+Phase 34 - Testing — **COMPLETE (verified)**
+Next: Phase 35 - Production deployment
 
 ## Completed
 
@@ -43,12 +43,13 @@ Next: Phase 34 - Testing
 - **Phase 31 — API**: `/api/v1` with Sanctum tokens (read/write abilities, 30-day expiry, throttled issue, revoke), public catalogue, customer `/me` (bookings/orders/payments/notifications/messages + book a stay + cash order), business `/business` via X-Tenant with dashboard permissions (bookings/orders state transitions), explicit JSON whitelists; fix: per-tenant employee numbering
 - **Phase 32 — Security audit**: per-area audit in docs/SECURITY.md; added global security headers + CSP, production password policy (min 10, mixed case, numbers, HIBP), secure session cookie + forced HTTPS in production; composer/npm audit clean
 - **Phase 33 — Performance**: measured with PERF_TRACE crawl; permission set memoised per request (dashboard pages 65–79 → 12–22 queries), ledger posted-key set, scoped view-time folio sync (+ nightly full), incremental CRM sync, reversible indexes; fix: Order::user relation; queued notifications deferred (tenant-aware payload, Phase 35)
-- Tests: Pest suite — **286 passed, 1861 assertions** (Phase 33: 2, Phase 32: 4, Phase 31: 4, demo seed: 1, Phase 30: 6, Phase 29: 4, Phase 28: 6, Phase 27: 8, Phase 26: 6, Phase 25: 4, Phase 24: 4, Phase 23: 6, Phase 22: 7, Phase 21: 4, Phase 20: 6, Phase 19: 5, Phase 18: 6, Phase 17: 6, Phase 16: 4, Phase 15: 5, Phase 14: 7, Phase 13: 5, Phase 12: 6, Phase 11: 8, Phase 10: 6, Phase 09: 10, Phase 05: 19, Phase 06: 7, Phase 07: 12, Phase 08: 10); previously **98 passed, 320 assertions** (`php artisan test`, real MySQL), including 24 Phase 04 coverage tests
+- **Phase 34 — Testing**: critical-scenario → test map + per-module matrix in docs/TESTING.md; added cross-tenant tests for loyalty/marketing and DB-free unit tests for the booking/order state machines
+- Tests: Pest suite — **297 passed, 1931 assertions** (Phase 34: 11, Phase 33: 2, Phase 32: 4, Phase 31: 4, demo seed: 1, Phase 30: 6, Phase 29: 4, Phase 28: 6, Phase 27: 8, Phase 26: 6, Phase 25: 4, Phase 24: 4, Phase 23: 6, Phase 22: 7, Phase 21: 4, Phase 20: 6, Phase 19: 5, Phase 18: 6, Phase 17: 6, Phase 16: 4, Phase 15: 5, Phase 14: 7, Phase 13: 5, Phase 12: 6, Phase 11: 8, Phase 10: 6, Phase 09: 10, Phase 05: 19, Phase 06: 7, Phase 07: 12, Phase 08: 10); previously **98 passed, 320 assertions** (`php artisan test`, real MySQL), including 24 Phase 04 coverage tests
 - Documentation: docs/* updated per phase; `docs/modules/{marketplace,property-management}.md` completed; CHANGELOG carries Phase 01–08 entries
 
 ## In Progress
 
-- (nothing — Phase 34 not started)
+- (nothing — Phase 35 not started)
 
 ## Pending
 
@@ -73,4 +74,4 @@ Claude Code (Opus)
 
 php artisan test
 
-Result: PASS (286 tests, 1861 assertions, MySQL `hospitality_os_testing`)
+Result: PASS (297 tests, 1931 assertions, MySQL `hospitality_os_testing`)

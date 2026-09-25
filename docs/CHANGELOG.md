@@ -1,19 +1,15 @@
 # CHANGELOG.md
 
-## 2026-09-26 — Phase 33: Performance (v0.33.0)
+## 2026-09-26 — Phase 34: Testing (v0.34.0)
 
-(verified: 286 tests / 1861 assertions; measured with the new `PERF_TRACE` crawl, see `docs/PERFORMANCE.md`)
+(verified: 297 tests / 1931 assertions)
 
-- Permissions resolve in one query per business per request, memoised on the user. It used to be three queries per `hasPermissionTo()` call, about 20 calls a page. Dashboard pages dropped from 65–79 queries to 12–22.
-- Accounting:
-  - The ledger loads posted source keys once per sync, so there are no per-row existence queries.
-  - Report screens re-sync only live and recent folios. The nightly `accounting:sync` runs `sync(full: true)` as the backstop.
-- CRM sync is incremental: a per-business watermark means only changed rows are folded and only touched contacts get their metrics refreshed. A missing watermark means a full pass.
-- New reversible indexes: `(tenant_id, updated_at)` on bookings, orders, payments and table_reservations, and `(tenant_id, check_in)` on bookings.
-- Dev tooling: `PERF_TRACE=true` logs query counts and lazy-load violations to `storage/logs/perf.log`.
-- Fix: `Order` had no `user` relation, so CRM never captured an ordering customer's email.
-- Deferred: queued notifications need a tenant-aware job payload (Phase 35).
-- 2 new Pest tests (`PerformanceTest`: dashboard query budget, incremental CRM correctness).
+- Coverage audit. `docs/TESTING.md` maps every critical scenario in the master plan (double booking, tenant access, permission bypass, duplicate webhook, failed payment, refund, inventory release, order status, delivery) to the test that proves it. It also includes a per-module matrix.
+- Gaps closed:
+  - `CrossTenantModulesTest`: another business's loyalty members, rewards and campaigns return 404, even for an owner with full permissions.
+  - `Unit/StateMachinesTest`: booking and order transitions, the rule that every room-occupying status can leave occupancy, refund eligibility, and the API money shape. No database needed.
+- Cleanup: CRM now uses the existing `Order::customer()` relation, and the duplicate `Order::user()` added in Phase 33 is removed.
+- 11 new tests.
 ## 2026-09-26 — Phase 33: Performance (v0.33.0)
 
 (verified: 286 tests / 1861 assertions; measured with the new `PERF_TRACE` crawl, see `docs/PERFORMANCE.md`)
