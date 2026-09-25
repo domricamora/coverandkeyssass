@@ -138,6 +138,10 @@ Changes to existing tables: `payments.booking_id` and `commissions.booking_id` a
 
 `rooms` gains `housekeeping_status` (default `clean`), `housekeeping_updated_at`, and an index `(property_id, housekeeping_status)`.
 
+## Phase 16 changes (Maintenance)
+
+`maintenance_tickets` gains `category` (default `other`), `cost`, `started_at`, `closed_at`, and an index `(tenant_id, status, priority)`. New table `maintenance_ticket_notes` (tenant, ticket, nullable user, body, is_system). Attachments are `media` rows (`mediable` = ticket, disk `local`, kind `image` / `document`).
+
 ## Seeding
 
 `php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin` **and** a refresh of every existing tenant's system roles, so newly added catalogue permissions reach already-provisioned businesses).

@@ -1,5 +1,16 @@
 # CHANGELOG.md
 
+## 2026-09-25 — Phase 16: Maintenance (v0.16.0)
+
+(verified: 197 tests / 1008 assertions)
+
+- New `App\Modules\Maintenance` provider (workforce): tickets with category, priority, assigned staff (notified), cost, started / resolved / closed times.
+- Workflow open → in_progress ⇄ on_hold → resolved → closed, with reopen. Workers claim or progress their own tickets. Managers assign, cost and close. Closed tickets are read-only.
+- Notes thread with system notes for every change. Private attachments (images / PDF, 5 MB) on the local disk behind an authorised download route.
+- When a room's last active ticket is resolved, the room goes back to housekeeping as dirty. Housekeeping's "Report issue" now opens tickets through `MaintenanceService`.
+- Maintenance list and detail screens, sidebar link. Permissions `maintenance.view/work/manage`.
+- 4 new Pest tests.
+
 ## 2026-09-25 — Phase 15: Housekeeping (v0.15.0)
 
 (verified: 193 tests / 961 assertions)

@@ -34,6 +34,7 @@ class RoleSeeder extends Seeder
                     'bookings.view', 'bookings.create', 'bookings.update', 'promotions.manage',
                     'folio.view', 'folio.manage', 'folio.void',
                     'housekeeping.view', 'housekeeping.work', 'housekeeping.manage',
+                    'maintenance.view', 'maintenance.work', 'maintenance.manage',
                     'wallet.view', 'payouts.request',
                 ],
             ],
@@ -53,6 +54,7 @@ class RoleSeeder extends Seeder
                     'bookings.view', 'bookings.create', 'bookings.update', 'promotions.manage',
                     'folio.view', 'folio.manage', 'folio.void',
                     'housekeeping.view', 'housekeeping.work', 'housekeeping.manage',
+                    'maintenance.view', 'maintenance.work', 'maintenance.manage',
                     'wallet.view',
                 ],
             ],
@@ -66,13 +68,13 @@ class RoleSeeder extends Seeder
                     'rooms.view', 'rates.view', 'availability.view',
                     'bookings.view', 'bookings.create', 'bookings.update',
                     'folio.view', 'folio.manage',
-                    'housekeeping.view',
+                    'housekeeping.view', 'maintenance.view', 'maintenance.work',
                 ],
             ],
             'staff' => [
                 'display_name' => 'Staff',
                 'description' => 'General staff member (housekeeping).',
-                'permissions' => ['housekeeping.view', 'housekeeping.work'],
+                'permissions' => ['housekeeping.view', 'housekeeping.work', 'maintenance.view', 'maintenance.work'],
             ],
         ];
     }

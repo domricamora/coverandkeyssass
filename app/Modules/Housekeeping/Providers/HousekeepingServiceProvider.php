@@ -19,7 +19,6 @@ class HousekeepingServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadMigrationsFrom(__DIR__.'/../Migrations');
-        $this->loadMigrationsFrom(__DIR__.'/../../Maintenance/Migrations');
         $this->loadViewsFrom(__DIR__.'/../Views', 'housekeeping');
 
         Route::middleware('web')->group(__DIR__.'/../routes.php');

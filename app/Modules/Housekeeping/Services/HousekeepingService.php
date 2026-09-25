@@ -7,6 +7,7 @@ use App\Modules\Booking\Models\Booking;
 use App\Modules\Housekeeping\Models\HousekeepingTask;
 use App\Modules\Housekeeping\Notifications\TaskAssigned;
 use App\Modules\Maintenance\Models\MaintenanceTicket;
+use App\Modules\Maintenance\Services\MaintenanceService;
 use App\Modules\PropertyManagement\Models\Room;
 use App\Support\AuditLogger;
 use App\Support\TenantContext;
@@ -190,19 +191,15 @@ class HousekeepingService
     public function reportIssue(Room $room, string $title, ?string $description, string $priority, bool $outOfOrder, User $by): MaintenanceTicket
     {
         return DB::transaction(function () use ($room, $title, $description, $priority, $outOfOrder, $by) {
-            $ticket = MaintenanceTicket::create([
-                'property_id' => $room->property_id,
-                'room_id' => $room->id,
-                'reference' => MaintenanceTicket::newReference(),
+            // Resolved lazily: MaintenanceService depends on this service (room hand-back).
+            $ticket = app(MaintenanceService::class)->open($room->property, $room, [
                 'title' => $title,
                 'description' => $description,
-                'priority' => in_array($priority, MaintenanceTicket::PRIORITIES, true) ? $priority : 'normal',
+                'priority' => $priority,
                 'room_out_of_order' => $outOfOrder,
-                'reported_by' => $by->id,
-            ]);
+            ], $by);
 
             $this->setRoomStatus($room, $outOfOrder ? Room::HK_OUT_OF_ORDER : Room::HK_MAINTENANCE, $by, 'Ticket '.$ticket->reference);
-            $this->audit->log('maintenance.reported', $ticket, null, ['room' => $room->room_number, 'out_of_order' => $outOfOrder]);
 
             return $ticket;
         });

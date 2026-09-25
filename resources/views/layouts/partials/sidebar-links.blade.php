@@ -42,6 +42,12 @@
             Housekeeping
         </a>
     @endif
+    @if (auth()->user()?->hasPermissionTo('maintenance.view'))
+        <a class="{{ str_starts_with((string) $route, 'maintenance.') ? 'is-active' : '' }}" href="{{ route('maintenance.index') }}">
+            <svg class="side-nav__icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a4 4 0 00-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 005.4-5.4l-2.5 2.5-2.5-.5-.5-2.5 2.5-2.5z"/></svg>
+            Maintenance
+        </a>
+    @endif
     @if (auth()->user()?->hasPermissionTo('wallet.view'))
         <a class="{{ str_starts_with((string) $route, 'wallet.') ? 'is-active' : '' }}" href="{{ route('wallet.index') }}">
             <svg class="side-nav__icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7h16a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7zm0 0l2-3h12M16 13h.01"/></svg>

@@ -28,7 +28,7 @@ out_of_order  (issue reported, room removed from sellable inventory)
 
 ## Maintenance requests
 
-"Report issue" on a room creates a `maintenance_tickets` row (reference `MT…`, priority, reporter) and sets the room to `maintenance`, or to `out_of_order` when ticked. The ticket workflow is Phase 16 (see `maintenance.md`).
+"Report issue" on a room creates a `maintenance_tickets` row (reference `MT…`, priority, reporter) and sets the room to `maintenance`, or to `out_of_order` when ticked. Phase 16 adds the ticket workflow (see `maintenance.md`), which returns the room as `dirty` when the last ticket is resolved.
 
 ## Screen / permissions
 

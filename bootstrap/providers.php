@@ -5,6 +5,7 @@ use App\Modules\Customer\Providers\CustomerServiceProvider;
 use App\Modules\Delivery\Providers\DeliveryServiceProvider;
 use App\Modules\Folio\Providers\FolioServiceProvider;
 use App\Modules\Housekeeping\Providers\HousekeepingServiceProvider;
+use App\Modules\Maintenance\Providers\MaintenanceServiceProvider;
 use App\Modules\Marketplace\Providers\MarketplaceServiceProvider;
 use App\Modules\Ordering\Providers\OrderingServiceProvider;
 use App\Modules\Payments\Providers\PaymentsServiceProvider;
@@ -26,5 +27,6 @@ return [
     DeliveryServiceProvider::class,
     FolioServiceProvider::class,
     HousekeepingServiceProvider::class,
+    MaintenanceServiceProvider::class,
 ];
 

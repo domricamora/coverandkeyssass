@@ -79,6 +79,11 @@ class PermissionRegistry
                 'housekeeping.work' => 'Start and finish cleaning tasks, report room issues',
                 'housekeeping.manage' => 'Create, assign and inspect tasks, set room status',
             ],
+            'maintenance' => [
+                'maintenance.view' => 'View maintenance tickets',
+                'maintenance.work' => 'Open tickets, add notes and files, progress assigned tickets',
+                'maintenance.manage' => 'Assign, cost and close maintenance tickets',
+            ],
             'wallet' => [
                 'wallet.view' => 'View the host wallet, commissions and payouts',
                 'payouts.request' => 'Request payouts from the host wallet',
