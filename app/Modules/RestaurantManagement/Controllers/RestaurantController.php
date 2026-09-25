@@ -45,6 +45,7 @@ class RestaurantController extends RestaurantManagementController
     {
         $this->authorizeTo($request, 'restaurants.create');
 
+        \App\Modules\Billing\Support\Usage::ensureRoom(app(\App\Support\TenantContext::class)->tenant(), 'restaurants');
         $validated = $request->validate($this->rules());
 
         $restaurant = Restaurant::create($this->attributes($request, $validated) + [

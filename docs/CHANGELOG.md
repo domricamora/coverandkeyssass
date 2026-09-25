@@ -1,5 +1,23 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Phase 27: SaaS Billing (v0.27.0)
+
+(verified: 259 tests / 1602 assertions)
+
+- New `App\Modules\Billing`. Businesses buy modules one by one, monthly or yearly (yearly = 10 × monthly), and required modules are added automatically. There is one subscription per business, with items per module.
+- Invoices are issued at subscribe, on a mid-period add (prorated) and at each renewal. They are idempotent by source key. Trials are charged only from the trial end.
+- Coupons: % or ₱ off, for once, n invoices or forever. Redemptions are capped and race-safe.
+- `billing:run` (daily):
+  - Renews periods and ends cancelled subscriptions.
+  - Marks invoices past due at the due date, with an owner notice.
+  - Suspends modules after 7 days of grace; paying restores them.
+  - Expires trials on modules nobody pays for.
+- Payment: PayMongo checkout. The return URL and webhook re-verify the exact total, and the webhook falls back to invoices. A Super Admin can also confirm a bank transfer.
+- Usage and limits: live counts of properties, rooms, restaurants and team members against the plan limit or a per-business override. They are enforced when these are created.
+- New screens: the business Billing page and invoice page (owner-only `billing.view/manage`), and Super Admin `/admin/billing` (MRR, invoices, subscriptions, coupons).
+- Fix: `notifications:trials` found no subscriptions from cron (tenant scope).
+- 8 new Pest tests.
+
 ## 2026-09-26 — Phase 26: Notifications (v0.26.0)
 
 (verified: 251 tests / 1519 assertions)

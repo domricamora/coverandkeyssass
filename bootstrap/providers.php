@@ -1,6 +1,7 @@
 <?php
 
 use App\Modules\Accounting\Providers\AccountingServiceProvider;
+use App\Modules\Billing\Providers\BillingServiceProvider;
 use App\Modules\Booking\Providers\BookingServiceProvider;
 use App\Modules\Crm\Providers\CrmServiceProvider;
 use App\Modules\Customer\Providers\CustomerServiceProvider;
@@ -48,5 +49,6 @@ return [
     ReviewsServiceProvider::class,
     MessagingServiceProvider::class,
     NotifyServiceProvider::class,
+    BillingServiceProvider::class,
 ];
 

@@ -25,6 +25,8 @@ final class Events
         'ticket_assigned' => ['Maintenance ticket assigned', 'staff', ['push']],
         'low_stock' => ['Low stock', 'staff', ['mail']],
         'trial_expiring' => ['Module trial / subscription expiring', 'staff', ['mail']],
+        'billing_invoice' => ['Subscription invoice issued / paid', 'staff', ['mail']],
+        'billing_past_due' => ['Subscription payment overdue', 'staff', ['mail', 'push']],
     ];
 
     public const CHANNELS = ['mail' => 'Email', 'sms' => 'SMS', 'push' => 'Push'];

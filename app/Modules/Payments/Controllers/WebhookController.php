@@ -3,6 +3,8 @@
 namespace App\Modules\Payments\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Modules\Billing\Models\Invoice;
+use App\Modules\Billing\Services\BillingService;
 use App\Modules\Payments\Models\Payment;
 use App\Modules\Payments\Services\PayMongoGateway;
 use App\Modules\Payments\Services\PaymentService;
@@ -55,7 +57,8 @@ class WebhookController extends Controller
         }
 
         match ($type) {
-            'checkout_session.payment.paid' => $this->sync(Payment::byProvider()->where('checkout_session_id', $resource['id'] ?? '')->first()),
+            'checkout_session.payment.paid' => $this->sync(Payment::byProvider()->where('checkout_session_id', $resource['id'] ?? '')->first())
+                ?: $this->syncInvoice((string) ($resource['id'] ?? '')),
             'payment.paid' => $this->sync(Payment::byProvider()->where('payment_intent_id', data_get($resource, 'attributes.payment_intent_id', ''))->first()),
             'payment.failed' => ($payment = Payment::byProvider()->where('payment_intent_id', data_get($resource, 'attributes.payment_intent_id', ''))->first())
                 ? $this->payments->markFailed($payment, data_get($resource, 'attributes.failed_message'))
@@ -68,10 +71,22 @@ class WebhookController extends Controller
         return response('OK', 200);
     }
 
-    private function sync(?Payment $payment): void
+    private function sync(?Payment $payment): bool
     {
         if ($payment) {
             $this->payments->sync($payment);
+        }
+
+        return $payment !== null;
+    }
+
+    /** Not a guest payment: maybe a business paying its subscription invoice (Phase 27). */
+    private function syncInvoice(string $sessionId): void
+    {
+        $invoice = $sessionId === '' ? null : Invoice::query()->where('checkout_session_id', $sessionId)->first();
+
+        if ($invoice) {
+            app(BillingService::class)->sync($invoice);
         }
     }
 }

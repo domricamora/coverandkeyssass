@@ -126,6 +126,10 @@ class PermissionRegistry
                 'messages.view' => 'Read guest conversations',
                 'messages.reply' => 'Answer guests and close conversations',
             ],
+            'billing' => [
+                'billing.view' => 'See the subscription, usage and invoices',
+                'billing.manage' => 'Change modules, apply coupons and pay invoices',
+            ],
             'wallet' => [
                 'wallet.view' => 'View the host wallet, commissions and payouts',
                 'payouts.request' => 'Request payouts from the host wallet',

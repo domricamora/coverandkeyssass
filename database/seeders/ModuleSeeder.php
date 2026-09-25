@@ -230,7 +230,14 @@ class ModuleSeeder extends Seeder
         }
     }
 
-    /** Seeds the module's monthly plan and feature bullets (idempotent). */
+    /** Per-business caps included with each module (Super Admin can override per business). */
+    public const PLAN_LIMITS = [
+        'core' => ['staff' => 25],
+        'property' => ['properties' => 5, 'rooms' => 150],
+        'restaurant' => ['restaurants' => 3],
+    ];
+
+    /** Seeds the module's monthly and yearly plans and feature bullets (idempotent). */
     private function seedCatalog(Module $module): void
     {
         $catalog = self::moduleCatalog()[$module->slug] ?? null;
@@ -239,15 +246,19 @@ class ModuleSeeder extends Seeder
             return;
         }
 
-        $module->plans()->updateOrCreate(
-            ['name' => 'Monthly'],
-            [
-                'price_cents' => $catalog['price_cents'],
-                'currency' => 'PHP',
-                'billing_interval' => 'monthly',
-                'is_active' => true,
-            ],
-        );
+        // Yearly = 10 × monthly (two months free). Limits feed Billing\Support\Usage (Phase 27).
+        foreach (['Monthly' => ['monthly', 1], 'Yearly' => ['yearly', 10]] as $name => [$interval, $multiplier]) {
+            $module->plans()->updateOrCreate(
+                ['name' => $name],
+                [
+                    'price_cents' => $catalog['price_cents'] * $multiplier,
+                    'currency' => 'PHP',
+                    'billing_interval' => $interval,
+                    'limits' => self::PLAN_LIMITS[$module->slug] ?? null,
+                    'is_active' => true,
+                ],
+            );
+        }
 
         foreach ($catalog['features'] as $index => [$name, $description, $highlighted]) {
             $module->features()->updateOrCreate(

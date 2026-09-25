@@ -61,7 +61,13 @@
             Inventory
         </a>
     @endif
-    @php($unreadNotifications = auth()->user()?->unreadNotifications()->count() ?? 0)
+    @if (auth()->user()?->hasPermissionTo('billing.view'))
+        <a class="{{ str_starts_with((string) $route, 'billing.') ? 'is-active' : '' }}" href="{{ route('billing.index') }}">
+            <svg class="side-nav__icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7h18v10H3zM3 11h18M7 15h3"/></svg>
+            Billing
+        </a>
+    @endif
+    @php($unreadNotifications =auth()->user()?->unreadNotifications()->count() ?? 0)
     <a class="{{ str_starts_with((string) $route, 'notifications.') ? 'is-active' : '' }}" href="{{ route('notifications.index') }}">
         <svg class="side-nav__icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0a3 3 0 11-6 0"/></svg>
         Notifications

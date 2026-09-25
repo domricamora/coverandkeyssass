@@ -11,6 +11,7 @@
             <a href="{{ route('admin.payouts.index') }}" class="btn btn-dark btn-sm">Payouts</a>
             <a href="{{ route('admin.reviews.index') }}" class="btn btn-dark btn-sm">Reviews</a>
             <a href="{{ route('admin.support.index') }}" class="btn btn-dark btn-sm">Support</a>
+            <a href="{{ route('admin.billing.index') }}" class="btn btn-dark btn-sm">Billing</a>
         </div>
     </div>
 

@@ -19,6 +19,7 @@ class RoomController extends PropertyManagementController
         [$property, $type] = $this->resolveType($property, $roomType);
         $this->authorizeProperty($request, $property, 'rooms.create');
 
+        \App\Modules\Billing\Support\Usage::ensureRoom(app(\App\Support\TenantContext::class)->tenant(), 'rooms');
         $validated = $request->validate($this->rules($property));
 
         $room = $type->rooms()->create($validated + ['property_id' => $property->getKey()]);

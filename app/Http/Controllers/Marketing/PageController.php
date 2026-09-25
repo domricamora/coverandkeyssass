@@ -77,7 +77,7 @@ class PageController extends Controller
             ->with(['activePlans', 'features'])
             ->get()
             ->map(function (Module $module) {
-                $plan = $module->activePlans->first();
+                $plan = $module->activePlans->firstWhere('billing_interval', 'monthly');
 
                 $module->setAttribute('monthly_price_cents', (int) ($plan->price_cents ?? 0));
 

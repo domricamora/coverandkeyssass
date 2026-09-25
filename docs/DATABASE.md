@@ -246,6 +246,18 @@ The unique `(user_id, reviewable_type, reviewable_id)` becomes a plain index, so
 | push_devices | registered mobile / browser devices | user, platform `ios/android/web`, token unique, last_seen_at |
 | push_messages | push outbox | user, event, title, body, data json, sent_at (null = not delivered yet) |
 
+## Phase 27 tables (SaaS Billing)
+
+| Table | Purpose | Notes |
+|---|---|---|
+| billing_coupons | platform coupons for subscriptions | code unique, percent_off / amount_off_cents, duration `once/repeating/forever`, duration_cycles, max_redemptions, redeemed_count, expires_at, is_active |
+| subscriptions | one per business | tenant unique, status `active/past_due/cancelled`, billing_interval `monthly/yearly`, current_period_start/end, cancel_at_period_end, cancelled_at, billing_coupon_id, coupon_cycles_used |
+| subscription_items | modules paid for | subscription + module unique, quantity |
+| billing_invoices | invoices to businesses | number unique, source_key unique (`renewal:{sub}:{ts}` / `change:{sub}:{uuid}`), status `open/paid/void`, period, subtotal/discount/total cents, coupon_code, due_at, paid_at, payment_method `paymongo/manual/none`, payment_reference, checkout_session_id/url, recorded_by |
+| billing_invoice_items | invoice lines | module, description, quantity, unit_cents, amount_cents |
+
+`module_plans` gains a **Yearly** row per module (10 × monthly), and `limits` on the core / property / restaurant plans.
+
 ## Seeding
 
 `php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin` **and** a refresh of every existing tenant's system roles, so newly added catalogue permissions reach already-provisioned businesses).

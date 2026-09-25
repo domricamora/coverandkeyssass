@@ -55,6 +55,7 @@ class PropertyController extends PropertyManagementController
     {
         $this->authorize('create', Property::class);
 
+        \App\Modules\Billing\Support\Usage::ensureRoom(app(\App\Support\TenantContext::class)->tenant(), 'properties');
         $validated = $request->validate($this->profileRules());
 
         $property = Property::create($validated + [

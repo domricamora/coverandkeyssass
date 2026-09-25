@@ -63,6 +63,8 @@ class TeamManager extends Component
             return;
         }
 
+        \App\Modules\Billing\Support\Usage::ensureRoom($this->tenant, 'staff', 1, 'email');
+
         $user = User::withTrashed()->where('email', $email)->first();
 
         if ($user && $user->trashed()) {

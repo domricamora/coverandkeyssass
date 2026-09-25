@@ -41,6 +41,7 @@ class RoleSeeder extends Seeder
                     'accounting.view', 'accounting.manage',
                     'crm.view', 'crm.manage', 'marketing.view', 'marketing.manage', 'loyalty.view', 'loyalty.manage', 'reviews.view', 'reviews.reply', 'messages.view', 'messages.reply',
                     'wallet.view', 'payouts.request',
+                    'billing.view', 'billing.manage',
                 ],
             ],
             'manager' => [
