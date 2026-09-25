@@ -2,8 +2,8 @@
 
 ## Current Phase
 
-Phase 24 - Reviews — **COMPLETE (verified)**
-Next: Phase 25 - Messaging
+Phase 25 - Messaging — **COMPLETE (verified)**
+Next: Phase 26 - Notifications
 
 ## Completed
 
@@ -33,16 +33,17 @@ Next: Phase 25 - Messaging
 - **Phase 22 — Marketing**: `App\Modules\Marketing` (crm) — consent-gated email / SMS campaigns to segments / tags with personal single-use coupons, signed unsubscribe, CRM-logged and never doubled; coupons redeem promotions on stays and orders (race-safe); automations (abandoned booking / cart, review request, post-stay, reactivation) via `marketing:run`; permissions `marketing.*`
 - **Phase 23 — Loyalty**: `App\Modules\Loyalty` (crm) — points on check-out / completed orders (events + sync, idempotent, reversed on refund), tiers on lifetime points, referrals (one-time double bonus), rewards → coupon / credit, gift cards + store credit usable at POS and folio with accounting liability; guest Rewards tab; permissions `loyalty.*`
 - **Phase 24 — Reviews**: `App\Modules\Reviews` — verified reviews per stay (property + room type) / order (restaurant + dishes) / table visit, category ratings, listing summaries incl. host rating, host replies + reports, Super Admin moderation; fix: ratings recalc without tenant context; permissions `reviews.*`
-- Tests: Pest suite — **241 passed, 1428 assertions** (Phase 24: 4, Phase 23: 6, Phase 22: 7, Phase 21: 4, Phase 20: 6, Phase 19: 5, Phase 18: 6, Phase 17: 6, Phase 16: 4, Phase 15: 5, Phase 14: 7, Phase 13: 5, Phase 12: 6, Phase 11: 8, Phase 10: 6, Phase 09: 10, Phase 05: 19, Phase 06: 7, Phase 07: 12, Phase 08: 10); previously **98 passed, 320 assertions** (`php artisan test`, real MySQL), including 24 Phase 04 coverage tests
+- **Phase 25 — Messaging**: `App\Modules\Messaging` — guest ↔ host / restaurant (about listing, booking, order, table), guest ↔ support, staff threads; one access service; private attachments; read status; notifications; CRM logging; guest / business / admin inboxes; permissions `messages.*`
+- Tests: Pest suite — **245 passed, 1477 assertions** (Phase 25: 4, Phase 24: 4, Phase 23: 6, Phase 22: 7, Phase 21: 4, Phase 20: 6, Phase 19: 5, Phase 18: 6, Phase 17: 6, Phase 16: 4, Phase 15: 5, Phase 14: 7, Phase 13: 5, Phase 12: 6, Phase 11: 8, Phase 10: 6, Phase 09: 10, Phase 05: 19, Phase 06: 7, Phase 07: 12, Phase 08: 10); previously **98 passed, 320 assertions** (`php artisan test`, real MySQL), including 24 Phase 04 coverage tests
 - Documentation: docs/* updated per phase; `docs/modules/{marketplace,property-management}.md` completed; CHANGELOG carries Phase 01–08 entries
 
 ## In Progress
 
-- (nothing — Phase 25 not started)
+- (nothing — Phase 26 not started)
 
 ## Pending
 
-- Phases 25–38: messaging, notifications, SaaS billing, super admin, marketplace administration, SEO, API, security audit, performance, testing, deployment, backups, monitoring, final audit
+- Phases 26–38: notifications, SaaS billing, super admin, marketplace administration, SEO, API, security audit, performance, testing, deployment, backups, monitoring, final audit
 
 ## Known Issues
 
@@ -63,4 +64,4 @@ Claude Code (Opus)
 
 php artisan test
 
-Result: PASS (241 tests, 1428 assertions, MySQL `hospitality_os_testing`)
+Result: PASS (245 tests, 1477 assertions, MySQL `hospitality_os_testing`)

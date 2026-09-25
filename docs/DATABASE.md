@@ -230,6 +230,14 @@ Also: the POS tender `gift_card` (refunds excluded), the folio payment method `g
 
 The unique `(user_id, reviewable_type, reviewable_id)` becomes a plain index, so a guest can review each stay or meal. New table `review_item_ratings` (review, menu_item, rating; unique per review × dish).
 
+## Phase 25 tables (Messaging)
+
+| Table | Purpose | Notes |
+|---|---|---|
+| message_threads | conversations | nullable tenant (null = platform support), kind `guest_host/guest_restaurant/support/staff`, subject, nullable guest user, nullable morph `about` (booking / order / reservation / listing), status `open/closed`, last_message_at, created_by |
+| message_participants | members + read status | thread + user unique, side, last_read_at |
+| messages | messages | thread, nullable author, side, body; attachments are `media` rows (disk `local`) |
+
 ## Seeding
 
 `php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin` **and** a refresh of every existing tenant's system roles, so newly added catalogue permissions reach already-provisioned businesses).

@@ -1,5 +1,15 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Phase 25: Messaging (v0.25.0)
+
+(verified: 245 tests / 1477 assertions)
+
+- New `App\Modules\Messaging`: guest ↔ host and guest ↔ restaurant conversations about a listing or the guest's own booking / order / table, guest ↔ platform support, and private staff conversations. One access service decides every read and write.
+- Private attachments behind an access-checked download, per-participant read status with unread counts, database notifications to the other side, and CRM logging of guest conversations. Close and reopen.
+- Entry points on listing, trip and order pages, a guest inbox (customer nav "Messages"), a business inbox (sidebar), and a Super Admin support inbox.
+- Permissions `messages.view/reply` (owner, manager, front desk).
+- 4 new Pest tests.
+
 ## 2026-09-26 — Phase 24: Reviews (v0.24.0)
 
 (verified: 241 tests / 1428 assertions)

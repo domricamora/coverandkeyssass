@@ -8,6 +8,7 @@
         ['account.payments.index', 'Payments'],
         ['marketplace.favorites.index', 'Wish list'],
         ['account.reviews', 'Reviews'],
+        ['account.messages.index', 'Messages'],
         ['account.notifications', 'Notifications'],
         ['profile.edit', 'Profile'],
     ] as [$name, $label])

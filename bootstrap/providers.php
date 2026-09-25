@@ -13,6 +13,7 @@ use App\Modules\Maintenance\Providers\MaintenanceServiceProvider;
 use App\Modules\Marketing\Providers\MarketingServiceProvider;
 use App\Modules\Workforce\Providers\WorkforceServiceProvider;
 use App\Modules\Marketplace\Providers\MarketplaceServiceProvider;
+use App\Modules\Messaging\Providers\MessagingServiceProvider;
 use App\Modules\Ordering\Providers\OrderingServiceProvider;
 use App\Modules\Payments\Providers\PaymentsServiceProvider;
 use App\Modules\Pos\Providers\PosServiceProvider;
@@ -44,5 +45,6 @@ return [
     MarketingServiceProvider::class,
     LoyaltyServiceProvider::class,
     ReviewsServiceProvider::class,
+    MessagingServiceProvider::class,
 ];
 

@@ -61,6 +61,10 @@
             Inventory
         </a>
     @endif
+    <a class="{{ str_starts_with((string) $route, 'messages.') ? 'is-active' : '' }}" href="{{ route('messages.index') }}">
+        <svg class="side-nav__icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l9 6 9-6M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        Messages
+    </a>
     @if (auth()->user()?->hasPermissionTo('reviews.view'))
         <a class="{{ str_starts_with((string) $route, 'reviews.') ? 'is-active' : '' }}" href="{{ route('reviews.index') }}">
             <svg class="side-nav__icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h8M8 14h5M21 12a9 9 0 01-13.5 7.8L3 21l1.2-4.5A9 9 0 1121 12z"/></svg>

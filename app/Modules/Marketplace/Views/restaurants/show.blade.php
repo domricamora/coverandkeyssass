@@ -220,6 +220,9 @@
                         @else
                             <a class="btn btn-primary btn-block" href="{{ route('login') }}">Sign in to save this restaurant</a>
                         @endauth
+                        @auth
+                            <a class="btn btn-ghost btn-block" href="{{ route('account.messages.create', ['restaurant' => $r->slug]) }}">Message the restaurant</a>
+                        @endauth
 
                         <a class="btn btn-ghost btn-block" href="{{ route('marketplace.restaurants.index', ['location' => $r->location?->slug]) }}">More restaurants nearby</a>
                     </div>

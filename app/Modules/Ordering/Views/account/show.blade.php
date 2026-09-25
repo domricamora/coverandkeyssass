@@ -7,6 +7,7 @@
         </div>
 
         @include('customer::partials.nav')
+        <p><a class="btn btn-sm btn-ghost" href="{{ route('account.messages.create', ['order' => $order->reference]) }}">Message the restaurant</a></p>
 
         @error('order')<p role="alert" class="card" style="padding:12px;color:var(--danger, #b91c1c);">{{ $message }}</p>@enderror
         @error('payment')<p role="alert" class="card" style="padding:12px;color:var(--danger, #b91c1c);">{{ $message }}</p>@enderror

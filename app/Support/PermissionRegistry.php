@@ -122,6 +122,10 @@ class PermissionRegistry
                 'reviews.view' => 'Read guest reviews of the business',
                 'reviews.reply' => 'Reply to and report reviews',
             ],
+            'messages' => [
+                'messages.view' => 'Read guest conversations',
+                'messages.reply' => 'Answer guests and close conversations',
+            ],
             'wallet' => [
                 'wallet.view' => 'View the host wallet, commissions and payouts',
                 'payouts.request' => 'Request payouts from the host wallet',

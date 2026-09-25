@@ -221,6 +221,9 @@
                         @else
                             <a class="btn btn-primary btn-block" href="{{ route('login') }}">Sign in to save this stay</a>
                         @endauth
+                        @auth
+                            <a class="btn btn-ghost btn-block" href="{{ route('account.messages.create', ['property' => $p->slug]) }}">Message the host</a>
+                        @endauth
 
                         <a class="btn btn-ghost btn-block" href="{{ route('marketplace.hotels', ['location' => $p->location?->slug]) }}">More stays in this destination</a>
                     </div>
