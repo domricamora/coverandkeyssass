@@ -26,7 +26,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'tenant_id', 'host_id', 'location_id', 'slug', 'name', 'tagline', 'description',
     'address_line', 'city', 'region', 'country_code', 'latitude', 'longitude',
     'phone', 'email', 'price_level', 'opening_hours', 'highlights',
-    'reservations_enabled', 'reservation_duration_minutes', 'delivery_enabled', 'ordering_enabled',
+    'reservations_enabled', 'reservation_duration_minutes', 'delivery_enabled', 'room_service_enabled', 'ordering_enabled',
     'tax_rate', 'tax_inclusive', 'prep_minutes', 'status', 'is_featured', 'published_at',
 ])]
 class Restaurant extends Model
@@ -53,6 +53,7 @@ class Restaurant extends Model
             'reservations_enabled' => 'boolean',
             'delivery_enabled' => 'boolean',
             'ordering_enabled' => 'boolean',
+            'room_service_enabled' => 'boolean',
             'tax_rate' => 'decimal:2',
             'tax_inclusive' => 'boolean',
             'prep_minutes' => 'integer',

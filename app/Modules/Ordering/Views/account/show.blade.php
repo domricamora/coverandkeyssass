@@ -3,7 +3,7 @@
         <div class="section-head">
             <span class="eyebrow">Order {{ $order->reference }}</span>
             <h1>{{ $order->restaurant?->name ?? 'Restaurant' }}</h1>
-            <p class="muted">{{ $order->created_at->format('M j, Y · g:i A') }} · {{ ucfirst($order->fulfillment) }} · {{ $order->payment_method === 'online' ? 'Paid online' : 'Cash' }}</p>
+            <p class="muted">{{ $order->created_at->format('M j, Y · g:i A') }} · {{ $order->fulfillmentLabel() }} · {{ $order->paymentLabel() }}</p>
         </div>
 
         @include('customer::partials.nav')

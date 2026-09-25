@@ -8,7 +8,7 @@
         </div>
 
         @if ($error)<p role="alert" class="card" style="padding:12px;color:var(--danger, #b91c1c);">{{ $error }}</p>@endif
-        @foreach (['cart', 'fulfillment', 'payment_method', 'delivery_address', 'delivery_zone_id', 'customer_phone', 'promo_code', 'modifiers'] as $field)
+        @foreach (['cart', 'fulfillment', 'payment_method', 'delivery_address', 'delivery_zone_id', 'booking_id', 'room_id', 'room_stay', 'customer_phone', 'promo_code', 'modifiers'] as $field)
             @error($field)<p role="alert" class="card" style="padding:12px;color:var(--danger, #b91c1c);">{{ $message }}</p>@enderror
         @endforeach
 
@@ -59,7 +59,19 @@
                         @if ($listing->delivery_enabled && $zones->isNotEmpty())
                             <label><input type="radio" name="fulfillment" value="delivery" x-model="mode" /> Delivery</label>
                         @endif
+                        @if ($stays->isNotEmpty())
+                            <label><input type="radio" name="fulfillment" value="room_service" x-model="mode" /> Room service</label>
+                        @endif
                     </fieldset>
+                    @if ($stays->isNotEmpty())
+                        <select name="room_stay" class="form-input" aria-label="Deliver to room" x-show="mode === 'room_service'">
+                            @foreach ($stays as $stay)
+                                @foreach ($stay->rooms as $bookingRoom)
+                                    <option value="{{ $stay->id }}:{{ $bookingRoom->room_id }}">Room {{ $bookingRoom->room?->label() }} · {{ $stay->property->name }} ({{ $stay->reference }})</option>
+                                @endforeach
+                            @endforeach
+                        </select>
+                    @endif
                     <div x-show="mode === 'delivery'" style="display:grid;gap:8px;"
                          x-data="{ lat: '{{ old('delivery_lat') }}', lng: '{{ old('delivery_lng') }}', locating: false,
                                    locate() { this.locating = true; navigator.geolocation?.getCurrentPosition(p => { this.lat = p.coords.latitude.toFixed(7); this.lng = p.coords.longitude.toFixed(7); this.locating = false }, () => this.locating = false) } }">
@@ -85,6 +97,9 @@
                             <label><input type="radio" name="payment_method" value="online" checked /> Pay now (card, GCash, Maya)</label>
                         @endif
                         <label><input type="radio" name="payment_method" value="cash" @checked(! $onlinePayments) /> Cash on pickup / delivery</label>
+                        @if ($stays->isNotEmpty())
+                            <label x-show="mode === 'room_service'"><input type="radio" name="payment_method" value="room_charge" /> Charge to my room</label>
+                        @endif
                     </fieldset>
                     <button class="btn btn-primary btn-block" type="submit">Place order · {{ $money($quote['total']) }}</button>
                 </form>

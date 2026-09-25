@@ -1,5 +1,16 @@
 # CHANGELOG.md
 
+## 2026-09-25 — Phase 13: Hotel Room Service (v0.13.0)
+
+(verified: 181 tests / 851 assertions)
+
+- Orders can be delivered to the room (`fulfillment = room_service`) for signed-in guests with a checked-in stay at a property of the same business. The order is linked to the booking and room.
+- "Charge to my room" (`payment_method = room_charge`, `payment_status = charged`) for the folio (Phase 14). Cash and online also work. No payment or commission is created for room charges.
+- Room service follows the delivery states without a driver. The ETA is prep time plus a 10-minute walk.
+- Restaurant setting `room_service_enabled`. The cart shows a room picker and the room-charge option. Order screens use `fulfillmentLabel()` / `paymentLabel()`.
+- Fix found by the new tests: an explicit room id outside a single-room stay no longer falls back to that room.
+- 5 new Pest tests.
+
 ## 2026-09-25 — Phase 12: Delivery (v0.12.0)
 
 (verified: 176 tests / 820 assertions)

@@ -3,8 +3,8 @@
         <div>
             <h1>Order {{ $order->reference }}</h1>
             <p class="mt-1 text-sm" style="color:var(--text-3)">
-                {{ $order->created_at->format('M j, Y · g:i A') }} · {{ ucfirst($order->fulfillment) }} ·
-                {{ $order->payment_method === 'online' ? 'Online, '.$order->payment_status : 'Cash' }}
+                {{ $order->created_at->format('M j, Y · g:i A') }} · {{ $order->fulfillmentLabel() }} ·
+                {{ $order->paymentLabel() }}
             </p>
         </div>
         <a href="{{ route('restaurants.orders.index', $restaurant) }}" class="btn btn-ghost">Back to orders</a>

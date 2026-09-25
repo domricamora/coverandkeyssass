@@ -223,6 +223,7 @@ class RestaurantController extends RestaurantManagementController
             'reservation_duration_minutes' => ['nullable', 'integer', 'min:15', 'max:480'],
             'delivery_enabled' => ['nullable', 'boolean'],
             'ordering_enabled' => ['nullable', 'boolean'],
+            'room_service_enabled' => ['nullable', 'boolean'],
             'tax_inclusive' => ['nullable', 'boolean'],
             'tax_rate' => ['nullable', 'numeric', 'min:0', 'max:50'],
             'cuisines' => ['nullable', 'array'],
@@ -249,6 +250,7 @@ class RestaurantController extends RestaurantManagementController
             'reservations_enabled' => $request->boolean('reservations_enabled'),
             'delivery_enabled' => $request->boolean('delivery_enabled'),
             'ordering_enabled' => $request->boolean('ordering_enabled'),
+            'room_service_enabled' => $request->boolean('room_service_enabled'),
             'tax_inclusive' => $request->boolean('tax_inclusive'),
             'tax_rate' => (float) ($validated['tax_rate'] ?? 0),
         ];

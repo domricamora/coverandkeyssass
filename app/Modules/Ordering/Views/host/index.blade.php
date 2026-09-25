@@ -26,7 +26,7 @@
                     <div class="mt-3 pt-3 text-sm" style="border-top:1px solid var(--border);color:var(--text-2)">
                         <a href="{{ route('restaurants.orders.show', [$restaurant, $order->reference]) }}"><strong style="color:var(--text)">{{ $order->reference }}</strong></a>
                         · {{ $order->customer_name }} · {{ (int) $order->items_sum_quantity }} item(s) · {{ $order->money($order->total) }}
-                        <br><small style="color:var(--text-3)">{{ ucfirst($order->fulfillment) }} · {{ $order->payment_method === 'online' ? 'online '.$order->payment_status : 'cash' }} · {{ $order->created_at->diffForHumans() }}</small>
+                        <br><small style="color:var(--text-3)">{{ $order->fulfillmentLabel() }} · {{ $order->paymentLabel() }} · {{ $order->created_at->diffForHumans() }}</small>
                         @if ($order->scheduled_for)<br><small><strong>Scheduled {{ $order->scheduled_for->format('D g:i A') }}</strong></small>@endif
                         @if ($order->estimated_at)<br><small style="color:var(--text-3)">ETA {{ $order->estimated_at->format('g:i A') }}</small>@endif
                         @if ($canManage && $order->fulfillment === Order::DELIVERY && $order->status !== Order::PENDING)

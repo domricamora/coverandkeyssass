@@ -73,6 +73,7 @@
             <label class="flex items-center gap-2"><input type="checkbox" name="reservations_enabled" value="1" @checked(old('reservations_enabled', $restaurant->reservations_enabled)) /> Accepts reservations</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="ordering_enabled" value="1" @checked(old('ordering_enabled', $restaurant->ordering_enabled)) /> Online ordering</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="delivery_enabled" value="1" @checked(old('delivery_enabled', $restaurant->delivery_enabled)) /> Offers delivery</label>
+            <label class="flex items-center gap-2"><input type="checkbox" name="room_service_enabled" value="1" @checked(old('room_service_enabled', $restaurant->room_service_enabled)) /> Room service for in-house guests</label>
             <label class="flex items-center gap-2">Sitting length
                 <input name="reservation_duration_minutes" type="number" min="15" max="480" step="15" value="{{ old('reservation_duration_minutes', $restaurant->reservation_duration_minutes ?? 90) }}" class="form-input" style="width:90px" /> min
             </label>

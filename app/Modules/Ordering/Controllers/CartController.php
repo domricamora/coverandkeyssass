@@ -77,6 +77,7 @@ class CartController extends Controller
             'error' => $error,
             'onlinePayments' => PaymentService::enabled(),
             'zones' => $listing ? $this->context->runAs($listing, fn () => $listing->deliveryZones()->active()->get()) : collect(),
+            'stays' => $listing ? $this->context->runAs($listing, fn () => $this->orders->roomServiceStays($listing, $request->user())) : collect(),
         ]);
     }
 
@@ -95,8 +96,9 @@ class CartController extends Controller
         $listing = $this->orderable(Restaurant::publicQuery()->findOrFail($cart['restaurant_id'])->slug);
 
         $validated = $request->validate([
-            'fulfillment' => ['required', Rule::in([Order::PICKUP, Order::DELIVERY])],
-            'payment_method' => ['required', Rule::in([Order::PAY_ONLINE, Order::PAY_CASH])],
+            'fulfillment' => ['required', Rule::in([Order::PICKUP, Order::DELIVERY, Order::ROOM_SERVICE])],
+            'payment_method' => ['required', Rule::in([Order::PAY_ONLINE, Order::PAY_CASH, Order::PAY_ROOM])],
+            'room_stay' => ['nullable', 'regex:/^\d+:\d+$/'],
             'customer_phone' => ['required', 'string', 'max:40'],
             'delivery_address' => ['nullable', 'string', 'max:500'],
             'delivery_zone_id' => ['nullable', 'integer'],
@@ -108,6 +110,9 @@ class CartController extends Controller
         ]);
 
         $user = $request->user();
+
+        // "bookingId:roomId" from the room service picker.
+        [$validated['booking_id'], $validated['room_id']] = array_map('intval', explode(':', $validated['room_stay'] ?? '0:0'));
 
         $order = $this->context->runAs($listing, fn () => $this->orders->place(
             $listing,

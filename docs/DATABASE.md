@@ -119,6 +119,10 @@ Changes to existing tables: `payments.booking_id` and `commissions.booking_id` a
 
 `orders` gains `delivery_zone_id` and `driver_id` (both nullOnDelete), `delivery_lat/lng`, `scheduled_for`, `estimated_at`, `dispatched_at`, `delivered_at`, and an index `(driver_id, status)`. `restaurants` gains `prep_minutes` (default 20).
 
+## Phase 13 changes (Hotel Room Service)
+
+`orders` gains `booking_id` and `room_id` (nullable, nullOnDelete) for `fulfillment = room_service`. It also gets the new payment_method `room_charge` and payment_status `charged`. `restaurants` gains `room_service_enabled` (default false).
+
 ## Seeding
 
 `php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin` **and** a refresh of every existing tenant's system roles, so newly added catalogue permissions reach already-provisioned businesses).

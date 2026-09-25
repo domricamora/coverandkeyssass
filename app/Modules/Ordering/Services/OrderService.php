@@ -5,7 +5,10 @@ namespace App\Modules\Ordering\Services;
 use App\Models\Module;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Modules\Booking\Models\Booking;
 use App\Modules\Booking\Models\Promotion;
+use App\Modules\PropertyManagement\Models\Room;
+use Illuminate\Database\Eloquent\Collection;
 use App\Modules\Delivery\Models\DeliveryZone;
 use App\Modules\Delivery\Models\Driver;
 use App\Modules\Marketplace\Models\Restaurant;
@@ -32,6 +35,9 @@ use Illuminate\Validation\ValidationException;
 class OrderService
 {
     public const MAX_QUANTITY = 50;
+
+    // ponytail: flat walk-to-room time; per-property setting if resorts ask.
+    public const ROOM_SERVICE_MINUTES = 10;
 
     public function __construct(
         private readonly AuditLogger $audit,
@@ -118,13 +124,20 @@ class OrderService
             $data['fulfillment'] === Order::DELIVERY && ! $restaurant->delivery_enabled => $this->fail('fulfillment', 'This restaurant does not deliver.'),
             $data['fulfillment'] === Order::DELIVERY && blank($data['delivery_address'] ?? null) => $this->fail('delivery_address', 'Enter a delivery address.'),
             $data['payment_method'] === Order::PAY_ONLINE && ! PaymentService::enabled() => $this->fail('payment_method', 'Online payment is not available right now.'),
+            $data['fulfillment'] === Order::ROOM_SERVICE && ! $restaurant->room_service_enabled => $this->fail('fulfillment', 'This restaurant does not offer room service.'),
+            $data['payment_method'] === Order::PAY_ROOM && $data['fulfillment'] !== Order::ROOM_SERVICE => $this->fail('payment_method', 'Only room service orders can be charged to a room.'),
             default => null,
         };
 
         $zone = $data['fulfillment'] === Order::DELIVERY ? $this->deliveryZone($restaurant, $data) : null;
+        [$booking, $room] = $data['fulfillment'] === Order::ROOM_SERVICE ? $this->roomServiceStay($restaurant, $customer, $data) : [null, null];
+
+        if ($room) {
+            $data['delivery_address'] = 'Room '.$room->label().' · '.$booking->property->name;
+        }
         $scheduledFor = $this->scheduledFor($restaurant, $data['scheduled_for'] ?? null);
 
-        $order = DB::transaction(function () use ($restaurant, $lines, $data, $customer, $zone, $scheduledFor) {
+        $order = DB::transaction(function () use ($restaurant, $lines, $data, $customer, $zone, $scheduledFor, $booking, $room) {
             $quote = $this->quote($restaurant, $lines, $data['promo_code'] ?? null, $zone);
 
             if ($zone?->min_order !== null && $quote['subtotal'] < (float) $zone->min_order) {
@@ -139,10 +152,12 @@ class OrderService
                 'status' => Order::PENDING,
                 'fulfillment' => $data['fulfillment'],
                 'payment_method' => $data['payment_method'],
-                'payment_status' => Order::UNPAID,
+                'payment_status' => $data['payment_method'] === Order::PAY_ROOM ? Order::CHARGED : Order::UNPAID,
+                'booking_id' => $booking?->id,
+                'room_id' => $room?->id,
                 'customer_name' => $data['customer_name'],
                 'customer_phone' => $data['customer_phone'] ?? null,
-                'delivery_address' => $zone ? $data['delivery_address'] : null,
+                'delivery_address' => ($zone || $room) ? $data['delivery_address'] : null,
                 'delivery_zone_id' => $zone?->id,
                 'delivery_lat' => $zone ? ($data['delivery_lat'] ?? null) : null,
                 'delivery_lng' => $zone ? ($data['delivery_lng'] ?? null) : null,
@@ -191,18 +206,23 @@ class OrderService
         // Listeners may veto (the PayMongo refund throws when it fails).
         OrderTransitioning::dispatch($order, $to);
 
-        if ($to === Order::OUT_FOR_DELIVERY && ! $order->driver_id) {
+        if ($to === Order::OUT_FOR_DELIVERY && $order->fulfillment === Order::DELIVERY && ! $order->driver_id) {
             $this->fail('driver_id', 'Assign a driver before dispatching the order.');
         }
 
-        $zoneEta = (int) ($order->zone?->eta_minutes ?? 30);
+        // Ride time: the zone's for deliveries, a walk to the room for room service.
+        $zoneEta = match ($order->fulfillment) {
+            Order::DELIVERY => (int) ($order->zone?->eta_minutes ?? 30),
+            Order::ROOM_SERVICE => self::ROOM_SERVICE_MINUTES,
+            default => 0,
+        };
 
         $order->status = $to;
         match ($to) {
             // ETA: the scheduled time, or kitchen prep (+ the ride for deliveries).
             Order::ACCEPTED => $order->forceFill([
                 'accepted_at' => now(),
-                'estimated_at' => $order->scheduled_for ?? now()->addMinutes((int) $order->restaurant->prep_minutes + ($order->fulfillment === Order::DELIVERY ? $zoneEta : 0)),
+                'estimated_at' => $order->scheduled_for ?? now()->addMinutes((int) $order->restaurant->prep_minutes + $zoneEta),
             ]),
             Order::READY => $order->forceFill(['ready_at' => now()]),
             Order::OUT_FOR_DELIVERY => $order->forceFill(['dispatched_at' => now(), 'estimated_at' => now()->addMinutes($zoneEta)]),
@@ -268,6 +288,48 @@ class OrderService
             ->map(fn (ModifierOption $o) => ['group' => $o->group->name, 'name' => $o->name, 'price' => (string) $o->price])
             ->values()
             ->all();
+    }
+
+    /**
+     * The customer's checked-in stays at a property of this restaurant's
+     * business — the rooms room service can deliver to. Runs inside the
+     * restaurant's tenant.
+     *
+     * @return Collection<int, Booking>
+     */
+    public function roomServiceStays(Restaurant $restaurant, ?User $customer): Collection
+    {
+        if (! $customer || ! $restaurant->room_service_enabled) {
+            return new Collection;
+        }
+
+        return Booking::forCustomer($customer)
+            ->where('tenant_id', $restaurant->tenant_id)
+            ->where('status', Booking::CHECKED_IN)
+            ->with(['property', 'rooms.room'])
+            ->get();
+    }
+
+    /** @return array{0: Booking, 1: Room} */
+    private function roomServiceStay(Restaurant $restaurant, ?User $customer, array $data): array
+    {
+        $booking = $this->roomServiceStays($restaurant, $customer)->firstWhere('id', (int) ($data['booking_id'] ?? 0));
+
+        if (! $booking) {
+            $this->fail('booking_id', 'Room service is for guests checked in at this resort. Choose your stay.');
+        }
+
+        // No room given and a single-room stay → that room; a given room must belong to the stay.
+        $roomId = (int) ($data['room_id'] ?? 0);
+        $room = $roomId === 0 && $booking->rooms->count() === 1
+            ? $booking->rooms->first()->room
+            : $booking->rooms->pluck('room')->firstWhere('id', $roomId);
+
+        if (! $room) {
+            $this->fail('room_id', 'Choose the room to deliver to.');
+        }
+
+        return [$booking, $room];
     }
 
     /** The chosen active zone of this restaurant, covering the drop-off point. */

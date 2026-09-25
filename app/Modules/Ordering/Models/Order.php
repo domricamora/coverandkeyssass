@@ -15,12 +15,12 @@ use Illuminate\Support\Str;
 /**
  * A food order (Phase 11). Status only moves through OrderService.
  *
- * pending → accepted → preparing → ready ─┬─ (pickup)   → completed
- *                                         └─ (delivery) → out_for_delivery → delivered → completed
+ * pending → accepted → preparing → ready ─┬─ (pickup)                 → completed
+ *                                         └─ (delivery/room service) → out_for_delivery → delivered → completed
  * pending / accepted → cancelled;  cancelled / completed → refunded (paid online)
  */
 #[Fillable([
-    'tenant_id', 'restaurant_id', 'user_id', 'promotion_id', 'reference', 'status',
+    'tenant_id', 'restaurant_id', 'user_id', 'booking_id', 'room_id', 'promotion_id', 'reference', 'status',
     'fulfillment', 'payment_method', 'payment_status', 'customer_name', 'customer_phone',
     'delivery_address', 'delivery_zone_id', 'driver_id', 'delivery_lat', 'delivery_lng',
     'scheduled_for', 'estimated_at', 'notes', 'currency', 'subtotal', 'discount_total', 'tax_rate',
@@ -52,13 +52,21 @@ class Order extends Model
 
     public const DELIVERY = 'delivery';
 
+    /** Hotel room service (Phase 13): delivered to the room of a checked-in stay. */
+    public const ROOM_SERVICE = 'room_service';
+
     public const PAY_ONLINE = 'online';
 
     public const PAY_CASH = 'cash';
 
+    /** Charged to the stay; settled through the guest folio (Phase 14). */
+    public const PAY_ROOM = 'room_charge';
+
     public const UNPAID = 'unpaid';
 
     public const PAID = 'paid';
+
+    public const CHARGED = 'charged';
 
     /** States the kitchen still has to act on. */
     public const OPEN = [self::PENDING, self::ACCEPTED, self::PREPARING, self::READY, self::OUT_FOR_DELIVERY, self::DELIVERED];
@@ -121,6 +129,16 @@ class Order extends Model
         return $this->belongsTo(\App\Modules\Delivery\Models\Driver::class);
     }
 
+    public function booking(): BelongsTo
+    {
+        return $this->belongsTo(\App\Modules\Booking\Models\Booking::class);
+    }
+
+    public function room(): BelongsTo
+    {
+        return $this->belongsTo(\App\Modules\PropertyManagement\Models\Room::class)->withTrashed();
+    }
+
     public function customer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
@@ -135,7 +153,7 @@ class Order extends Model
             self::PENDING => [self::ACCEPTED, self::CANCELLED],
             self::ACCEPTED => [self::PREPARING, self::CANCELLED],
             self::PREPARING => [self::READY],
-            self::READY => [$this->fulfillment === self::DELIVERY ? self::OUT_FOR_DELIVERY : self::COMPLETED],
+            self::READY => [$this->fulfillment === self::PICKUP ? self::COMPLETED : self::OUT_FOR_DELIVERY],
             self::OUT_FOR_DELIVERY => [self::DELIVERED],
             self::DELIVERED => [self::COMPLETED],
             self::CANCELLED, self::COMPLETED => $paidOnline ? [self::REFUNDED] : [],
@@ -151,6 +169,20 @@ class Order extends Model
     public function needsPayment(): bool
     {
         return $this->payment_method === self::PAY_ONLINE && $this->payment_status === self::UNPAID && $this->status === self::PENDING;
+    }
+
+    public function fulfillmentLabel(): string
+    {
+        return Str::headline($this->fulfillment);
+    }
+
+    public function paymentLabel(): string
+    {
+        return match ($this->payment_method) {
+            self::PAY_ONLINE => 'Online · '.$this->payment_status,
+            self::PAY_ROOM => 'Charged to room',
+            default => 'Cash',
+        };
     }
 
     public function statusLabel(): string

@@ -69,7 +69,7 @@ class PaymentService
 
         return $this->openCheckout(['order_id' => $order->id], $user, (float) $order->total, $order->currency, $order->reference, [
             'name' => 'Order from '.$order->restaurant->name,
-            'description' => $order->items()->sum('quantity').' item(s) · '.ucfirst($order->fulfillment),
+            'description' => $order->items()->sum('quantity').' item(s) · '.$order->fulfillmentLabel(),
             'label' => 'Order',
             'success_url' => route('account.orders.payment-return', $order->reference),
             'cancel_url' => route('account.orders.show', $order->reference),

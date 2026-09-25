@@ -36,6 +36,20 @@ States: `pending, accepted, preparing, ready, out_for_delivery, delivered, compl
 - Commission is resolved for the restaurant listing (restaurant rates set in Phase 08 now apply). It is released to the available balance when the order is **completed** and reversed on refund.
 - Ceiling: **cash orders carry no platform commission**, because the money never passes through the platform. Invoice the host for these if the business model needs it.
 
+## Hotel room service (Phase 13)
+
+Verified 2026-09-25: suite green (181 tests / 851 assertions).
+
+```text
+Guest (checked in) → restaurant of the same business → menu → order → room service → room → charge to room OR pay
+```
+
+- `fulfillment = room_service` needs `restaurants.room_service_enabled`. It is only for a signed-in customer with a **checked-in** booking at a property of the **same business** (`OrderService::roomServiceStays()`).
+- The customer picks the room (`room_stay = bookingId:roomId`). A single-room stay defaults to its room, and a room outside the stay is refused. The order stores `booking_id` and `room_id`, and the address reads "Room 101 · Resort name".
+- Payment: `room_charge` sets `payment_status = charged` and creates no payment or commission. The guest folio (Phase 14) settles it. Cash and online also work. `room_charge` is refused for pickup and delivery.
+- States use the delivery path (ready → out_for_delivery → delivered → completed) **without a driver**. ETA = prep + `ROOM_SERVICE_MINUTES` (10).
+- Tests: `tests/Feature/RoomServiceTest.php` (5 tests): the eligible guest flow charged to the room, no-driver delivery and ETA, refusals (no stay, someone else's booking, a foreign room, checked out), payment method rules, the restaurant toggle, another business never sees the stay, and the host queue shows the room.
+
 ## Routes / permissions
 
 | Route | Who |
