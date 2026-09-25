@@ -1,5 +1,16 @@
 # CHANGELOG.md
 
+## 2026-09-25 — Phase 14: Guest Folio (v0.14.0)
+
+(verified: 188 tests / 918 assertions)
+
+- New `App\Modules\Folio`: `folio_entries`, a per-booking ledger of charges, payments and refunds, with voids and no deletes.
+- An idempotent sync posts room nights (weekday and weekend rates; only nights stayed after an early check-out), the promo discount, online PayMongo payments and refunds, and room-service orders charged to the room (Phase 13). Cancelled orders and cancelled-before-stay nights are voided.
+- Desk: charges (food, laundry, minibar, activities, transport, other), payments (cash, card, transfer, e-wallet), refunds capped at the net paid, voids of manual lines with a reason. Totals by category and balance due. Printable folio.
+- The guest's read-only folio is linked from the trip page, and the host folio from the booking page.
+- Permissions `folio.view/manage` (owner, manager, front desk), `folio.void` (owner, manager).
+- 7 new Pest tests.
+
 ## 2026-09-25 — Phase 13: Hotel Room Service (v0.13.0)
 
 (verified: 181 tests / 851 assertions)

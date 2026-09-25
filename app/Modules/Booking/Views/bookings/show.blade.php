@@ -17,7 +17,12 @@
                 · {{ $booking->nights() }} {{ Str::plural('night', $booking->nights()) }} · {{ Str::headline($booking->source) }}
             </p>
         </div>
-        <a href="{{ route('bookings.index') }}" class="btn btn-ghost">Back to bookings</a>
+        <div class="flex gap-2">
+            @if (auth()->user()->hasPermissionTo('folio.view'))
+                <a href="{{ route('folio.show', $booking->reference) }}" class="btn btn-dark">Folio</a>
+            @endif
+            <a href="{{ route('bookings.index') }}" class="btn btn-ghost">Back to bookings</a>
+        </div>
     </div>
 
     <x-input-error :messages="$errors->get('status')" />

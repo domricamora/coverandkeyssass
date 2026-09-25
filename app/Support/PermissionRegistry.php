@@ -69,6 +69,11 @@ class PermissionRegistry
                 'bookings.update' => 'Confirm, check in/out, cancel and mark no-shows',
                 'promotions.manage' => 'Create and deactivate promo codes',
             ],
+            'folio' => [
+                'folio.view' => 'View guest folios',
+                'folio.manage' => 'Post folio charges, payments and refunds',
+                'folio.void' => 'Void folio lines',
+            ],
             'wallet' => [
                 'wallet.view' => 'View the host wallet, commissions and payouts',
                 'payouts.request' => 'Request payouts from the host wallet',

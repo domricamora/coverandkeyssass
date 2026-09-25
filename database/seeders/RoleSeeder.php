@@ -32,6 +32,7 @@ class RoleSeeder extends Seeder
                     'rates.view', 'rates.manage',
                     'availability.view', 'availability.manage',
                     'bookings.view', 'bookings.create', 'bookings.update', 'promotions.manage',
+                    'folio.view', 'folio.manage', 'folio.void',
                     'wallet.view', 'payouts.request',
                 ],
             ],
@@ -49,6 +50,7 @@ class RoleSeeder extends Seeder
                     'rates.view', 'rates.manage',
                     'availability.view', 'availability.manage',
                     'bookings.view', 'bookings.create', 'bookings.update', 'promotions.manage',
+                    'folio.view', 'folio.manage', 'folio.void',
                     'wallet.view',
                 ],
             ],
@@ -61,6 +63,7 @@ class RoleSeeder extends Seeder
                     'restaurants.view', 'menu.view', 'tables.view', 'reservations.view', 'reservations.manage', 'orders.view', 'orders.manage',
                     'rooms.view', 'rates.view', 'availability.view',
                     'bookings.view', 'bookings.create', 'bookings.update',
+                    'folio.view', 'folio.manage',
                 ],
             ],
             'staff' => [

@@ -123,6 +123,12 @@ Changes to existing tables: `payments.booking_id` and `commissions.booking_id` a
 
 `orders` gains `booking_id` and `room_id` (nullable, nullOnDelete) for `fulfillment = room_service`. It also gets the new payment_method `room_charge` and payment_status `charged`. `restaurants` gains `room_service_enabled` (default false).
 
+## Phase 14 tables (Guest Folio)
+
+| Table | Purpose | Notes |
+|---|---|---|
+| folio_entries | per-booking ledger | tenant + booking FKs; type `charge/payment/refund`; category; description; quantity × unit_amount = amount (negative for discounts); service_date; reference; nullable `source_key` unique per booking (derived lines); posted_by; voided_at / void_reason / voided_by (never deleted) |
+
 ## Seeding
 
 `php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin` **and** a refresh of every existing tenant's system roles, so newly added catalogue permissions reach already-provisioned businesses).

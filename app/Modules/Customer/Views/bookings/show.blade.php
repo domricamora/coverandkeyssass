@@ -32,7 +32,7 @@
                 @endif
                 <p class="price-breakdown__total"><span>Total</span> <span>{{ $booking->money($booking->total) }}</span></p>
             </div>
-            <p style="margin-bottom:0;"><a href="{{ route('account.bookings.invoice', $booking->reference) }}">View invoice</a>
+            <p style="margin-bottom:0;"><a href="{{ route('account.bookings.invoice', $booking->reference) }}">View invoice</a> · <a href="{{ route('account.folio', $booking->reference) }}">View folio</a>
                 @if ($booking->property?->check_in_time) · Check-in from {{ $booking->property->check_in_time }}, check-out by {{ $booking->property->check_out_time }} @endif
             </p>
         </div>

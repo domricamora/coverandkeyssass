@@ -2,8 +2,8 @@
 
 ## Current Phase
 
-Phase 13 - Hotel Room Service — **COMPLETE (verified)**
-Next: Phase 14 - Guest Folio
+Phase 14 - Guest Folio — **COMPLETE (verified)**
+Next: Phase 15 - Housekeeping
 
 ## Completed
 
@@ -22,16 +22,17 @@ Next: Phase 14 - Guest Folio
 - **Phase 11 — Online Food Ordering**: `App\Modules\Ordering` — session cart, server-side pricing via `MenuItem::priceWith()`, order promo codes (`promotions.applies_to`), inclusive/exclusive tax, pickup/delivery, cash or PayMongo; 9-state order machine; snapshot `orders`/`order_items`; Payments + Wallet generalised (`order_id` beside `booking_id`) — commission on online orders, release on completed, reversal on refund, refused refund vetoes; host order queue + promo codes; customer Orders tab; `TenantContext::runAs()` shared tenant switch
 - **Phase 12 — Delivery**: `App\Modules\Delivery` — zones (named / radius via haversine, fee, free-over, minimum, ETA, pause), drivers, scheduled orders, driver assignment (required for dispatch, audited), ETAs on accept/dispatch, delivered time; host delivery setup screen; permission `delivery.manage`
 - **Phase 13 — Hotel Room Service**: `fulfillment = room_service` for checked-in guests at the same business (booking + room on the order), "charge to my room" (`room_charge` → `charged`, settled by the Phase 14 folio), delivery path without driver, 10-min walk ETA, restaurant toggle
-- Tests: Pest suite — **181 passed, 851 assertions** (Phase 13: 5, Phase 12: 6, Phase 11: 8, Phase 10: 6, Phase 09: 10, Phase 05: 19, Phase 06: 7, Phase 07: 12, Phase 08: 10); previously **98 passed, 320 assertions** (`php artisan test`, real MySQL), including 24 Phase 04 coverage tests
+- **Phase 14 — Guest Folio**: `App\Modules\Folio` — per-booking ledger (charges/payments/refunds, voids, never deletes); idempotent sync of room nights (early check-out aware), discount, PayMongo payments/refunds and room-charge orders; desk charges/payments/refunds; printable + guest read-only folio; permissions `folio.*`
+- Tests: Pest suite — **188 passed, 918 assertions** (Phase 14: 7, Phase 13: 5, Phase 12: 6, Phase 11: 8, Phase 10: 6, Phase 09: 10, Phase 05: 19, Phase 06: 7, Phase 07: 12, Phase 08: 10); previously **98 passed, 320 assertions** (`php artisan test`, real MySQL), including 24 Phase 04 coverage tests
 - Documentation: docs/* updated per phase; `docs/modules/{marketplace,property-management}.md` completed; CHANGELOG carries Phase 01–08 entries
 
 ## In Progress
 
-- (nothing — Phase 14 not started)
+- (nothing — Phase 15 not started)
 
 ## Pending
 
-- Phases 14–38: folio, housekeeping, maintenance, staff management, inventory, POS, accounting, CRM, marketing, loyalty, reviews, messaging, notifications, SaaS billing, super admin, marketplace administration, SEO, API, security audit, performance, testing, deployment, backups, monitoring, final audit
+- Phases 15–38: housekeeping, maintenance, staff management, inventory, POS, accounting, CRM, marketing, loyalty, reviews, messaging, notifications, SaaS billing, super admin, marketplace administration, SEO, API, security audit, performance, testing, deployment, backups, monitoring, final audit
 
 ## Known Issues
 
@@ -52,4 +53,4 @@ Claude Code (Opus)
 
 php artisan test
 
-Result: PASS (181 tests, 851 assertions, MySQL `hospitality_os_testing`)
+Result: PASS (188 tests, 918 assertions, MySQL `hospitality_os_testing`)
