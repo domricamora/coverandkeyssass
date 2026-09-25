@@ -44,8 +44,8 @@ class CrmService
         $recent(Booking::query()->select(['id', 'user_id', 'guest_name', 'guest_email', 'guest_phone', 'updated_at']))->each(
             function ($b) use (&$touched) { $touched[] = $this->upsert($b->user_id, $b->guest_name, $b->guest_email, $b->guest_phone, 'booking')?->id; });
 
-        $recent(Order::query()->with('user:id,email')->select(['id', 'user_id', 'customer_name', 'customer_phone', 'updated_at']))->each(
-            function ($o) use (&$touched) { $touched[] = $this->upsert($o->user_id, $o->customer_name, $o->user?->email, $o->customer_phone, 'order')?->id; });
+        $recent(Order::query()->with('customer:id,email')->select(['id', 'user_id', 'customer_name', 'customer_phone', 'updated_at']))->each(
+            function ($o) use (&$touched) { $touched[] = $this->upsert($o->user_id, $o->customer_name, $o->customer?->email, $o->customer_phone, 'order')?->id; });
 
         $recent(TableReservation::query()->select(['id', 'user_id', 'guest_name', 'guest_email', 'guest_phone', 'updated_at']))->each(
             function ($r) use (&$touched) { $touched[] = $this->upsert($r->user_id, $r->guest_name, $r->guest_email, $r->guest_phone, 'reservation')?->id; });

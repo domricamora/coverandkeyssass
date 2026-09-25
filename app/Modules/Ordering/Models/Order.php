@@ -131,13 +131,6 @@ class Order extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
-
-    /** The signed-in customer who placed it (null for walk-ins and POS tickets). */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(\App\Models\User::class);
-    }
-
     public function zone(): BelongsTo
     {
         return $this->belongsTo(\App\Modules\Delivery\Models\DeliveryZone::class, 'delivery_zone_id');

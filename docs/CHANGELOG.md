@@ -14,6 +14,20 @@
 - Fix: `Order` had no `user` relation, so CRM never captured an ordering customer's email.
 - Deferred: queued notifications need a tenant-aware job payload (Phase 35).
 - 2 new Pest tests (`PerformanceTest`: dashboard query budget, incremental CRM correctness).
+## 2026-09-26 — Phase 33: Performance (v0.33.0)
+
+(verified: 286 tests / 1861 assertions; measured with the new `PERF_TRACE` crawl, see `docs/PERFORMANCE.md`)
+
+- Permissions resolve in one query per business per request, memoised on the user. It used to be three queries per `hasPermissionTo()` call, about 20 calls a page. Dashboard pages dropped from 65–79 queries to 12–22.
+- Accounting:
+  - The ledger loads posted source keys once per sync, so there are no per-row existence queries.
+  - Report screens re-sync only live and recent folios. The nightly `accounting:sync` runs `sync(full: true)` as the backstop.
+- CRM sync is incremental: a per-business watermark means only changed rows are folded and only touched contacts get their metrics refreshed. A missing watermark means a full pass.
+- New reversible indexes: `(tenant_id, updated_at)` on bookings, orders, payments and table_reservations, and `(tenant_id, check_in)` on bookings.
+- Dev tooling: `PERF_TRACE=true` logs query counts and lazy-load violations to `storage/logs/perf.log`.
+- Fix: `Order` had no `user` relation, so CRM never captured an ordering customer's email.
+- Deferred: queued notifications need a tenant-aware job payload (Phase 35).
+- 2 new Pest tests (`PerformanceTest`: dashboard query budget, incremental CRM correctness).
 ## 2026-09-26 — Phase 32: Security audit (v0.32.0)
 
 (verified: 284 tests / 1858 assertions; `composer audit` and `npm audit` clean; browser sweep with CSP live found no violations)
