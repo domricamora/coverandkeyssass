@@ -25,19 +25,37 @@ class CrmService
 {
     public const STAY_STATUSES = [Booking::CHECKED_IN, Booking::CHECKED_OUT, Booking::COMPLETED];
 
-    public function sync(): void
+    /**
+     * Fold bookings, orders and table reservations into contacts.
+     *
+     * Incremental: only sources changed since this business's last sync (a
+     * cache watermark) are folded, and only the contacts they touched get
+     * their metrics refreshed. No watermark (first run, cache cleared) or
+     * $full means a complete pass, so a lost cache costs time, not data.
+     */
+    public function sync(bool $full = false): void
     {
-        // ponytail: full scan of the three sources each run; move to incremental (updated_at cursor) when volumes grow.
-        Booking::query()->select(['id', 'user_id', 'guest_name', 'guest_email', 'guest_phone'])->each(
-            fn ($b) => $this->upsert($b->user_id, $b->guest_name, $b->guest_email, $b->guest_phone, 'booking'));
+        $key = 'crm.synced_at.'.(app(\App\Support\TenantContext::class)->id() ?? 0);
+        $since = $full ? null : \Illuminate\Support\Facades\Cache::get($key);
+        $startedAt = now();
+        $recent = fn ($query) => $query->when($since, fn ($q) => $q->where('updated_at', '>=', $since));
+        $touched = [];
 
-        Order::query()->select(['id', 'user_id', 'customer_name', 'customer_phone'])->each(
-            fn ($o) => $this->upsert($o->user_id, $o->customer_name, $o->user?->email, $o->customer_phone, 'order'));
+        $recent(Booking::query()->select(['id', 'user_id', 'guest_name', 'guest_email', 'guest_phone', 'updated_at']))->each(
+            function ($b) use (&$touched) { $touched[] = $this->upsert($b->user_id, $b->guest_name, $b->guest_email, $b->guest_phone, 'booking')?->id; });
 
-        TableReservation::query()->select(['id', 'user_id', 'guest_name', 'guest_email', 'guest_phone'])->each(
-            fn ($r) => $this->upsert($r->user_id, $r->guest_name, $r->guest_email, $r->guest_phone, 'reservation'));
+        $recent(Order::query()->with('user:id,email')->select(['id', 'user_id', 'customer_name', 'customer_phone', 'updated_at']))->each(
+            function ($o) use (&$touched) { $touched[] = $this->upsert($o->user_id, $o->customer_name, $o->user?->email, $o->customer_phone, 'order')?->id; });
 
-        Contact::query()->each(fn (Contact $c) => $this->refreshMetrics($c));
+        $recent(TableReservation::query()->select(['id', 'user_id', 'guest_name', 'guest_email', 'guest_phone', 'updated_at']))->each(
+            function ($r) use (&$touched) { $touched[] = $this->upsert($r->user_id, $r->guest_name, $r->guest_email, $r->guest_phone, 'reservation')?->id; });
+
+        Contact::query()
+            ->when($since, fn ($q) => $q->whereIn('id', array_unique(array_filter($touched))))
+            ->each(fn (Contact $c) => $this->refreshMetrics($c));
+
+        // A little overlap so rows written during this run are seen next time.
+        \Illuminate\Support\Facades\Cache::forever($key, $startedAt->subSeconds(5));
     }
 
     /** Find the contact for an identity (account → email → phone) or create it; fill in what was missing. */

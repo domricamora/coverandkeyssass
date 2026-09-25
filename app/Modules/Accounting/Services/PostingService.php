@@ -37,9 +37,13 @@ class PostingService
         private readonly FolioService $folio,
     ) {}
 
-    public function sync(): void
+    /**
+     * $full re-derives every folio (nightly `accounting:sync`); report screens
+     * sync on view with only the folios that can still change (see folios()).
+     */
+    public function sync(bool $full = false): void
     {
-        $this->folios();
+        $this->folios($full);
         $this->orders();
         $this->wallet();
         $this->stock();
@@ -60,10 +64,24 @@ class PostingService
         });
     }
 
-    private function folios(): void
+    private function folios(bool $full): void
     {
-        // ponytail: re-syncs every folio each run; scope to recently-updated bookings when volumes grow.
-        Booking::query()->whereNotIn('status', [Booking::PENDING, Booking::HELD])->get()->each(fn (Booking $b) => $this->folio->sync($b));
+        // Folio sync is ~6 queries per booking. On view, limit it to folios that
+        // can still change: open stays, stays touched in the last 60 days, and
+        // any stay whose payment (late refund) or room-charge order moved since.
+        // The nightly full run is the backstop for anything older.
+        $since = now()->subDays(60);
+        $touched = $full ? null : \App\Modules\Payments\Models\Payment::query()->whereNotNull('booking_id')->where('updated_at', '>=', $since)->pluck('booking_id')
+            ->merge(\App\Modules\Ordering\Models\Order::query()->whereNotNull('booking_id')->where('updated_at', '>=', $since)->pluck('booking_id'));
+
+        Booking::query()
+            ->whereNotIn('status', [Booking::PENDING, Booking::HELD])
+            ->when(! $full, fn ($q) => $q->where(fn ($w) => $w
+                ->whereIn('status', [Booking::CONFIRMED, Booking::CHECKED_IN])
+                ->orWhere('updated_at', '>=', $since)
+                ->orWhereIn('id', $touched->unique()->all())))
+            ->get()
+            ->each(fn (Booking $b) => $this->folio->sync($b));
 
         FolioEntry::query()->with('booking:id,reference')->orderBy('id')->each(function (FolioEntry $e): void {
             $key = 'folio:'.$e->id;

@@ -29,7 +29,7 @@ class AccountingServiceProvider extends ServiceProvider
 
                 foreach (Tenant::query()->get() as $tenant) {
                     $context->set($tenant);
-                    app(PostingService::class)->sync();
+                    app(PostingService::class)->sync(full: true);
                     $this->info('Synced '.$tenant->name);
                 }
 

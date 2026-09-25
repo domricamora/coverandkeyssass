@@ -59,6 +59,11 @@ class LedgerService
             return null; // nothing to book (zero amounts)
         }
 
+        // Already booked under this source key: idempotent no-op, no query.
+        if ($sourceKey && $this->has($sourceKey)) {
+            return null;
+        }
+
         if (abs($debits - $credits) > 0.004) {
             throw ValidationException::withMessages(['journal' => "Unbalanced entry \"{$memo}\": debits {$debits} ≠ credits {$credits}."]);
         }
@@ -82,6 +87,10 @@ class LedgerService
                 $entry->lines()->create(['ledger_account_id' => $account->id, 'debit' => $debit, 'credit' => $credit]);
             }
 
+            if ($sourceKey) {
+                $this->keyMemo[app(\App\Support\TenantContext::class)->id() ?? 0][$sourceKey] = true;
+            }
+
             return $entry;
         });
     }
@@ -101,8 +110,28 @@ class LedgerService
 
     public function has(string $sourceKey): bool
     {
-        return JournalEntry::query()->where('source_key', $sourceKey)->exists();
+        return isset($this->postedKeys()[$sourceKey]);
     }
+
+    /**
+     * Source keys already booked for the current business, loaded once per
+     * service instance: a sync touches every source row, and one query per
+     * row made the report screens (which sync on view) grow with history.
+     *
+     * @return array<string, true>
+     */
+    private function postedKeys(): array
+    {
+        return $this->keyMemo[app(\App\Support\TenantContext::class)->id() ?? 0] ??= JournalEntry::query()
+            ->whereNotNull('source_key')
+            ->pluck('source_key')
+            ->flip()
+            ->map(fn () => true)
+            ->all();
+    }
+
+    /** @var array<int, array<string, true>> */
+    private array $keyMemo = [];
 
     // ------------------------------------------------------------------
     // Reports

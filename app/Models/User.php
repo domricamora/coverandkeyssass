@@ -56,11 +56,17 @@ class User extends Authenticatable
     /** True when the user holds the platform super_admin role. */
     public function isPlatformAdmin(): bool
     {
-        return $this->roles()
+        // Memoised per instance (one request): checked by every permission test.
+        return $this->platformAdminMemo ??= $this->roles()
             ->whereNull('user_roles.tenant_id')
             ->where('roles.slug', 'super_admin')
             ->exists();
     }
+
+    private ?bool $platformAdminMemo = null;
+
+    /** @var array<int, array<string, true>> tenant id => permission names, per request */
+    private array $permissionMemo = [];
 
     public function hasRole(string $slug, ?int $tenantId = null): bool
     {
@@ -95,25 +101,26 @@ class User extends Authenticatable
             return false;
         }
 
-        $roleIdCacheKey = "hoso.role.{$tenantId}.{$permissionName}";
+        // One query per tenant per request resolves every permission the user
+        // holds there (the sidebar alone asks ~20 times per page).
+        $this->permissionMemo[$tenantId] ??= \Illuminate\Support\Facades\DB::table('user_roles')
+            ->join('role_permissions', 'role_permissions.role_id', '=', 'user_roles.role_id')
+            ->join('permissions', 'permissions.id', '=', 'role_permissions.permission_id')
+            ->where('user_roles.user_id', $this->id)
+            ->where('user_roles.tenant_id', $tenantId)
+            ->pluck('permissions.name')
+            ->flip()
+            ->map(fn () => true)
+            ->all();
 
-        $roleIds = cache()->remember($roleIdCacheKey, 3600, function () use ($permissionName) {
-            return \Illuminate\Support\Facades\DB::table('role_permissions')
-                ->join('permissions', 'permissions.id', '=', 'role_permissions.permission_id')
-                ->where('permissions.name', $permissionName)
-                ->pluck('role_id')
-                ->all();
-        });
+        return isset($this->permissionMemo[$tenantId][$permissionName]);
+    }
 
-        if ($roleIds === []) {
-            return false;
-        }
-
-        return \Illuminate\Support\Facades\DB::table('user_roles')
-            ->where('user_id', $this->id)
-            ->where('tenant_id', $tenantId)
-            ->whereIn('role_id', $roleIds)
-            ->exists();
+    /** Drop memoised roles/permissions after a role change on this instance. */
+    public function forgetPermissionMemo(): void
+    {
+        $this->platformAdminMemo = null;
+        $this->permissionMemo = [];
     }
 
     // ------------------------------------------------------------------
@@ -154,6 +161,7 @@ class User extends Authenticatable
         $tenantId = $tenant instanceof Tenant ? $tenant->id : $tenant;
 
         $this->roles()->syncWithoutDetaching([$role->id => ['tenant_id' => $tenantId]]);
+        $this->forgetPermissionMemo();
     }
 
     /** Assign the platform super_admin role (tenant_id = NULL). */
@@ -165,6 +173,7 @@ class User extends Authenticatable
             ->firstOrFail();
 
         $this->roles()->syncWithoutDetaching([$superAdmin->id => ['tenant_id' => null]]);
+        $this->forgetPermissionMemo();
     }
 
     /** The tenant the current request operates on (from the context). */

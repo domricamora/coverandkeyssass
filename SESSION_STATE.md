@@ -5,14 +5,14 @@
 ## Snapshot
 
 - Date: 2026-09-26
-- Phase: **32 COMPLETE (verified)** → next **33 — Performance**
-- Tests: PASS — 284 tests, 1858 assertions, MySQL `hospitality_os_testing`
+- Phase: **33 COMPLETE (verified)** → next **34 — Testing**
+- Tests: PASS — 286 tests, 1861 assertions, MySQL `hospitality_os_testing`
 - Git: `master` → origin <https://github.com/domricamora/coverandkeyssass.git> — **not pushed yet**: the auto-mode classifier blocks `git push` from the agent; the owner runs `git push -u origin master:main` (or adds a Bash permission rule)
 
 ## Environment (ready)
 
 - Windows WAMP PHP 8.3.14 (`C:\wamp64\bin\php\php8.3.14`), Composer 2.10.3, MySQL 9.1.0 (root / no password).
-- Dev DB `hospitality_os` (migrated through Phase 31; local Super Admin admin@coverandkeys.test), test DB `hospitality_os_testing`.
+- Dev DB `hospitality_os` (migrated through Phase 33; local Super Admin admin@coverandkeys.test), test DB `hospitality_os_testing`.
 - The default `php` on PATH is 7.4 — run everything via: `cmd.exe //c "_ai\run.bat php artisan <cmd>"` from the repo root.
 - Frontend build: `node node_modules/vite/bin/vite.js build` (the `&` in the path breaks npm shims).
 - Dev URL: `http://localhost/ck/public`. No Python on this machine; use PHP / bash (prefer the Write tool for files containing quotes — bash heredocs have broken on apostrophes).
@@ -29,7 +29,7 @@
 ## Next actions
 
 1. Design pass + follow-ups DONE (2026-09-26): cinematic video hero; browser QA of 33 pages at 390/768/1440 (no console errors, no 4xx/5xx, no overflow); responsive module grids; live demo operations (`DemoOperationsSeeder`, covered by `DemoSeedTest`).
-2. Phase 31 — API DONE (`docs/API.md`). Phase 32 — Security audit DONE (`docs/SECURITY.md`, accepted risk: CSP script-src still inline/eval). **Now: Phase 33 — Performance** (master plan). Keep the demo seeder extended for any new screen (memory: demo-data-live).
+2. Phase 31 — API DONE (`docs/API.md`). Phase 32 — Security audit DONE (`docs/SECURITY.md`, accepted risk: CSP script-src still inline/eval). Phase 33 — Performance DONE (`docs/PERFORMANCE.md`; deferred: tenant-aware queued notifications → Phase 35). **Now: Phase 34 — Testing** (master plan). Keep the demo seeder extended for any new screen (memory: demo-data-live).
 3. Browser QA script: `node qa.mjs <email|-> <outdir> <width> <shoot 0|1> <paths… | @sidebar>` (session scratchpad; recreate from CHANGELOG notes if the scratchpad is gone).
 4. Owner preferences live in memory: design-direction (square, ink + champagne, Instrument Sans + Geist), demo-data-live, git-autonomy.
 
@@ -42,4 +42,4 @@
 
 ## Last command run
 
-`_ai\run.bat php artisan test` → PASS (284 tests, 1858 assertions).
+`_ai\run.bat php artisan test` → PASS (286 tests, 1861 assertions).

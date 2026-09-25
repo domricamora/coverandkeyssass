@@ -36,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
         );
 
         $this->hardenForProduction();
+        $this->tracePerformance();
 
         // Model policies.
         Gate::policy(Tenant::class, TenantPolicy::class);
@@ -51,6 +52,38 @@ class AppServiceProvider extends ServiceProvider
         // for /admin routes; this only simplifies tenant-side checks.
         Gate::before(function (User $user, string $ability) {
             return $user->isPlatformAdmin() ? true : null;
+        });
+    }
+
+    /**
+     * Dev-only performance trace (Phase 33), off unless PERF_TRACE=true and
+     * never in production: logs every lazy-loaded relation (N+1 suspect) and
+     * each request's query count / time to the `perf` log channel.
+     */
+    private function tracePerformance(): void
+    {
+        if ($this->app->isProduction() || ! env('PERF_TRACE')) {
+            return;
+        }
+
+        $log = \Illuminate\Support\Facades\Log::build(['driver' => 'single', 'path' => storage_path('logs/perf.log')]);
+
+        \Illuminate\Database\Eloquent\Model::preventLazyLoading();
+        \Illuminate\Database\Eloquent\Model::handleLazyLoadingViolationUsing(
+            fn ($model, string $relation) => $log->warning('lazy-load '.get_class($model).'::'.$relation.' '.request()->path()),
+        );
+
+        $queries = 0;
+        $ms = 0.0;
+        \Illuminate\Support\Facades\DB::listen(function ($query) use (&$queries, &$ms) {
+            $queries++;
+            $ms += $query->time;
+        });
+
+        $this->app->terminating(function () use (&$queries, &$ms, $log) {
+            if (! $this->app->runningInConsole()) {
+                $log->info(sprintf('queries=%d db_ms=%.1f %s', $queries, $ms, request()->path()));
+            }
         });
     }
 
