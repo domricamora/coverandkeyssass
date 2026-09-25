@@ -19,6 +19,9 @@ class UserController extends Controller
                         ->orWhere('email', 'like', "%{$q}%");
                 });
             })
+            // Hosts belong to a business; customers don't (Phase 28).
+            ->when($request->query('type') === 'hosts', fn ($q) => $q->whereHas('tenants'))
+            ->when($request->query('type') === 'customers', fn ($q) => $q->whereDoesntHave('tenants')->whereDoesntHave('roles', fn ($r) => $r->where('slug', 'super_admin')))
             ->orderBy('name')
             ->paginate(25)
             ->withQueryString();

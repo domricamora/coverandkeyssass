@@ -8,6 +8,11 @@
 
     <form method="GET" action="{{ route('admin.users.index') }}" class="admin-search">
         <input type="text" name="q" value="{{ request('q') }}" placeholder="Search name or email…" class="form-input" aria-label="Search users" />
+        <select name="type" class="form-input" aria-label="User type" style="max-width:160px">
+            <option value="">Everyone</option>
+            <option value="hosts" @selected(request('type') === 'hosts')>Hosts</option>
+            <option value="customers" @selected(request('type') === 'customers')>Customers</option>
+        </select>
         <button type="submit" class="btn btn-dark btn-sm">
             <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-4.3-4.3"/></svg>
             Search

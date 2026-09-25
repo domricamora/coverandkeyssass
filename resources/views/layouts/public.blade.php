@@ -86,6 +86,9 @@
         </header>
 
         <main id="main">
+            @if (! empty($announcement))
+                <div role="status" style="background:var(--gold);color:#1a1a1a;text-align:center;padding:8px 16px;font-weight:500;">{{ $announcement }}</div>
+            @endif
             @include('layouts.partials.messages')
             {{ $slot }}
         </main>
@@ -119,6 +122,11 @@
                         <li><a href="{{ route('marketing.features') }}">Features</a></li>
                         <li><a href="{{ route('marketing.pricing') }}">Pricing</a></li>
                         <li><a href="{{ route('marketing.contact') }}">Contact</a></li>
+                        @foreach ($footerPages ?? [] as $footerPage)
+                            <li><a href="{{ route('pages.show', $footerPage->slug) }}">{{ $footerPage->title }}</a></li>
+                        @endforeach
+                        @if (! empty($supportEmail))<li><a href="mailto:{{ $supportEmail }}">{{ $supportEmail }}</a></li>@endif
+                        @if (! empty($supportPhone))<li><a href="tel:{{ preg_replace('/[^0-9+]/', '', $supportPhone) }}">{{ $supportPhone }}</a></li>@endif
                     </ul>
                 </div>
                 <div>

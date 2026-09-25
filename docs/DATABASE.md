@@ -258,6 +258,13 @@ The unique `(user_id, reviewable_type, reviewable_id)` becomes a plain index, so
 
 `module_plans` gains a **Yearly** row per module (10 × monthly), and `limits` on the core / property / restaurant plans.
 
+## Phase 28 tables (Super Admin)
+
+| Table | Purpose | Notes |
+|---|---|---|
+| cms_pages | public content pages | slug unique, title, meta_description, body (Markdown), is_published, in_footer, updated_by |
+| platform_settings | platform key / value settings | key primary; support_email, support_phone, announcement, commission_default_rate |
+
 ## Seeding
 
 `php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin` **and** a refresh of every existing tenant's system roles, so newly added catalogue permissions reach already-provisioned businesses).

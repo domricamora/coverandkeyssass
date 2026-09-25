@@ -1,5 +1,23 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Phase 28: Super Admin (v0.28.0)
+
+(verified: 265 tests / 1680 assertions)
+
+- The platform dashboard now covers money (guest payments, commission, subscription revenue), volume (bookings, orders), supply (hosts, listings awaiting approval) and demand (customers), plus subscriptions and payouts. There is a nav bar to every admin screen.
+- New `App\Modules\PlatformAdmin`:
+  - Property and restaurant control: approve, publish, suspend with a reason, send back.
+  - Cross-business bookings, orders and payments.
+  - Admin refunds through the booking / order state machine.
+  - Module pricing editor.
+  - CMS pages: safe Markdown at `/pages/{slug}`, with footer links.
+  - Platform settings: support contact, announcement banner, default commission %.
+  - CSV reports, with protection against spreadsheet formulas.
+  - Audit log viewer.
+- The users list gains a hosts / customers filter. `Payment` gains a `user` relation.
+- The pricing page reads each module's Monthly plan explicitly (modules now have Yearly plans too).
+- 6 new Pest tests.
+
 ## 2026-09-26 — Phase 27: SaaS Billing (v0.27.0)
 
 (verified: 259 tests / 1602 assertions)

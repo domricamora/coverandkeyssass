@@ -2,8 +2,8 @@
 
 ## Current Phase
 
-Phase 27 - SaaS Billing — **COMPLETE (verified)**
-Next: Phase 28 - Super Admin
+Phase 28 - Super Admin — **COMPLETE (verified)**
+Next: Phase 29 - Marketplace Administration
 
 ## Completed
 
@@ -36,12 +36,13 @@ Next: Phase 28 - Super Admin
 - **Phase 25 — Messaging**: `App\Modules\Messaging` — guest ↔ host / restaurant (about listing, booking, order, table), guest ↔ support, staff threads; one access service; private attachments; read status; notifications; CRM logging; guest / business / admin inboxes; permissions `messages.*`
 - **Phase 26 — Notifications**: `App\Modules\Notify` — `ChannelNotification` base (in-app always; email / SMS / push per user preference or event default), push outbox + device registration, payment received / failed, new-order staff alerts, trial-expiring owner alerts (`notifications:trials`), staff notification centre with badge, settings matrix
 - **Phase 27 — SaaS Billing**: `App\Modules\Billing` — per-module subscriptions (monthly / yearly = 10×, dependencies auto-added), invoices (idempotent, trial-prorated, mid-period adds), coupons (race-safe), `billing:run` (renew, past due, suspend after grace, restore on payment, expire unpaid trials), PayMongo + manual payment, usage & plan limits enforced, owner Billing page + Super Admin billing; permissions `billing.*`
-- Tests: Pest suite — **259 passed, 1602 assertions** (Phase 27: 8, Phase 26: 6, Phase 25: 4, Phase 24: 4, Phase 23: 6, Phase 22: 7, Phase 21: 4, Phase 20: 6, Phase 19: 5, Phase 18: 6, Phase 17: 6, Phase 16: 4, Phase 15: 5, Phase 14: 7, Phase 13: 5, Phase 12: 6, Phase 11: 8, Phase 10: 6, Phase 09: 10, Phase 05: 19, Phase 06: 7, Phase 07: 12, Phase 08: 10); previously **98 passed, 320 assertions** (`php artisan test`, real MySQL), including 24 Phase 04 coverage tests
+- **Phase 28 — Super Admin**: `App\Modules\PlatformAdmin` — platform KPI dashboard + admin nav, listing approve / suspend / reinstate, cross-business bookings / orders / payments, refunds via the state machines, module pricing editor, CMS pages (safe Markdown, footer links), platform settings (support contact, announcement, default commission), CSV reports (formula-safe), audit log viewer, hosts / customers filter
+- Tests: Pest suite — **265 passed, 1680 assertions** (Phase 28: 6, Phase 27: 8, Phase 26: 6, Phase 25: 4, Phase 24: 4, Phase 23: 6, Phase 22: 7, Phase 21: 4, Phase 20: 6, Phase 19: 5, Phase 18: 6, Phase 17: 6, Phase 16: 4, Phase 15: 5, Phase 14: 7, Phase 13: 5, Phase 12: 6, Phase 11: 8, Phase 10: 6, Phase 09: 10, Phase 05: 19, Phase 06: 7, Phase 07: 12, Phase 08: 10); previously **98 passed, 320 assertions** (`php artisan test`, real MySQL), including 24 Phase 04 coverage tests
 - Documentation: docs/* updated per phase; `docs/modules/{marketplace,property-management}.md` completed; CHANGELOG carries Phase 01–08 entries
 
 ## In Progress
 
-- (nothing — Phase 28 not started)
+- (nothing — Phase 29 not started)
 
 ## Pending
 

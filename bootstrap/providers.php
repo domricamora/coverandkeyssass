@@ -18,6 +18,7 @@ use App\Modules\Messaging\Providers\MessagingServiceProvider;
 use App\Modules\Notify\Providers\NotifyServiceProvider;
 use App\Modules\Ordering\Providers\OrderingServiceProvider;
 use App\Modules\Payments\Providers\PaymentsServiceProvider;
+use App\Modules\PlatformAdmin\Providers\PlatformAdminServiceProvider;
 use App\Modules\Pos\Providers\PosServiceProvider;
 use App\Modules\PropertyManagement\Providers\PropertyManagementServiceProvider;
 use App\Modules\RestaurantManagement\Providers\RestaurantManagementServiceProvider;
@@ -50,5 +51,6 @@ return [
     MessagingServiceProvider::class,
     NotifyServiceProvider::class,
     BillingServiceProvider::class,
+    PlatformAdminServiceProvider::class,
 ];
 

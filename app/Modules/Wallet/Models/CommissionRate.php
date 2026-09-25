@@ -54,6 +54,6 @@ class CommissionRate extends Model
 
     public static function defaultRate(): float
     {
-        return (float) config('services.commission.default_rate', 10);
+        return (float) \App\Modules\PlatformAdmin\Models\Setting::get('commission_default_rate', config('services.commission.default_rate', 10));
     }
 }

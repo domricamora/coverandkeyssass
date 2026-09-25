@@ -64,6 +64,11 @@ class Payment extends Model
         return $this->belongsTo(\App\Modules\Ordering\Models\Order::class);
     }
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\User::class);
+    }
+
     /** Amount in centavos, the unit PayMongo uses. */
     public function amountInCentavos(): int
     {

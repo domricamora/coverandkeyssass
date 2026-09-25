@@ -4,32 +4,29 @@
             <span class="badge badge-amber">Super Admin</span>
             <h1 class="mt-2">Platform overview</h1>
         </div>
-        <div class="flex gap-2">
-            <a href="{{ route('admin.users.index') }}" class="btn btn-dark btn-sm">Users</a>
-            <a href="{{ route('admin.tenants.index') }}" class="btn btn-dark btn-sm">Tenants</a>
-            <a href="{{ route('admin.commissions.index') }}" class="btn btn-dark btn-sm">Commissions</a>
-            <a href="{{ route('admin.payouts.index') }}" class="btn btn-dark btn-sm">Payouts</a>
-            <a href="{{ route('admin.reviews.index') }}" class="btn btn-dark btn-sm">Reviews</a>
-            <a href="{{ route('admin.support.index') }}" class="btn btn-dark btn-sm">Support</a>
-            <a href="{{ route('admin.billing.index') }}" class="btn btn-dark btn-sm">Billing</a>
-        </div>
     </div>
 
-    <div class="stat-grid stat-grid--3">
-        <div class="stat card">
-            <p class="stat__label">Tenants</p>
-            <p class="stat__value">{{ $tenantCount }}</p>
-            <p class="stat__sub">{{ $activeTenants }} active</p>
-        </div>
-        <div class="stat card">
-            <p class="stat__label">Users</p>
-            <p class="stat__value">{{ $userCount }}</p>
-        </div>
-        <div class="stat card">
-            <p class="stat__label">Modules</p>
-            <p class="stat__value">&mdash;</p>
-            <p class="stat__sub">Module engine lands in Phase 02</p>
-        </div>
+    <nav class="flex flex-wrap gap-2 mt-2" aria-label="Super Admin">
+        @foreach ([
+            'admin.users.index' => 'Users', 'admin.tenants.index' => 'Businesses', 'admin.modules.index' => 'Modules', 'admin.pricing.index' => 'Pricing',
+            'admin.billing.index' => 'Subscriptions', 'admin.bookings.index' => 'Bookings', 'admin.orders.index' => 'Orders', 'admin.payments.index' => 'Payments & refunds',
+            'admin.commissions.index' => 'Commissions', 'admin.payouts.index' => 'Payouts', 'admin.reviews.index' => 'Reviews', 'admin.support.index' => 'Support',
+            'admin.pages.index' => 'CMS pages', 'admin.settings.index' => 'Settings', 'admin.reports.index' => 'Reports', 'admin.logs.index' => 'Logs',
+        ] as $name => $label)
+            <a href="{{ route($name) }}" class="btn btn-dark btn-sm">{{ $label }}</a>
+        @endforeach
+        <a href="{{ route('admin.listings.index', 'properties') }}" class="btn btn-dark btn-sm">Properties</a>
+        <a href="{{ route('admin.listings.index', 'restaurants') }}" class="btn btn-dark btn-sm">Restaurants</a>
+    </nav>
+
+    <div class="stat-grid stat-grid--3 mt-6">
+        @foreach ($stats as [$label, $value, $sub, $link])
+            <a href="{{ $link }}" class="stat card" style="color:inherit;text-decoration:none">
+                <p class="stat__label">{{ $label }}</p>
+                <p class="stat__value">{{ $value }}</p>
+                <p class="stat__sub">{{ $sub }}</p>
+            </a>
+        @endforeach
     </div>
 
     <div class="grid gap-6 lg:grid-cols-2 mt-8">
