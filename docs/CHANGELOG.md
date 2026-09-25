@@ -1,5 +1,18 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Phase 32: Security audit (v0.32.0)
+
+(verified: 284 tests / 1858 assertions; `composer audit` and `npm audit` clean; browser sweep with CSP live found no violations)
+
+- Full audit across the master plan's checklist, recorded per area in `docs/SECURITY.md`.
+- Added the global `SecurityHeaders` middleware:
+  - `nosniff`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, `COOP`, and HSTS (production over HTTPS).
+  - A CSP pinning third-party origins to Google Fonts, with `object-src 'none'`, `base-uri 'self'`, `form-action 'self'` plus the PayMongo checkout redirect, and `frame-ancestors 'self'`.
+- Fixed the password policy: `Password::defaults()` was never configured (min 8). It is now min 10 with letters, mixed case and numbers, plus a Have I Been Pwned breach check in production.
+- Fixed the session cookie: it is now `secure` by default in production (was unset).
+- Added: HTTPS forced in production, and a critical log entry if `APP_DEBUG` is on in production.
+- Auth tests now use policy-compliant passwords.
+- 4 new Pest tests (`SecurityBaselineTest`).
 ## 2026-09-26 — Phase 31: REST API v1 (v0.31.0)
 
 (verified: 280 tests / 1829 assertions)

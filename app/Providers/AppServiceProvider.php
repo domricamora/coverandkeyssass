@@ -35,6 +35,8 @@ class AppServiceProvider extends ServiceProvider
             },
         );
 
+        $this->hardenForProduction();
+
         // Model policies.
         Gate::policy(Tenant::class, TenantPolicy::class);
 
@@ -50,6 +52,28 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(function (User $user, string $ability) {
             return $user->isPlatformAdmin() ? true : null;
         });
+    }
+
+    /**
+     * Phase 32 security baseline. Password rules apply everywhere (Breeze
+     * forms use Password::defaults()); the breach check (Have I Been Pwned,
+     * k-anonymity range API) and HTTPS forcing only in production.
+     */
+    private function hardenForProduction(): void
+    {
+        \Illuminate\Validation\Rules\Password::defaults(function () {
+            $rule = \Illuminate\Validation\Rules\Password::min(10)->letters()->mixedCase()->numbers();
+
+            return $this->app->isProduction() ? $rule->uncompromised() : $rule;
+        });
+
+        if ($this->app->isProduction()) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+
+            if (config('app.debug')) {
+                \Illuminate\Support\Facades\Log::critical('APP_DEBUG is enabled in production: stack traces and config are exposed. Set APP_DEBUG=false.');
+            }
+        }
     }
 }
 
