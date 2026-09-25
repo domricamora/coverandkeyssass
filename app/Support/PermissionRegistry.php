@@ -83,6 +83,8 @@ class PermissionRegistry
                 'menu.manage' => 'Edit menu categories, items, prices and modifiers',
                 'tables.view' => 'View dining areas and tables',
                 'tables.manage' => 'Edit dining areas and tables',
+                'reservations.view' => 'View table reservations',
+                'reservations.manage' => 'Create, confirm, seat, cancel and no-show table reservations',
             ],
         ];
     }

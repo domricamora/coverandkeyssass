@@ -64,6 +64,29 @@ Parameters are resolved through the tenant-scoped restaurant (`RestaurantManagem
 
 `/restaurant/{slug}` now shows the menu: active categories that have items, prices, "Sold out" for unavailable items, and available modifier options. It drops the tenant scope only on eager loads under a listing that `publicQuery()` already limited to published restaurants.
 
+## Reservations (Phase 10)
+
+Verified 2026-09-25: suite green (162 tests / 680 assertions), plus a live 8-process race for one table: exactly one reservation and seven clean rejections.
+
+`TableReservation` (`table_reservations`): one party at one table for `[reserved_at, ends_at)`, with a `TR…` reference.
+
+```text
+pending → confirmed → seated → completed
+   ↘ cancelled   ↘ cancelled / no_show
+```
+
+- **Time slots**: `ReservationService::slotsFor()` reads the day's opening hours (`"11:00–14:00, 17:00–22:00"`, en dash or hyphen, several ranges, past midnight). It emits a slot every 30 minutes, and the last slot leaves a full sitting (`restaurants.reservation_duration_minutes`, default 90) before closing. A missing or "Closed" day has no slots. Marketplace requests must land on a slot. Host reservations can use any time.
+- **Overbooking**: `reserve()` locks the restaurant's active tables (`FOR UPDATE`) and then excludes tables that have an overlapping `pending/confirmed/seated` reservation. It picks the smallest table that seats the party (or the table the host chose). Time ranges cannot carry a unique index, so the lock is the guarantee (proven by the race).
+- **Guards**: seating only on the reservation day; no-show only after the reserved time; completing early shortens `ends_at`, so the table frees up.
+- **Sources**: `host` is confirmed immediately; `marketplace` is pending until the host confirms. The customer gets a database notification on confirm or cancel.
+- **Customer**: `/account/reservations` (the "Tables" tab) lists only their own rows (`TableReservation::forCustomer`). They can self-cancel before the reserved time. Another customer's reference returns 404.
+- **Public**: `/restaurant/{slug}` shows "Book a table" only when `reservations_enabled` is on and the business has the restaurant module. The slot picker calls `GET /restaurant/{slug}/slots?date=`. The request is `POST /restaurant/{slug}/reserve` (auth).
+- **Host desk**: `restaurants.reservations` shows a day calendar per table, the booking list with state actions, and a phone-booking form. Permissions: `reservations.view` / `reservations.manage` (owner, manager, front desk).
+
+Ceilings: one table per party (no table combining); fixed 30-minute grid.
+
 ## Tests
+
+`tests/Feature/RestaurantReservationsTest.php` (6 tests): slot derivation, allocation without overbooking (smallest fit, back-to-back, cancel frees, too-large party, no overlapping rows), state machine and date guards, marketplace request rules, customer isolation and cancel, host desk permissions and tenant isolation.
 
 `tests/Feature/RestaurantManagementTest.php` (10 tests): module gating, create with hours and cuisines plus publish, cross-tenant 404s (including a foreign item id), front-desk read-only access, the menu builder flow, rejecting another restaurant's category, `priceWith` (the add-on example, a required single choice, a foreign option, an unavailable option), availability toggle, the floor plan, and the public menu.

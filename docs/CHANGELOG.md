@@ -1,5 +1,16 @@
 # CHANGELOG.md
 
+## 2026-09-25 — Phase 10: Restaurant Reservations (v0.10.0)
+
+(verified: 162 tests / 680 assertions, plus a live 8-process race for one table → exactly 1 reservation)
+
+- `table_reservations` and `ReservationService`: time slots from opening hours and the sitting length; table allocation (smallest fit) under a `FOR UPDATE` lock on the restaurant's tables. Overlapping pending, confirmed or seated reservations can never share a table.
+- State machine: pending → confirmed → seated → completed, plus cancelled and no-show. Date guards on seat and no-show; completing early frees the table. Audited transitions; the customer is notified on confirm or cancel.
+- Host desk `/dashboard/restaurants/{slug}/reservations`: day calendar per table, booking list with actions, phone bookings (confirmed immediately, optional table choice).
+- Marketplace "Book a table" on `/restaurant/{slug}` (slot picker from `/restaurant/{slug}/slots`). Requests start as pending. Customer "Tables" tab at `/account/reservations` with self-cancel.
+- New permissions `reservations.view/manage` (owner, manager, front desk); new setting `restaurants.reservation_duration_minutes`.
+- 6 new Pest tests.
+
 ## 2026-09-25 — Phase 09: Restaurant Management (v0.9.0)
 
 (verified: 156 tests / 621 assertions)

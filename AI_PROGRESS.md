@@ -2,8 +2,8 @@
 
 ## Current Phase
 
-Phase 09 - Restaurant Management — **COMPLETE (verified)**
-Next: Phase 10 - Restaurant Reservations
+Phase 10 - Restaurant Reservations — **COMPLETE (verified)**
+Next: Phase 11 - Online Food Ordering
 
 ## Completed
 
@@ -18,16 +18,17 @@ Next: Phase 10 - Restaurant Reservations
 - **Phase 07 — PayMongo**: `App\Modules\Payments` — checkout sessions, signed webhook (outside web group, replay window), server-side session verification before confirming, idempotent event ledger + row-locked markPaid, failed payments + retry, refunds vetoing the `refunded` transition, customer Payments tab + booking payment panels
 - **Phase 08 — Host Wallet & Commissions**: `App\Modules\Wallet` — commission rates (global / listing / promotional, Super Admin screen + revenue totals), one commission per paid payment, host wallet with pending → available on check-out/no-show and reversal on refund, append-only ledger (sum = balances), payouts (host request, admin paid/reject), all row-locked; earning + paid status + booking confirmation commit atomically (webhook retry completes a failed attempt)
 - **Phase 09 — Restaurant Management**: `App\Modules\RestaurantManagement` — host restaurant profile (hours, cuisines, contact, photos, audited publish), menu builder (categories → items → modifier groups with min/max → options), `MenuItem::priceWith()` server-side pricing with rule enforcement, dining areas + tables, public menu on `/restaurant/{slug}`, permissions `menu.*`, `tables.*`
-- Tests: Pest suite — **156 passed, 621 assertions** (Phase 09: 10, Phase 05: 19, Phase 06: 7, Phase 07: 12, Phase 08: 10); previously **98 passed, 320 assertions** (`php artisan test`, real MySQL), including 24 Phase 04 coverage tests
+- **Phase 10 — Restaurant Reservations**: `table_reservations` + `ReservationService` — slots from opening hours + sitting length, smallest-fit table allocation under `FOR UPDATE` lock on the restaurant tables (live 8-process race → exactly 1), pending/confirmed/seated/completed/cancelled/no_show with date guards, host day calendar + phone bookings, marketplace "Book a table" with slot picker, customer Tables tab + self-cancel, notifications, permissions `reservations.*`
+- Tests: Pest suite — **162 passed, 680 assertions** (Phase 10: 6, Phase 09: 10, Phase 05: 19, Phase 06: 7, Phase 07: 12, Phase 08: 10); previously **98 passed, 320 assertions** (`php artisan test`, real MySQL), including 24 Phase 04 coverage tests
 - Documentation: docs/* updated per phase; `docs/modules/{marketplace,property-management}.md` completed; CHANGELOG carries Phase 01–08 entries
 
 ## In Progress
 
-- (nothing — Phase 10 not started)
+- (nothing — Phase 11 not started)
 
 ## Pending
 
-- Phases 10–38: reservations, ordering, delivery, room service, folio, housekeeping, maintenance, staff management, inventory, POS, accounting, CRM, marketing, loyalty, reviews, messaging, notifications, SaaS billing, super admin, marketplace administration, SEO, API, security audit, performance, testing, deployment, backups, monitoring, final audit
+- Phases 11–38: ordering, delivery, room service, folio, housekeeping, maintenance, staff management, inventory, POS, accounting, CRM, marketing, loyalty, reviews, messaging, notifications, SaaS billing, super admin, marketplace administration, SEO, API, security audit, performance, testing, deployment, backups, monitoring, final audit
 
 ## Known Issues
 
@@ -48,4 +49,4 @@ Claude Code (Opus)
 
 php artisan test
 
-Result: PASS (156 tests, 621 assertions, MySQL `hospitality_os_testing`)
+Result: PASS (162 tests, 680 assertions, MySQL `hospitality_os_testing`)

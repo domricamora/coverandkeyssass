@@ -2,6 +2,7 @@
     @foreach ([
         ['account.dashboard', 'Overview'],
         ['account.bookings.index', 'Trips'],
+        ['account.reservations.index', 'Tables'],
         ['account.payments.index', 'Payments'],
         ['marketplace.favorites.index', 'Wish list'],
         ['account.reviews', 'Reviews'],

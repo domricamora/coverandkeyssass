@@ -1,6 +1,8 @@
 <?php
 
+use App\Modules\RestaurantManagement\Controllers\GuestReservationController;
 use App\Modules\RestaurantManagement\Controllers\MenuController;
+use App\Modules\RestaurantManagement\Controllers\ReservationController;
 use App\Modules\RestaurantManagement\Controllers\RestaurantController;
 use App\Modules\RestaurantManagement\Controllers\TableController;
 use Illuminate\Support\Facades\Route;
@@ -57,5 +59,19 @@ Route::middleware(['auth', 'tenant.context', 'module.active:restaurant'])
             Route::post('/tables', [TableController::class, 'storeTable'])->name('tables.store');
             Route::patch('/tables/{table}', [TableController::class, 'updateTable'])->name('tables.update');
             Route::delete('/tables/{table}', [TableController::class, 'destroyTable'])->name('tables.destroy');
+
+            // Reservation desk (Phase 10).
+            Route::get('/reservations', [ReservationController::class, 'index'])->name('reservations');
+            Route::post('/reservations', [ReservationController::class, 'store'])->name('reservations.store');
+            Route::post('/reservations/{reservation}/status', [ReservationController::class, 'transition'])->name('reservations.transition');
         });
     });
+
+// Guest side (Phase 10): marketplace request + the customer's own reservations.
+Route::get('/restaurant/{restaurant}/slots', [GuestReservationController::class, 'slots'])->name('marketplace.restaurants.slots');
+
+Route::middleware('auth')->group(function (): void {
+    Route::post('/restaurant/{restaurant}/reserve', [GuestReservationController::class, 'store'])->name('marketplace.restaurants.reserve');
+    Route::get('/account/reservations', [GuestReservationController::class, 'index'])->name('account.reservations.index');
+    Route::post('/account/reservations/{reservation}/cancel', [GuestReservationController::class, 'cancel'])->name('account.reservations.cancel');
+});

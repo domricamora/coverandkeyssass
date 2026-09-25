@@ -143,12 +143,30 @@
                         <p><span>Delivery</span> <strong>{{ $r->delivery_enabled ? 'Available' : 'Not enabled' }}</strong></p>
                     </div>
 
-                    <div class="card" style="margin-top:14px;background:var(--surface-2);">
-                        <p class="muted" style="margin:0;">
-                            <strong>Menus, table booking and ordering arrive with the Restaurant and Ordering modules.</strong>
-                            This listing already carries the profile, location and cuisine data those phases build on.
-                        </p>
-                    </div>
+                    @if (\App\Modules\RestaurantManagement\Controllers\GuestReservationController::acceptsReservations($r, app(\App\Support\ModuleService::class)))
+                        @auth
+                            <form method="POST" action="{{ route('marketplace.restaurants.reserve', $r->slug) }}" style="margin-top:14px;display:grid;gap:8px;"
+                                  x-data="{ slots: [], load(d) { fetch('{{ route('marketplace.restaurants.slots', $r->slug) }}?date=' + d).then(r => r.json()).then(j => this.slots = j.slots) } }"
+                                  x-init="load($refs.date.value)">
+                                @csrf
+                                <h3 style="margin:0;">Book a table</h3>
+                                <input x-ref="date" type="date" name="date" value="{{ old('date', today()->toDateString()) }}" min="{{ today()->toDateString() }}" required class="form-input" aria-label="Date" @change="load($event.target.value)" />
+                                <select name="time" required class="form-input" aria-label="Time">
+                                    <template x-for="s in slots" :key="s"><option :value="s" x-text="s"></option></template>
+                                </select>
+                                <p class="muted" x-show="slots.length === 0" style="margin:0;">Closed or fully outside opening hours that day.</p>
+                                <input type="number" name="party_size" min="1" max="50" value="{{ old('party_size', 2) }}" required class="form-input" aria-label="Guests" />
+                                <input type="text" name="guest_phone" value="{{ old('guest_phone') }}" class="form-input" placeholder="Phone (optional)" aria-label="Phone" />
+                                <textarea name="special_requests" rows="2" class="form-input" placeholder="Special requests" aria-label="Special requests">{{ old('special_requests') }}</textarea>
+                                @foreach (['time', 'party_size', 'date'] as $field)
+                                    @error($field)<p class="muted" role="alert" style="margin:0;color:var(--danger, #b91c1c)">{{ $message }}</p>@enderror
+                                @endforeach
+                                <button class="btn btn-primary btn-block" type="submit">Request reservation</button>
+                            </form>
+                        @else
+                            <a class="btn btn-primary btn-block" style="margin-top:14px;" href="{{ route('login') }}">Sign in to book a table</a>
+                        @endauth
+                    @endif
 
                     <div style="margin-top:14px;display:grid;gap:8px;">
                         @auth

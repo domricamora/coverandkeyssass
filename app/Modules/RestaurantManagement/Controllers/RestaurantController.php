@@ -220,6 +220,7 @@ class RestaurantController extends RestaurantManagementController
             'email' => ['nullable', 'email', 'max:160'],
             'price_level' => ['required', 'integer', 'between:1,4'],
             'reservations_enabled' => ['nullable', 'boolean'],
+            'reservation_duration_minutes' => ['nullable', 'integer', 'min:15', 'max:480'],
             'delivery_enabled' => ['nullable', 'boolean'],
             'cuisines' => ['nullable', 'array'],
             'cuisines.*' => ['integer', 'exists:cuisines,id'],
@@ -239,8 +240,9 @@ class RestaurantController extends RestaurantManagementController
             }
         }
 
-        return collect($validated)->except(['cuisines', 'hours'])->all() + [
+        return collect($validated)->except(['cuisines', 'hours', 'reservation_duration_minutes'])->all() + [
             'opening_hours' => $hours ?: null,
+            'reservation_duration_minutes' => (int) ($validated['reservation_duration_minutes'] ?? 0) ?: 90,
             'reservations_enabled' => $request->boolean('reservations_enabled'),
             'delivery_enabled' => $request->boolean('delivery_enabled'),
         ];

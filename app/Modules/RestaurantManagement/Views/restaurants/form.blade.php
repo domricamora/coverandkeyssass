@@ -72,6 +72,9 @@
         <div class="flex gap-6 text-sm" style="color:var(--text-2)">
             <label class="flex items-center gap-2"><input type="checkbox" name="reservations_enabled" value="1" @checked(old('reservations_enabled', $restaurant->reservations_enabled)) /> Accepts reservations</label>
             <label class="flex items-center gap-2"><input type="checkbox" name="delivery_enabled" value="1" @checked(old('delivery_enabled', $restaurant->delivery_enabled)) /> Offers delivery</label>
+            <label class="flex items-center gap-2">Sitting length
+                <input name="reservation_duration_minutes" type="number" min="15" max="480" step="15" value="{{ old('reservation_duration_minutes', $restaurant->reservation_duration_minutes ?? 90) }}" class="form-input" style="width:90px" /> min
+            </label>
         </div>
 
         <h2 class="text-lg pt-2">Opening hours</h2>

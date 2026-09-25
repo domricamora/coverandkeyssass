@@ -93,6 +93,14 @@ Framework tables (`cache`, `jobs`, `sessions`, …) follow the Laravel defaults;
 
 Opening hours reuse `restaurants.opening_hours` (JSON `{day: "11:00–22:00"}`).
 
+## Phase 10 tables (Restaurant Reservations)
+
+| Table | Purpose | Notes |
+|---|---|---|
+| table_reservations | a party at one table for `[reserved_at, ends_at)` | tenant, restaurant, nullable table (nullOnDelete), nullable user / created_by; unique `reference`; source `marketplace/host`; status `pending/confirmed/seated/completed/cancelled/no_show`; party_size, guest contact, special_requests, confirmed/seated/cancelled timestamps; indexes `(restaurant_id, reserved_at)`, `(restaurant_table_id, reserved_at, ends_at)`, `(user_id, reserved_at)` |
+
+`restaurants.reservation_duration_minutes` (default 90) sets the sitting length.
+
 ## Seeding
 
 `php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin` **and** a refresh of every existing tenant's system roles, so newly added catalogue permissions reach already-provisioned businesses).
