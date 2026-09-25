@@ -1,5 +1,20 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Phase 36: Backups (v0.36.0)
+
+(verified: 302 tests / 1952 assertions; live `backup:verify` restored 120 tables / 2,725 rows from the dev database)
+
+- `App\Support\BackupManager` with the `backup:run`, `backup:verify` and `backup:restore` commands. One zip per run holds:
+  - a consistent `mysqldump`
+  - uploaded and private files
+  - `.env`, AES-256 encrypted with `BACKUP_PASSWORD`, or left out rather than stored in the clear
+  - a manifest with the dump's SHA-256
+- Database credentials are passed through a temporary 0600 option file, never the command line.
+- Count-based rotation (`BACKUP_KEEP`) and an optional off-site copy to any filesystem disk (`BACKUP_OFFSITE_DISK`).
+- **Restore is tested, not assumed.** `backup:verify` restores into a scratch database, checks the checksum and every table, and reports row counts. It is scheduled weekly (Sunday 04:00) next to the nightly `backup:run` (03:00).
+- `backup:restore` needs `--force`; `--no-files` restores the database only.
+- `docs/BACKUPS.md`: what is backed up, the schedule, rotation, configuration, the step-by-step restore procedure and a new-server recovery.
+- 3 new tests (`BackupTest`): a real dump restored row for row, tamper detection, rotation. They commit their probe row through a second connection because `mysqldump` can't see the test transaction.
 ## 2026-09-26 — Phase 35: Production deployment (v0.35.0)
 
 (verified: 299 tests / 1941 assertions; `route:cache` and `config:cache` succeed; live probe of the dev server)

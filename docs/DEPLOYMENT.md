@@ -48,6 +48,8 @@ The target is conventional cPanel hosting or a Z.com / other VPS (Apache or Ngin
    | `accounting:sync` | 02:00 | Full ledger backstop |
    | `notifications:trials` | 08:00 | Trial-ending warnings |
    | `queue:work --stop-when-empty --max-time=55` | every minute | The queue worker on hosts without a supervisor |
+   | `backup:run` | 03:00 | Database, uploads and encrypted `.env` archive with rotation (docs/BACKUPS.md) |
+   | `backup:verify` | Sunday 04:00 | Real restore into a scratch database to prove the latest backup |
    | `queue:prune-failed`, `sanctum:prune-expired` | daily | Housekeeping |
 
 9. **PayMongo webhook.** Register `https://your-domain.com/webhooks/paymongo` for `checkout_session.payment.paid`, `payment.paid` and `payment.failed` (the events the handler processes; refunds are confirmed synchronously through the API). Put its secret in `PAYMONGO_WEBHOOK_SECRET`. The curl command is in `docs/modules/payments.md`.

@@ -5,8 +5,8 @@
 ## Snapshot
 
 - Date: 2026-09-26
-- Phase: **35 COMPLETE (verified)** → next **36 — Backups**
-- Tests: PASS — 299 tests, 1941 assertions, MySQL `hospitality_os_testing`
+- Phase: **36 COMPLETE (verified)** → next **37 — Monitoring**
+- Tests: PASS — 302 tests, 1952 assertions, MySQL `hospitality_os_testing`
 - Git: `master` → origin <https://github.com/domricamora/coverandkeyssass.git> — **not pushed yet**: the auto-mode classifier blocks `git push` from the agent; the owner runs `git push -u origin master:main` (or adds a Bash permission rule)
 
 ## Environment (ready)
@@ -28,7 +28,7 @@
 ## Next actions
 
 1. Design pass + follow-ups DONE (2026-09-26): cinematic video hero; browser QA of 33 pages at 390/768/1440 (no console errors, no 4xx/5xx, no overflow); responsive module grids; live demo operations (`DemoOperationsSeeder`, covered by `DemoSeedTest`).
-2. Phase 31 — API DONE (`docs/API.md`). Phase 32 — Security audit DONE (`docs/SECURITY.md`, accepted risk: CSP script-src still inline/eval). Phase 33 — Performance DONE (`docs/PERFORMANCE.md`; deferred: tenant-aware queued notifications → Phase 35). Phase 34 — Testing DONE (`docs/TESTING.md`). Phase 35 — Production deployment DONE (`docs/DEPLOYMENT.md`, `deploy.sh`, `.env.production.example`, root `.htaccess`, schedule in `routes/console.php`). **Now: Phase 36 — Backups** (master plan). Keep the demo seeder extended for any new screen (memory: demo-data-live).
+2. Phase 31 — API DONE (`docs/API.md`). Phase 32 — Security audit DONE (`docs/SECURITY.md`, accepted risk: CSP script-src still inline/eval). Phase 33 — Performance DONE (`docs/PERFORMANCE.md`; deferred: tenant-aware queued notifications → Phase 35). Phase 34 — Testing DONE (`docs/TESTING.md`). Phase 35 — Production deployment DONE (`docs/DEPLOYMENT.md`, `deploy.sh`, `.env.production.example`, root `.htaccess`, schedule in `routes/console.php`). Phase 36 — Backups DONE (`docs/BACKUPS.md`; set BACKUP_OFFSITE_DISK + BACKUP_PASSWORD before go-live). **Now: Phase 37 — Monitoring** (master plan). Keep the demo seeder extended for any new screen (memory: demo-data-live).
 3. Browser QA script: `node qa.mjs <email|-> <outdir> <width> <shoot 0|1> <paths… | @sidebar>` (session scratchpad; recreate from CHANGELOG notes if the scratchpad is gone).
 4. Owner preferences live in memory: design-direction (square, ink + champagne, Instrument Sans + Geist), demo-data-live, git-autonomy.
 
@@ -41,4 +41,4 @@
 
 ## Last command run
 
-`_ai\run.bat php artisan test` → PASS (299 tests, 1941 assertions).
+`_ai\run.bat php artisan test` → PASS (302 tests, 1952 assertions).
