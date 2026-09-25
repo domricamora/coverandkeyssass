@@ -73,7 +73,9 @@ it('follows preferences: opt out of email, opt in to SMS and push with a device'
 
     expect($notification->via($guest))->toBe(['database', \App\Modules\Notify\Channels\SmsChannel::class, \App\Modules\Notify\Channels\PushChannel::class]);
 
-    $guest->notify($notification);
+    // notifyNow: this test is about channel preferences; the Payment above is an
+    // unsaved stand-in, which a queued notification could not re-fetch by id.
+    $guest->notifyNow($notification);
 
     expect(SmsSender::$sent)->toHaveCount(1)
         ->and(SmsSender::$sent[0]['to'])->toBe('09171234567')

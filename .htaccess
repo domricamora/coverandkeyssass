@@ -1,0 +1,28 @@
+# Safety net for hosts where the document root cannot point at /public
+# (shared cPanel, or this repo sitting under a WAMP/XAMPP web root).
+# The correct setup is still: document root = <app>/public. With that, Apache
+# never reads this file.
+
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Let AutoSSL / ACME domain validation through.
+    RewriteRule ^\.well-known/ - [L]
+
+    # Never serve anything outside public/: dotfiles (.env, .git), source,
+    # config, logs, dependencies, tooling.
+    RewriteRule (^|/)\. - [F,L]
+    RewriteRule ^(app|bootstrap|config|database|docs|lang|node_modules|resources|routes|storage|tests|vendor|_ai)(/|$) - [F,L,NC]
+    RewriteRule ^(artisan|composer\.(json|lock)|package(-lock)?\.json|phpunit\.xml|vite\.config\.js|tailwind\.config\.js|postcss\.config\.js|.*\.md)$ - [F,L,NC]
+
+    # Everything else is served from public/.
+    RewriteRule ^public/ - [L]
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+    # Without mod_rewrite, refuse everything rather than expose the app.
+    Require all denied
+</IfModule>

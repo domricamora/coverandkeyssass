@@ -51,9 +51,10 @@ The crawl logged no lazy-loading (N+1) violations.
 
 ### Deferred, with reasons
 
-- **Queued notifications.**
-  - Mail, SMS and push are sent inside the request today. Queuing them needs a tenant-aware job payload: record the tenant id at dispatch and restore `TenantContext` before the job unserialises.
-  - Without that, the worker's deny-by-default scope can't re-fetch the `Booking` or `Order` the notification carries, and the job fails.
-  - Planned alongside the queue-worker setup in Phase 35. The in-app channel should stay synchronous (`viaConnections(['database' => 'sync'])`).
+- **Queued notifications: done in Phase 35.**
+  - Mail, SMS and push go through the queue; in-app stays synchronous (`viaConnections(['database' => 'sync'])`).
+  - Each notification captures its business at dispatch, from the context or from the tenant-owned model it carries.
+  - The `RestoreTenantContext` job middleware runs the job inside that business and always restores the previous context.
+  - Correction to the original note: Laravel restores queued models without scopes, so re-fetching the model was never the problem. The risk was relations loaded lazily while rendering (e.g. `$ticket->room`), which the deny-by-default scope would hide in a worker with no context.
 - **Redis.** Config is ready. Switch `CACHE_STORE`, `SESSION_DRIVER` and `QUEUE_CONNECTION` to `redis` in production (Phase 35). Locally, the database drivers stay.
 - **Responsive image variants** (`srcset`). Worth adding when host uploads grow. The demo photos are already capped.

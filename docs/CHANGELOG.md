@@ -1,5 +1,30 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Phase 35: Production deployment (v0.35.0)
+
+(verified: 299 tests / 1941 assertions; `route:cache` and `config:cache` succeed; live probe of the dev server)
+
+- **Security fix, found by probing the dev server.** With the repo root as the web root (WAMP, or shared hosting that can't change the document root), `.env`, `.git/config`, logs, `vendor/` and `composer.json` were all served with HTTP 200.
+  - A new root `.htaccess` returns 403 for dotfiles, source, config, storage, vendor, tooling and docs, lets `.well-known` through for AutoSSL, and routes everything else into `public/`.
+  - Verified: every one of those paths now returns 403.
+- **Scheduler.** Nothing was scheduled before, so in production billing, accounting, campaigns and trial warnings would never have run. `routes/console.php` now schedules:
+  - `marketing:run` every 15 min
+  - `billing:run` at 01:00
+  - `accounting:sync` at 02:00
+  - `notifications:trials` at 08:00
+  - a per-minute `queue:work --stop-when-empty --max-time=55`, for cPanel with no supervisor
+  - daily pruning of failed jobs and expired tokens
+- **Queued notifications, tenant-aware.** `ChannelNotification` implements `ShouldQueue`:
+  - In-app stays synchronous; mail, SMS and push go through the queue.
+  - The business is captured at dispatch (from the context or the carried model), and the `RestoreTenantContext` job middleware runs the job inside it and always restores the previous context.
+  - Tested end to end with a real `queue:work`, plus a direct middleware test that includes the exception path.
+- **Templates and runbook.**
+  - `.env.production.example`: debug off, Redis, encrypted sessions, SMTP, PayMongo, token expiry.
+  - `deploy.sh`: maintenance mode with a secret bypass, pull, Composer without dev packages, build, migrate, caches, storage link and permissions, queue restart, and always bringing the site back up.
+  - `docs/DEPLOYMENT.md` rewritten: cPanel first install, the cron entry and its schedule, the queue worker on cPanel vs supervisor, the webhook URL, the smoke test and hard rules.
+- **Dev defaults.** Local `QUEUE_CONNECTION=sync`, so everything is visible instantly on localhost without a worker.
+- **Tooling fix.** `_ai\run.bat composer …` works; earlier, `%1` was expanded before `shift` inside the block.
+- 2 new tests (`QueuedNotificationsTest`). `NotificationsTest` now uses `notifyNow()` for its unsaved stand-in model.
 ## 2026-09-26 — Phase 34: Testing (v0.34.0)
 
 (verified: 297 tests / 1931 assertions)

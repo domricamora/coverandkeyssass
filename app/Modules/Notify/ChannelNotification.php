@@ -20,8 +20,42 @@ use Illuminate\Notifications\Notification;
  *
  * Push goes to an outbox (push_messages) so a mobile worker can deliver it later.
  */
-abstract class ChannelNotification extends Notification
+abstract class ChannelNotification extends Notification implements \Illuminate\Contracts\Queue\ShouldQueue
 {
+    use \Illuminate\Bus\Queueable;
+
+    /**
+     * Business the notification belongs to, captured at dispatch (in via())
+     * and restored by RestoreTenantContext while a queue worker renders it.
+     */
+    public ?int $tenantId = null;
+
+    /** In-app stays immediate (the bell updates now); mail, SMS and push go through the queue. */
+    public function viaConnections(): array
+    {
+        return ['database' => 'sync'];
+    }
+
+    /** @return list<object> */
+    public function middleware(object $notifiable, string $channel): array
+    {
+        return [new \App\Support\RestoreTenantContext($this->tenantId)];
+    }
+
+    /** The tenant of the first tenant-owned model this notification carries. */
+    private function ownedTenantId(): ?int
+    {
+        foreach ((new \ReflectionObject($this))->getProperties() as $property) {
+            $value = $property->getValue($this);
+
+            if ($value instanceof \Illuminate\Database\Eloquent\Model && $value->getAttribute('tenant_id')) {
+                return (int) $value->getAttribute('tenant_id');
+            }
+        }
+
+        return null;
+    }
+
     abstract public function event(): string;
 
     /** One line for the in-app list, SMS and push body. */
@@ -45,6 +79,10 @@ abstract class ChannelNotification extends Notification
 
     public function via(object $notifiable): array
     {
+        // Captured while the dispatching code still knows the business (or from
+        // the model itself, e.g. webhooks that run without a context).
+        $this->tenantId ??= app(\App\Support\TenantContext::class)->id() ?? $this->ownedTenantId();
+
         $channels = ['database'];
 
         if ($notifiable->email && $this->allows($notifiable, 'mail')) {
