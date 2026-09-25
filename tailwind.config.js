@@ -10,6 +10,7 @@ export default {
         './storage/framework/views/*.php',
         './resources/views/**/*.blade.php',
         './app/Modules/**/*.blade.php',
+        './resources/js/**/*.{js,jsx}',
     ],
 
     theme: {
@@ -17,11 +18,26 @@ export default {
             fontFamily: {
                 sans: ['"Geist"', 'ui-sans-serif', 'system-ui', '-apple-system', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
                 mono: ['"Geist Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
-                display: ['"Playfair Display"', 'Georgia', '"Times New Roman"', 'serif'],
+                display: ['"Instrument Sans"', '"Geist"', 'ui-sans-serif', 'sans-serif'],
             },
             colors: {
+                // React dashboard: semantic tokens backed by CSS variables (resources/css/react.css)
+                canvas: 'var(--bg)',
+                raised: 'var(--bg-raised)',
+                surface: 'var(--surface)',
+                soft: 'var(--soft)',
+                line: { DEFAULT: 'var(--border)', strong: 'var(--border-strong)' },
+                fg: { DEFAULT: 'var(--text)', 2: 'var(--text-2)', 3: 'var(--text-3)', 4: 'var(--text-4)' },
+                brand: { DEFAULT: 'var(--primary)', deep: 'var(--primary-deep)', soft: 'var(--primary-soft)' },
+                coral: { DEFAULT: 'var(--coral)', deep: 'var(--coral-deep)', soft: 'var(--coral-soft)' },
+                ok: { DEFAULT: 'var(--green)', bg: 'var(--green-bg)' },
+                warn: { DEFAULT: 'var(--amber)', bg: 'var(--amber-bg)' },
+                bad: { DEFAULT: 'var(--red)', bg: 'var(--red-bg)' },
+                info: { DEFAULT: 'var(--blue)', bg: 'var(--blue-bg)' },
                 // Marketing palette (ink/bone neutrals + gold/brown accents)
                 ink: {
+                    DEFAULT: 'var(--ink)',
+                    2: 'var(--ink-2)',
                     900: '#0a0a0b',
                     800: '#121213',
                     700: '#1a1a1c',

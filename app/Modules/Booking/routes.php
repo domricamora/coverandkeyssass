@@ -38,3 +38,12 @@ Route::middleware(['auth', 'tenant.context', 'module.active:booking'])
 Route::post('/property/{property}/reserve', [ReservationController::class, 'store'])
     ->middleware(['auth', 'throttle:20,1'])
     ->name('marketplace.properties.reserve');
+
+// Front desk (React/Inertia, 2026-09-26): today's board, tape chart, room moves.
+Route::middleware(['auth', 'tenant.context', 'module.active:booking'])
+    ->prefix('dashboard/front-desk')
+    ->name('frontdesk.')
+    ->group(function (): void {
+        Route::get('/', [\App\Modules\Booking\Controllers\FrontDeskController::class, 'index'])->name('index');
+        Route::post('/move', [\App\Modules\Booking\Controllers\FrontDeskController::class, 'move'])->name('move');
+    });

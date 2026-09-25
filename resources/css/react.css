@@ -1,0 +1,70 @@
+/*
+ * React dashboard (Inertia). Loaded only by app-react.blade.php, so it can
+ * carry Tailwind's preflight without touching the Blade screens.
+ * Tokens mirror the Blade dashboard theme (app.css, .dash-body): cool ink
+ * + champagne, square corners, Instrument Sans display + Geist body.
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Palette v3 "Lagoon & Coral" (2026-09-26): light, fresh, inviting.
+   Sea-mist canvas, lagoon teal primary (7:1 on white), sunset coral accent. */
+:root {
+    --bg: #f7faf9;
+    --bg-raised: #eef4f2;
+    --surface: #ffffff;
+    --border: #dde7e4;
+    --border-strong: #c3d1cd;
+    --text: #10252a;
+    --text-2: #3b5157;
+    --text-3: #5e7277;
+    --text-4: #7f9095;
+    --soft: #eef4f2;
+    --ink: #10252a;
+    --ink-2: #1b363c;
+    --primary: #0e6461;
+    --primary-deep: #0a4f4d;
+    --primary-soft: #e1f0ee;
+    --coral: #d9603f;
+    --coral-deep: #b84a2c;
+    --coral-soft: #fcebe4;
+    --amber: #8a6a1f;  --amber-bg: #f6efdf;
+    --green: #2f6b4f;  --green-bg: #e6f0ea;
+    --red: #a3372f;    --red-bg: #f8e7e5;
+    --blue: #28576b;   --blue-bg: #e4eef2;
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+html, body, #app { height: 100%; }
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 whitespace-nowrap border px-3.5 h-9 text-[13px] font-medium transition-[transform,background-color,border-color,color] duration-150 active:scale-[0.97] disabled:opacity-50 disabled:pointer-events-none;
+        transition-timing-function: var(--ease-out);
+    }
+    .btn-primary { @apply btn border-brand bg-brand text-white hover:bg-brand-deep hover:border-brand-deep; }
+    .btn-coral { @apply btn border-coral bg-coral text-white hover:bg-coral-deep hover:border-coral-deep; }
+    .btn-ghost { @apply btn border-line bg-surface text-fg hover:border-line-strong; }
+    .btn-danger { @apply btn border-line bg-surface text-bad hover:border-bad; }
+    .btn-sm { @apply h-8 px-2.5 text-xs; }
+
+    .field { @apply block w-full border border-line-strong bg-surface px-3 h-9 text-[13px] text-fg focus:border-brand focus:outline-none focus:ring-0; }
+    .label { @apply mb-1 block text-[11px] font-medium uppercase tracking-[0.08em] text-fg-3; }
+
+    .pill { @apply inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium; }
+
+    .focus-ring { @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: 0ms !important; animation-duration: 0ms !important; }
+}

@@ -13,10 +13,14 @@ use Symfony\Component\HttpFoundation\Response;
  * Resolves the active tenant from the session, validates that the
  * authenticated user is an active member of it, and initialises the
  * TenantContext used by the BelongsToTenant scope.
+ *
+ * `tenant.context:optional` is for user-level dashboard pages (e.g.
+ * notifications): same validation, but no business simply means no context
+ * instead of a redirect — so the sidebar keeps the business sections.
  */
 class SetTenantContext
 {
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, ?string $mode = null): Response
     {
         $context = app(TenantContext::class);
         $user = $request->user();
@@ -36,6 +40,10 @@ class SetTenantContext
         ) {
             Session::forget('tenant_id');
             $context->forget();
+
+            if ($mode === 'optional') {
+                return $next($request);
+            }
 
             return redirect()->route('tenants.index')
                 ->with('warning', 'Please select an active business to continue.');

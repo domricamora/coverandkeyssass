@@ -14,6 +14,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
 
+        // React dashboard screens (Inertia); a no-op for Blade responses.
+        $middleware->web(append: [\App\Http\Middleware\HandleInertiaRequests::class]);
+
         $middleware->alias([
             'tenant.context' => \App\Http\Middleware\SetTenantContext::class,
             'super.admin' => \App\Http\Middleware\EnsureSuperAdmin::class,

@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 /* Notify (Phase 26): staff notification centre, channel preferences, push devices. */
 
 Route::middleware('auth')->group(function (): void {
-    Route::get('/dashboard/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/dashboard/notifications', [NotificationController::class, 'index'])->middleware('tenant.context:optional')->name('notifications.index');
     Route::post('/dashboard/notifications/read', [NotificationController::class, 'markAllRead'])->name('notifications.read');
     Route::get('/notifications/{id}/open', [NotificationController::class, 'open'])->name('notifications.open');
 

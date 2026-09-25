@@ -6,9 +6,11 @@ use App\Models\User;
 use App\Modules\Booking\Events\BookingTransitioned;
 use App\Modules\Booking\Events\BookingTransitioning;
 use App\Modules\Booking\Models\Booking;
+use App\Modules\Booking\Models\BookingRoom;
 use App\Modules\Booking\Models\Promotion;
 use App\Modules\Booking\Notifications\BookingStatusChanged;
 use App\Modules\Marketplace\Models\Property;
+use App\Modules\PropertyManagement\Models\Room;
 use App\Modules\PropertyManagement\Models\RoomType;
 use App\Modules\PropertyManagement\Services\AvailabilityService;
 use App\Support\AuditLogger;
@@ -268,6 +270,59 @@ class BookingService
         }
 
         return $booking;
+    }
+
+    /**
+     * Move one booked room to another room of the same property (front desk
+     * tape chart). Nights already slept stay on the old room; the remaining
+     * nights move. The price is kept: a move or upgrade is the desk's call.
+     * The unique (room_id, night) index is the conflict check.
+     */
+    public function moveRoom(BookingRoom $bookingRoom, Room $room): BookingRoom
+    {
+        $booking = $bookingRoom->booking;
+
+        if (! in_array($booking->status, Booking::OCCUPYING, true)) {
+            $this->fail('room_id', 'A '.strtolower($booking->statusLabel()).' booking no longer holds a room.');
+        }
+
+        if ((int) $room->property_id !== (int) $booking->property_id || $room->status !== Room::STATUS_ACTIVE || $room->housekeeping_status === Room::HK_OUT_OF_ORDER) {
+            $this->fail('room_id', 'Room '.$room->room_number.' cannot be sold right now.');
+        }
+
+        $from = max($booking->check_in->toDateString(), today()->toDateString());
+        $lastNight = $booking->check_out->copy()->subDay()->toDateString();
+
+        if ($from > $lastNight) {
+            $this->fail('room_id', 'No nights left to move.');
+        }
+
+        if ((int) $bookingRoom->room_id === (int) $room->id) {
+            return $bookingRoom;
+        }
+
+        if (in_array($room->id, $this->availability->blockedRoomIds($booking->property, $from, $lastNight), true)) {
+            $this->fail('room_id', 'Room '.$room->room_number.' is blocked on some of these nights.');
+        }
+
+        $old = $bookingRoom->room?->room_number;
+
+        try {
+            DB::transaction(function () use ($bookingRoom, $room, $from): void {
+                DB::table('room_nights')
+                    ->where('booking_room_id', $bookingRoom->id)
+                    ->where('night', '>=', $from)
+                    ->update(['room_id' => $room->id]);
+
+                $bookingRoom->forceFill(['room_id' => $room->id])->save();
+            });
+        } catch (UniqueConstraintViolationException) {
+            $this->fail('room_id', 'Room '.$room->room_number.' is taken on some of these nights.');
+        }
+
+        $this->audit->log('booking.room_moved', $booking, ['room' => $old], ['room' => $room->room_number, 'from' => $from]);
+
+        return $bookingRoom->setRelation('room', $room);
     }
 
     /** Cancel holds whose time ran out so their rooms go back on sale. */
