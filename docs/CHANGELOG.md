@@ -1,5 +1,16 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Phase 20: Accounting (v0.20.0)
+
+(verified: 220 tests / 1243 assertions)
+
+- New `App\Modules\Accounting` (finance module): double-entry general ledger with a default chart of accounts. Unbalanced entries are refused, postings are idempotent by `source_key`, and corrections are reversals.
+- Automatic postings from folios (room / F&B / other revenue, cash / bank / platform-wallet payments, refunds, voids), completed and refunded food and POS orders (output VAT, delivery fee), commissions, payouts, stock (inventory, COGS, waste, supplies, supplier payables from POS) and maintenance costs. Screens sync on view, and `php artisan accounting:sync` runs for all businesses.
+- Expenses with input VAT; customer invoices (draft → issued → partial and full payments, void); supplier payments capped at what is owed.
+- Reports: period P&L, VAT (output − input), balances, trial balance with a balanced check, journal by account, payables by supplier, open invoices with aging, commissions and payouts.
+- Permissions `accounting.view/manage`. Accounting link in the sidebar.
+- 6 new Pest tests.
+
 ## 2026-09-26 — Phase 19: POS (v0.19.0)
 
 (verified: 214 tests / 1188 assertions)

@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\Accounting\Providers\AccountingServiceProvider;
 use App\Modules\Booking\Providers\BookingServiceProvider;
 use App\Modules\Customer\Providers\CustomerServiceProvider;
 use App\Modules\Delivery\Providers\DeliveryServiceProvider;
@@ -34,5 +35,6 @@ return [
     WorkforceServiceProvider::class,
     InventoryServiceProvider::class,
     PosServiceProvider::class,
+    AccountingServiceProvider::class,
 ];
 

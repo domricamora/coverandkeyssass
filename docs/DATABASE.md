@@ -175,6 +175,17 @@ Changes to existing tables: `payments.booking_id` and `commissions.booking_id` a
 
 `orders` gains `channel` (`online` / `pos`, default online), `restaurant_table_id` (nullOnDelete), `discount_reason`, and an index `(restaurant_id, channel, status)`. There is a new payment_method `pos` and a new fulfillment `dine_in`. The module catalogue gains `pos` (depends on `restaurant`).
 
+## Phase 20 tables (Accounting)
+
+| Table | Purpose | Notes |
+|---|---|---|
+| ledger_accounts | chart of accounts | tenant, unique code and system_key per tenant, type `asset/liability/equity/revenue/expense` |
+| journal_entries | postings | tenant, entry_date, memo, reference, unique `(tenant_id, source_key)`, party_type / party_id (supplier / invoice), created_by |
+| journal_lines | debits / credits | tenant, entry (cascade), account (restrict), debit, credit |
+| expenses | bills | tenant, account, vendor, expense_date, amount (gross), tax_amount, paid_from `cash/bank/payable`, reference, notes |
+| invoices / invoice_lines / invoice_payments | receivables | unique `(tenant_id, number)`, customer, issue / due dates, status `draft/issued/paid/void`, tax_rate, subtotal / tax_total / total / amount_paid; lines (qty × unit); payments (paid_on, amount, method, reference) |
+| supplier_payments | payables settled | tenant, supplier (restrict), paid_on, amount, method, reference |
+
 ## Seeding
 
 `php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin` **and** a refresh of every existing tenant's system roles, so newly added catalogue permissions reach already-provisioned businesses).

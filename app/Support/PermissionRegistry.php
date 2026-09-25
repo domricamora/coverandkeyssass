@@ -102,6 +102,10 @@ class PermissionRegistry
                 'pos.refund' => 'Refund register tickets',
                 'pos.manage' => 'Close the register and read Z-reports',
             ],
+            'accounting' => [
+                'accounting.view' => 'View the books, reports, invoices and expenses',
+                'accounting.manage' => 'Book expenses, issue invoices and record payments',
+            ],
             'wallet' => [
                 'wallet.view' => 'View the host wallet, commissions and payouts',
                 'payouts.request' => 'Request payouts from the host wallet',
