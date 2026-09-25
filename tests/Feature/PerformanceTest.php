@@ -28,6 +28,20 @@ it('renders a sidebar-heavy dashboard page within a query budget', function () {
     expect($queries)->toBeLessThan(30);
 });
 
+it('keeps the CRM watermark usable on a serialising cache store', function () {
+    // Regression: a Carbon watermark came back from the database cache as
+    // __PHP_Incomplete_Class and crashed the Guests page on the second visit.
+    config(['cache.default' => 'database']);
+    [, , $property, $type] = BookingFixtures::hotel();
+    BookingFixtures::reserve($property, $type, ['guest_name' => 'Cara Lim', 'guest_email' => 'cara@example.test']);
+
+    $crm = app(CrmService::class);
+    $crm->sync();
+    $crm->sync();
+
+    expect(Contact::query()->where('email', 'cara@example.test')->exists())->toBeTrue();
+});
+
 it('syncs CRM incrementally without missing guests who arrive after the last sync', function () {
     [, , $property, $type] = BookingFixtures::hotel(rooms: 2);
     $crm = app(CrmService::class);

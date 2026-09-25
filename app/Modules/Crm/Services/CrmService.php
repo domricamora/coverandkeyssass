@@ -36,7 +36,11 @@ class CrmService
     public function sync(bool $full = false): void
     {
         $key = 'crm.synced_at.'.(app(\App\Support\TenantContext::class)->id() ?? 0);
-        $since = $full ? null : \Illuminate\Support\Facades\Cache::get($key);
+        // A plain timestamp string: cache stores that serialise (database, redis)
+        // only restore whitelisted classes, so a stored Carbon came back as
+        // __PHP_Incomplete_Class. Anything but a string means "full pass".
+        $cached = $full ? null : \Illuminate\Support\Facades\Cache::get($key);
+        $since = is_string($cached) ? $cached : null;
         $startedAt = now();
         $recent = fn ($query) => $query->when($since, fn ($q) => $q->where('updated_at', '>=', $since));
         $touched = [];
@@ -55,7 +59,7 @@ class CrmService
             ->each(fn (Contact $c) => $this->refreshMetrics($c));
 
         // A little overlap so rows written during this run are seen next time.
-        \Illuminate\Support\Facades\Cache::forever($key, $startedAt->subSeconds(5));
+        \Illuminate\Support\Facades\Cache::forever($key, $startedAt->subSeconds(5)->toDateTimeString());
     }
 
     /** Find the contact for an identity (account → email → phone) or create it; fill in what was missing. */
