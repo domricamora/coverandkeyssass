@@ -1379,3 +1379,137 @@ h2,
 .flex > label.form-label:first-child {
     margin-top: 0;
 }
+
+/* ------------------------------------------------ hero v2 (cinematic) --- */
+/* The video carries the section: light scrim from the bottom only, copy
+   anchored bottom-left, no glow, no badge. */
+.hero--media .hero__bg::before {
+    background: linear-gradient(to top, rgba(11, 12, 14, 0.92) 0%, rgba(11, 12, 14, 0.55) 38%, rgba(11, 12, 14, 0.12) 72%, rgba(11, 12, 14, 0.28) 100%);
+}
+
+.hero--media .hero__bg::after {
+    background: linear-gradient(to right, rgba(11, 12, 14, 0.45) 0%, rgba(11, 12, 14, 0) 55%);
+}
+
+.hero--media .hero__inner {
+    justify-content: flex-end;
+    min-height: min(calc(100dvh - 72px), 860px);
+    padding-top: 120px;
+    padding-bottom: 72px;
+}
+
+.hero__kicker {
+    margin: 0 0 18px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold-soft);
+}
+
+.hero--media .hero__inner h1 {
+    max-width: 13ch;
+    margin-bottom: 20px;
+    font-size: clamp(2.6rem, 6.2vw, 5.2rem);
+    font-weight: 400;
+    line-height: 1;
+    letter-spacing: -0.045em;
+    text-wrap: balance;
+}
+
+.hero--media .hero__inner > p:not(.hero__kicker) {
+    max-width: 44ch;
+    margin-bottom: 32px;
+    font-size: 1.1rem;
+    line-height: 1.55;
+    color: rgba(243, 241, 236, 0.86);
+}
+
+.hero--media .btn {
+    min-height: 48px;
+    padding: 0 26px;
+}
+
+.hero--media .btn-outline {
+    border-color: rgba(243, 241, 236, 0.45);
+    background: rgba(11, 12, 14, 0.25);
+    backdrop-filter: blur(6px);
+}
+
+.hero--media .btn-outline:hover {
+    border-color: var(--bone);
+    color: var(--bone);
+}
+
+/* Copy settles in once; transform + opacity only, skipped for reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+    .hero--media .hero__inner > * {
+        animation: hero-rise 700ms cubic-bezier(0.23, 1, 0.32, 1) both;
+    }
+
+    .hero--media .hero__inner > :nth-child(2) { animation-delay: 60ms; }
+    .hero--media .hero__inner > :nth-child(3) { animation-delay: 120ms; }
+    .hero--media .hero__inner > :nth-child(4) { animation-delay: 180ms; }
+}
+
+@keyframes hero-rise {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+}
+
+@media (max-width: 767px) {
+    .hero--media .hero__inner {
+        min-height: min(calc(100dvh - 64px), 640px);
+        padding-top: 96px;
+        padding-bottom: 48px;
+    }
+
+    .hero--media .hero__bg::after {
+        background: none;
+    }
+}
+
+/* `.container` (mobile: `padding: 0 16px`) is declared after `.section`, so on
+   phones `.container.section` lost its vertical rhythm. State both explicitly. */
+.container.section {
+    padding-top: 72px;
+    padding-bottom: 72px;
+}
+
+@media (max-width: 620px) {
+    .container.section,
+    .section {
+        padding-top: 56px;
+        padding-bottom: 56px;
+    }
+}
+
+.hero--media .hero__inner > .hero__kicker {
+    color: var(--gold-soft);
+}
+
+/* ---------------------------------------------- responsive module grids --- */
+/* Module screens use fixed `grid-cols-N` (and inline `grid-column: span N`).
+   One rule collapses them on small screens instead of editing ~80 templates. */
+@media (max-width: 900px) {
+    :is(.dash__main, .admin__main) .grid:is(.grid-cols-2, .grid-cols-3) {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    :is(.dash__main, .admin__main) .grid:is(.grid-cols-4, .grid-cols-5, .grid-cols-6) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    :is(.dash__main, .admin__main) .grid > * {
+        grid-column: auto !important;
+        min-width: 0;
+    }
+}
+
+@media (max-width: 420px) {
+    :is(.dash__main, .admin__main) .grid:is(.grid-cols-5, .grid-cols-6) {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

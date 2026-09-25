@@ -13,7 +13,7 @@
             })();
         </script>
         <div class="container hero__inner">
-            <span class="pill-badge pill-badge--amber">Hospitality operating system</span>
+            <p class="hero__kicker">Hospitality operating system</p>
             <h1>One system for every cover and every key.</h1>
             <p>
                 The marketplace that fills your rooms, the front desk that runs them and the back
