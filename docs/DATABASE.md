@@ -166,6 +166,15 @@ Changes to existing tables: `payments.booking_id` and `commissions.booking_id` a
 
 `restaurants` gains `stock_location_id` (nullOnDelete): the kitchen that food sales consume from.
 
+## Phase 19 tables (POS)
+
+| Table | Purpose | Notes |
+|---|---|---|
+| pos_sessions | cashier shifts | tenant, restaurant, opened_by / closed_by, opening_float, expected_cash, counted_cash, variance, notes, opened_at / closed_at |
+| pos_payments | register money | tenant, order, session (restrict), method `cash/card/ewallet/room_charge`, signed amount (negative = refund), tendered, change_given, reference, user |
+
+`orders` gains `channel` (`online` / `pos`, default online), `restaurant_table_id` (nullOnDelete), `discount_reason`, and an index `(restaurant_id, channel, status)`. There is a new payment_method `pos` and a new fulfillment `dine_in`. The module catalogue gains `pos` (depends on `restaurant`).
+
 ## Seeding
 
 `php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin` **and** a refresh of every existing tenant's system roles, so newly added catalogue permissions reach already-provisioned businesses).

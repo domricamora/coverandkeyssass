@@ -71,6 +71,17 @@ class ModuleSeeder extends Seeder
                 'metadata' => ['dependencies' => ['core']],
             ],
             [
+                'slug' => 'pos',
+                'name' => 'Point of Sale',
+                'description' => 'Dine-in tickets, kitchen display, cashier, cash sessions and daily closing.',
+                'category' => 'operations',
+                'icon' => 'receipt',
+                'is_core' => false,
+                'trial_days' => 14,
+                'sort_order' => 45,
+                'metadata' => ['dependencies' => ['restaurant']],
+            ],
+            [
                 'slug' => 'inventory',
                 'name' => 'Inventory',
                 'description' => 'Stock tracking, purchase orders, and suppliers.',
@@ -167,6 +178,13 @@ class ModuleSeeder extends Seeder
                     ['Menus & modifiers', 'Categories, items, add-ons and pricing.', true],
                     ['Table reservations', 'Time slots with overbooking protection.', true],
                     ['Online ordering', 'Pickup, delivery and hotel room service.', false],
+                ],
+            ],
+            'pos' => [
+                'price_cents' => 79900,
+                'features' => [
+                    ['Tables & tickets', 'Dine-in orders per table, split payments, receipts.', true],
+                    ['Cash sessions', 'Opening float, cash count, variance and Z-report.', true],
                 ],
             ],
             'inventory' => [

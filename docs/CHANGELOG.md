@@ -1,5 +1,18 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Phase 19: POS (v0.19.0)
+
+(verified: 214 tests / 1188 assertions)
+
+- New optional catalogue module `pos` (depends on `restaurant`) and `App\Modules\Pos`.
+- Register tickets are orders with `channel = pos`: dine-in at a table or counter, straight to the kitchen (consumes stock), add lines, manual discount with a reason. Same pricing and tax engine as online orders.
+- Cashier: split payments (cash with change, card, e-wallet) only inside an open cash session. Charge to an in-house guest's room (posted to the folio as food). Close check, void unpaid ticket, full refund out of the drawer. Printable receipts.
+- Kitchen display for all channels with bump (accepted → preparing → ready).
+- Cash sessions: opening float, expected cash, counted cash, variance, Z-report (takings by method, refunds, net, discounts, tax).
+- Guards: unpaid dine-in tables cannot be completed, and the online host queue cannot close or refund register tickets.
+- Permissions `pos.use/discount/refund/manage`. POS link on the restaurant page.
+- 5 new Pest tests. The module-catalogue test now expects 10 modules.
+
 ## 2026-09-26 — Phase 18: Inventory (v0.18.0)
 
 (verified: 209 tests / 1122 assertions)

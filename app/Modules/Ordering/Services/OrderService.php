@@ -12,7 +12,9 @@ use Illuminate\Database\Eloquent\Collection;
 use App\Modules\Delivery\Models\DeliveryZone;
 use App\Modules\Delivery\Models\Driver;
 use App\Modules\Marketplace\Models\Restaurant;
+use App\Modules\Ordering\Events\OrderLinesAdded;
 use App\Modules\Ordering\Events\OrderTransitioned;
+use App\Modules\RestaurantManagement\Models\RestaurantTable;
 use App\Modules\Ordering\Events\OrderTransitioning;
 use App\Modules\Ordering\Models\Order;
 use App\Modules\Ordering\Notifications\OrderStatusChanged;
@@ -201,6 +203,11 @@ class OrderService
             $this->fail('status', 'This order is waiting for the online payment.');
         }
 
+        // A dine-in check closes only once it is settled.
+        if ($to === Order::COMPLETED && $order->fulfillment === Order::DINE_IN && ! in_array($order->payment_status, [Order::PAID, Order::CHARGED], true)) {
+            $this->fail('status', 'Settle the bill before closing this table.');
+        }
+
         $from = $order->status;
 
         // Listeners may veto (the PayMongo refund throws when it fails).
@@ -241,6 +248,117 @@ class OrderService
         $order->customer?->notify(new OrderStatusChanged($order));
 
         return $order;
+    }
+
+    // ------------------------------------------------------------------
+    // Point of sale (Phase 19)
+    // ------------------------------------------------------------------
+
+    /**
+     * A dine-in (or walk-up) ticket rung up at the register. It skips the
+     * online-ordering switches, goes straight to the kitchen (accepted →
+     * stock is used) and is paid later through PosService.
+     */
+    public function placeAtRegister(Restaurant $restaurant, array $lines, ?RestaurantTable $table, User $staff, ?string $customerName = null, ?string $notes = null): Order
+    {
+        if ($lines === []) {
+            $this->fail('lines', 'Add at least one item.');
+        }
+
+        if ($table && ((int) $table->restaurant_id !== (int) $restaurant->id || $table->status !== RestaurantTable::STATUS_ACTIVE)) {
+            $this->fail('restaurant_table_id', 'Pick an active table of this restaurant.');
+        }
+
+        $order = DB::transaction(function () use ($restaurant, $lines, $table, $customerName, $notes) {
+            $quote = $this->quote($restaurant, $lines);
+
+            $order = Order::create([
+                'restaurant_id' => $restaurant->id,
+                'restaurant_table_id' => $table?->id,
+                'reference' => Order::newReference(),
+                'channel' => Order::CHANNEL_POS,
+                'status' => Order::PENDING,
+                'fulfillment' => $table ? Order::DINE_IN : Order::PICKUP,
+                'payment_method' => Order::PAY_POS,
+                'payment_status' => Order::UNPAID,
+                'customer_name' => $customerName ?: ($table ? 'Table '.$table->label : 'Walk-in'),
+                'notes' => $notes,
+                'currency' => $quote['lines'][0]['item']->currency ?? 'PHP',
+                'subtotal' => $quote['subtotal'],
+                'tax_rate' => $restaurant->tax_rate,
+                'tax_inclusive' => $restaurant->tax_inclusive,
+                'tax_total' => $quote['tax'],
+                'total' => $quote['total'],
+            ]);
+
+            foreach ($quote['lines'] as $line) {
+                $order->items()->create(collect($line)->except('item')->all());
+            }
+
+            return $order;
+        });
+
+        $this->audit->log('order.placed', $order, null, ['reference' => $order->reference, 'channel' => 'pos', 'staff' => $staff->id, 'total' => $order->total]);
+
+        return $this->transition($order, Order::ACCEPTED);
+    }
+
+    /** Add lines to an open, unpaid register ticket; new lines reach the kitchen (and stock) at once. */
+    public function addLines(Order $order, array $lines): Order
+    {
+        $this->mustBeOpenTicket($order);
+
+        DB::transaction(function () use ($order, $lines): void {
+            foreach ($this->quote($order->restaurant, $lines)['lines'] as $line) {
+                $order->items()->create(collect($line)->except('item')->all());
+            }
+
+            $this->recalculate($order);
+        });
+
+        OrderLinesAdded::dispatch($order);
+
+        return $order;
+    }
+
+    /** Manual discount at the register (percent or fixed) with a reason. */
+    public function applyDiscount(Order $order, string $type, float $value, string $reason): Order
+    {
+        $this->mustBeOpenTicket($order);
+
+        $subtotal = (float) $order->items()->sum('line_total');
+        $discount = $type === 'percent' ? round($subtotal * min(100, max(0, $value)) / 100, 2) : min($subtotal, max(0, $value));
+
+        $order->forceFill(['discount_total' => $discount, 'discount_reason' => $reason])->save();
+        $this->recalculate($order);
+
+        $this->audit->log('order.discounted', $order, null, ['type' => $type, 'value' => $value, 'amount' => $discount, 'reason' => $reason]);
+
+        return $order;
+    }
+
+    /** Re-total a ticket from its lines, the order's tax snapshot and its discount. */
+    private function recalculate(Order $order): void
+    {
+        $subtotal = round((float) $order->items()->sum('line_total'), 2);
+        $discount = min((float) $order->discount_total, $subtotal);
+        $taxable = $subtotal - $discount;
+        $rate = (float) $order->tax_rate / 100;
+        $tax = $order->tax_inclusive ? round($taxable - $taxable / (1 + $rate), 2) : round($taxable * $rate, 2);
+
+        $order->forceFill([
+            'subtotal' => $subtotal,
+            'discount_total' => $discount,
+            'tax_total' => $tax,
+            'total' => round($taxable + ($order->tax_inclusive ? 0 : $tax) + (float) $order->delivery_fee, 2),
+        ])->save();
+    }
+
+    private function mustBeOpenTicket(Order $order): void
+    {
+        if ($order->channel !== Order::CHANNEL_POS || $order->payment_status !== Order::UNPAID || ! in_array($order->status, [Order::ACCEPTED, Order::PREPARING, Order::READY], true)) {
+            $this->fail('order', 'Only open, unpaid register tickets can be changed.');
+        }
     }
 
     /** Assign (or clear) the driver of a delivery order that is still in the kitchen or on the road. */

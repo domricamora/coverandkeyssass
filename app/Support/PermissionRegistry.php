@@ -96,6 +96,12 @@ class PermissionRegistry
                 'inventory.manage' => 'Manage items, move stock, receive deliveries and edit recipes',
                 'purchasing.manage' => 'Manage suppliers and purchase orders',
             ],
+            'pos' => [
+                'pos.use' => 'Ring up tickets, take payments and use the kitchen display',
+                'pos.discount' => 'Give manual discounts at the register',
+                'pos.refund' => 'Refund register tickets',
+                'pos.manage' => 'Close the register and read Z-reports',
+            ],
             'wallet' => [
                 'wallet.view' => 'View the host wallet, commissions and payouts',
                 'payouts.request' => 'Request payouts from the host wallet',

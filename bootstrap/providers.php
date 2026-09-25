@@ -11,6 +11,7 @@ use App\Modules\Workforce\Providers\WorkforceServiceProvider;
 use App\Modules\Marketplace\Providers\MarketplaceServiceProvider;
 use App\Modules\Ordering\Providers\OrderingServiceProvider;
 use App\Modules\Payments\Providers\PaymentsServiceProvider;
+use App\Modules\Pos\Providers\PosServiceProvider;
 use App\Modules\PropertyManagement\Providers\PropertyManagementServiceProvider;
 use App\Modules\RestaurantManagement\Providers\RestaurantManagementServiceProvider;
 use App\Modules\Wallet\Providers\WalletServiceProvider;
@@ -32,5 +33,6 @@ return [
     MaintenanceServiceProvider::class,
     WorkforceServiceProvider::class,
     InventoryServiceProvider::class,
+    PosServiceProvider::class,
 ];
 

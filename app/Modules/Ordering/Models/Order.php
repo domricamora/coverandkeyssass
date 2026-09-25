@@ -20,7 +20,8 @@ use Illuminate\Support\Str;
  * pending / accepted → cancelled;  cancelled / completed → refunded (paid online)
  */
 #[Fillable([
-    'tenant_id', 'restaurant_id', 'user_id', 'booking_id', 'room_id', 'promotion_id', 'reference', 'status',
+    'tenant_id', 'restaurant_id', 'user_id', 'booking_id', 'room_id', 'restaurant_table_id', 'promotion_id',
+    'reference', 'channel', 'status', 'discount_reason',
     'fulfillment', 'payment_method', 'payment_status', 'customer_name', 'customer_phone',
     'delivery_address', 'delivery_zone_id', 'driver_id', 'delivery_lat', 'delivery_lng',
     'scheduled_for', 'estimated_at', 'notes', 'currency', 'subtotal', 'discount_total', 'tax_rate',
@@ -55,12 +56,22 @@ class Order extends Model
     /** Hotel room service (Phase 13): delivered to the room of a checked-in stay. */
     public const ROOM_SERVICE = 'room_service';
 
+    /** Point of sale (Phase 19): eaten at a table, paid at the register. */
+    public const DINE_IN = 'dine_in';
+
+    public const CHANNEL_ONLINE = 'online';
+
+    public const CHANNEL_POS = 'pos';
+
     public const PAY_ONLINE = 'online';
 
     public const PAY_CASH = 'cash';
 
     /** Charged to the stay; settled through the guest folio (Phase 14). */
     public const PAY_ROOM = 'room_charge';
+
+    /** Paid at the register, possibly split (see Pos\Models\PosPayment). */
+    public const PAY_POS = 'pos';
 
     public const UNPAID = 'unpaid';
 
@@ -70,6 +81,8 @@ class Order extends Model
 
     /** States the kitchen still has to act on. */
     public const OPEN = [self::PENDING, self::ACCEPTED, self::PREPARING, self::READY, self::OUT_FOR_DELIVERY, self::DELIVERED];
+
+    protected $attributes = ['channel' => self::CHANNEL_ONLINE];
 
     protected function casts(): array
     {
@@ -134,6 +147,11 @@ class Order extends Model
         return $this->belongsTo(\App\Modules\Booking\Models\Booking::class);
     }
 
+    public function table(): BelongsTo
+    {
+        return $this->belongsTo(\App\Modules\RestaurantManagement\Models\RestaurantTable::class, 'restaurant_table_id');
+    }
+
     public function room(): BelongsTo
     {
         return $this->belongsTo(\App\Modules\PropertyManagement\Models\Room::class)->withTrashed();
@@ -147,16 +165,17 @@ class Order extends Model
     /** @return list<string> */
     public function nextStates(): array
     {
-        $paidOnline = $this->payment_method === self::PAY_ONLINE && $this->payment_status === self::PAID;
+        // Refunds: PayMongo for online orders, the register for POS orders.
+        $refundable = $this->payment_status === self::PAID && in_array($this->payment_method, [self::PAY_ONLINE, self::PAY_POS], true);
 
         return match ($this->status) {
             self::PENDING => [self::ACCEPTED, self::CANCELLED],
             self::ACCEPTED => [self::PREPARING, self::CANCELLED],
             self::PREPARING => [self::READY],
-            self::READY => [$this->fulfillment === self::PICKUP ? self::COMPLETED : self::OUT_FOR_DELIVERY],
+            self::READY => [in_array($this->fulfillment, [self::PICKUP, self::DINE_IN], true) ? self::COMPLETED : self::OUT_FOR_DELIVERY],
             self::OUT_FOR_DELIVERY => [self::DELIVERED],
             self::DELIVERED => [self::COMPLETED],
-            self::CANCELLED, self::COMPLETED => $paidOnline ? [self::REFUNDED] : [],
+            self::CANCELLED, self::COMPLETED => $refundable ? [self::REFUNDED] : [],
             default => [],
         };
     }
@@ -181,6 +200,7 @@ class Order extends Model
         return match ($this->payment_method) {
             self::PAY_ONLINE => 'Online · '.$this->payment_status,
             self::PAY_ROOM => 'Charged to room',
+            self::PAY_POS => 'Register · '.$this->payment_status,
             default => 'Cash',
         };
     }

@@ -23,7 +23,7 @@ beforeEach(function () {
 });
 
 it('seeds the canonical module list', function () {
-    expect(Module::query()->count())->toBe(9)
+    expect(Module::query()->count())->toBe(10)
         ->and(Module::query()->where('slug', 'core')->exists())->toBeTrue()
         ->and(Module::query()->where('slug', 'booking')->exists())->toBeTrue();
 });

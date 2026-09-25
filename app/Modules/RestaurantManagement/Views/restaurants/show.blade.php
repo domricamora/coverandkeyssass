@@ -55,6 +55,7 @@
                 <a href="{{ route('restaurants.reservations', $restaurant) }}" class="btn btn-sm btn-ghost">Reservations</a>
                 <a href="{{ route('restaurants.orders.index', $restaurant) }}" class="btn btn-sm btn-ghost">Orders</a>
                 <a href="{{ route('restaurants.delivery.index', $restaurant) }}" class="btn btn-sm btn-ghost">Delivery</a>
+                <a href="{{ route('pos.register', $restaurant) }}" class="btn btn-sm btn-ghost">POS</a>
             </div>
         </div>
 

@@ -65,6 +65,11 @@ class HostOrderController extends RestaurantManagementController
             'reason' => ['nullable', 'string', 'max:255'],
         ]);
 
+        // Register tickets settle and refund through the POS drawer, never from the queue.
+        if ($order->channel === Order::CHANNEL_POS && in_array($validated['status'], [Order::REFUNDED, Order::COMPLETED], true)) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['status' => 'Close or refund register tickets at the POS.']);
+        }
+
         $this->orders->transition($order, $validated['status'], $validated['reason'] ?? null);
 
         return back()->with('success', 'Order '.$order->reference.' is now '.strtolower($order->statusLabel()).'.');

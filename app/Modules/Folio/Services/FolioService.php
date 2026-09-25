@@ -171,8 +171,10 @@ class FolioService
             $void = in_array($order->status, [Order::CANCELLED, Order::REFUNDED], true);
 
             if (! $void && ! $posted->has($key)) {
-                $this->postDerived($booking, $key, FolioEntry::CHARGE, 'room_service',
-                    'Room service · '.$order->restaurant?->name.' · '.$order->reference, (float) $order->total,
+                // Delivered to the room → room service; signed at a restaurant table (POS) → food.
+                [$category, $label] = $order->fulfillment === Order::ROOM_SERVICE ? ['room_service', 'Room service'] : ['food', 'Restaurant'];
+                $this->postDerived($booking, $key, FolioEntry::CHARGE, $category,
+                    $label.' · '.$order->restaurant?->name.' · '.$order->reference, (float) $order->total,
                     $order->created_at->toDateString(), $order->reference);
             } elseif ($void && $posted->has($key)) {
                 $this->voidDerived($posted[$key], 'Order '.$order->reference.' '.$order->status);
