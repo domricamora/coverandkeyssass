@@ -26,6 +26,11 @@ class WalletServiceProvider extends ServiceProvider
 
         Event::listen(fn (PaymentPaid $event) => app(WalletService::class)->recordEarning($event->payment));
         Event::listen(fn (PaymentRefunded $event) => app(WalletService::class)->reverse($event->payment));
+        Event::listen(function (\App\Modules\Ordering\Events\OrderTransitioned $event): void {
+            if ($event->to === \App\Modules\Ordering\Models\Order::COMPLETED) {
+                app(WalletService::class)->release($event->order);
+            }
+        });
         Event::listen(function (BookingTransitioned $event): void {
             if (in_array($event->to, [Booking::CHECKED_OUT, Booking::NO_SHOW], true)) {
                 app(WalletService::class)->release($event->booking);

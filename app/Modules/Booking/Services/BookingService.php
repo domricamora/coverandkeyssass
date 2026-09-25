@@ -2,7 +2,6 @@
 
 namespace App\Modules\Booking\Services;
 
-use App\Models\Tenant;
 use App\Models\User;
 use App\Modules\Booking\Events\BookingTransitioned;
 use App\Modules\Booking\Events\BookingTransitioning;
@@ -291,15 +290,7 @@ class BookingService
      */
     public function asTenantOf(Model $model, Closure $callback): mixed
     {
-        $context = app(TenantContext::class);
-        $previous = $context->snapshot();
-        $context->set(Tenant::query()->findOrFail($model->tenant_id));
-
-        try {
-            return $callback();
-        } finally {
-            $context->restore($previous);
-        }
+        return app(TenantContext::class)->runAs($model, $callback);
     }
 
     private function promotionFor(Property $property, ?string $code, CarbonImmutable $checkIn, int $nights): ?Promotion
@@ -308,7 +299,7 @@ class BookingService
             return null;
         }
 
-        $promotion = Promotion::query()->where('code', strtoupper(trim($code)))->first();
+        $promotion = Promotion::query()->where('applies_to', Promotion::FOR_STAYS)->where('code', strtoupper(trim($code)))->first();
 
         $rejection = $promotion
             ? $promotion->rejectionFor((int) $property->getKey(), $checkIn->toDateString(), $nights)

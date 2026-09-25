@@ -37,7 +37,8 @@
             <dl class="mt-4 text-sm space-y-1" style="color:var(--text-2)">
                 <dt><strong>Address</strong> {{ $restaurant->address_line ?: '—' }}</dt>
                 <dt><strong>Contact</strong> {{ $restaurant->phone ?: '—' }} · {{ $restaurant->email ?: '—' }}</dt>
-                <dt><strong>Reservations</strong> {{ $restaurant->reservations_enabled ? 'On' : 'Off' }} · <strong>Delivery</strong> {{ $restaurant->delivery_enabled ? 'On' : 'Off' }}</dt>
+                <dt><strong>Reservations</strong> {{ $restaurant->reservations_enabled ? 'On' : 'Off' }} · <strong>Online ordering</strong> {{ $restaurant->ordering_enabled ? 'On' : 'Off' }} · <strong>Delivery</strong> {{ $restaurant->delivery_enabled ? 'On' : 'Off' }}</dt>
+                <dt><strong>Tax</strong> {{ (float) $restaurant->tax_rate }}% {{ $restaurant->tax_inclusive ? 'included in prices' : 'added at checkout' }}</dt>
             </dl>
             @if ($restaurant->opening_hours)
                 <h3 class="mt-4 text-sm font-semibold">Opening hours</h3>
@@ -51,6 +52,8 @@
                 <a href="{{ route('restaurants.edit', $restaurant) }}" class="btn btn-sm btn-dark">Edit profile</a>
                 <a href="{{ route('restaurants.menu', $restaurant) }}" class="btn btn-sm btn-ghost">Menu</a>
                 <a href="{{ route('restaurants.tables', $restaurant) }}" class="btn btn-sm btn-ghost">Tables</a>
+                <a href="{{ route('restaurants.reservations', $restaurant) }}" class="btn btn-sm btn-ghost">Reservations</a>
+                <a href="{{ route('restaurants.orders.index', $restaurant) }}" class="btn btn-sm btn-ghost">Orders</a>
             </div>
         </div>
 

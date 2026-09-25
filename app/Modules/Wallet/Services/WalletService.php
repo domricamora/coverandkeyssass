@@ -5,6 +5,7 @@ namespace App\Modules\Wallet\Services;
 use App\Models\User;
 use App\Modules\Booking\Models\Booking;
 use App\Modules\Booking\Services\BookingService;
+use App\Modules\Ordering\Models\Order;
 use App\Modules\Payments\Models\Payment;
 use App\Modules\Wallet\Models\Commission;
 use App\Modules\Wallet\Models\CommissionRate;
@@ -39,14 +40,18 @@ class WalletService
     public function recordEarning(Payment $payment): ?Commission
     {
         return $this->bookings->asTenantOf($payment, function () use ($payment) {
-            $booking = $payment->booking()->with('property')->firstOrFail();
-            $rate = CommissionRate::resolveFor($booking->property, ($payment->paid_at ?? now())->toDateString());
+            // A booking's property or a food order's restaurant (Phase 11).
+            [$listing, $label] = $payment->order_id
+                ? [($order = $payment->order()->firstOrFail())->restaurant, 'Order '.$order->reference]
+                : [($booking = $payment->booking()->with('property')->firstOrFail())->property, 'Booking '.$booking->reference];
+
+            $rate = CommissionRate::resolveFor($listing, ($payment->paid_at ?? now())->toDateString());
             $percent = $rate ? (float) $rate->rate : CommissionRate::defaultRate();
 
             $gross = (float) $payment->amount;
             $fee = round($gross * $percent / 100, 2);
 
-            return DB::transaction(function () use ($payment, $booking, $rate, $percent, $gross, $fee) {
+            return DB::transaction(function () use ($payment, $label, $rate, $percent, $gross, $fee) {
                 $wallet = $this->lockedWallet($payment->currency);
 
                 if (Commission::query()->where('payment_id', $payment->id)->exists()) {
@@ -54,7 +59,8 @@ class WalletService
                 }
 
                 $commission = Commission::create([
-                    'booking_id' => $booking->id,
+                    'booking_id' => $payment->booking_id,
+                    'order_id' => $payment->order_id,
                     'payment_id' => $payment->id,
                     'commission_rate_id' => $rate?->id,
                     'gross' => $gross,
@@ -64,18 +70,21 @@ class WalletService
                     'status' => Commission::PENDING,
                 ]);
 
-                $this->post($wallet, 'earning', 'pending', $gross - $fee, 'Booking '.$booking->reference.' ('.$percent.'% commission)', commissionId: $commission->id);
+                $this->post($wallet, 'earning', 'pending', $gross - $fee, $label.' ('.$percent.'% commission)', commissionId: $commission->id);
 
                 return $commission;
             });
         });
     }
 
-    /** Stay done (checked out / no-show): pending earnings become withdrawable. */
-    public function release(Booking $booking): void
+    /** Stay done (checked out / no-show) or food order completed: pending earnings become withdrawable. */
+    public function release(Booking|Order $source): void
     {
-        DB::transaction(function () use ($booking): void {
-            $commissions = Commission::query()->where('booking_id', $booking->id)->where('status', Commission::PENDING)->get();
+        $column = $source instanceof Order ? 'order_id' : 'booking_id';
+        $label = ($source instanceof Order ? 'order ' : 'booking ').$source->reference;
+
+        DB::transaction(function () use ($source, $column, $label): void {
+            $commissions = Commission::query()->where($column, $source->id)->where('status', Commission::PENDING)->get();
 
             if ($commissions->isEmpty()) {
                 return;
@@ -84,8 +93,8 @@ class WalletService
             $wallet = $this->lockedWallet();
 
             foreach ($commissions as $commission) {
-                $this->post($wallet, 'release', 'pending', -$commission->host_amount, 'Released: booking '.$booking->reference, commissionId: $commission->id);
-                $this->post($wallet, 'release', 'available', (float) $commission->host_amount, 'Released: booking '.$booking->reference, commissionId: $commission->id);
+                $this->post($wallet, 'release', 'pending', -$commission->host_amount, 'Released: '.$label, commissionId: $commission->id);
+                $this->post($wallet, 'release', 'available', (float) $commission->host_amount, 'Released: '.$label, commissionId: $commission->id);
                 $commission->forceFill(['status' => Commission::RELEASED, 'released_at' => now()])->save();
             }
         });
@@ -104,7 +113,7 @@ class WalletService
             $wallet = $this->lockedWallet();
             $bucket = $commission->status === Commission::PENDING ? 'pending' : 'available';
 
-            $this->post($wallet, 'reversal', $bucket, -$commission->host_amount, 'Refund: booking '.$commission->booking?->reference, commissionId: $commission->id);
+            $this->post($wallet, 'reversal', $bucket, -$commission->host_amount, 'Refund: '.strtolower($commission->sourceLabel()), commissionId: $commission->id);
             $commission->forceFill(['status' => Commission::REVERSED, 'reversed_at' => now()])->save();
         });
     }

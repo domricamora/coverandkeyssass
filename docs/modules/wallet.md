@@ -16,6 +16,8 @@ Booking ₱12,500 paid online (PaymentPaid)
 
 Earnings stay pending until the stay is over, so money for a stay that may still be refunded is never withdrawn. After a refund of released earnings, the available balance can go negative; later earnings offset it.
 
+**Food orders (Phase 11):** an online-paid order earns a commission at the restaurant's rate (`commissions.order_id`). It is released when the order is **completed** and reversed on refund. Cash orders earn no commission.
+
 ## Tables / models (`App\Modules\Wallet\Models`)
 
 | Model | Table | Notes |

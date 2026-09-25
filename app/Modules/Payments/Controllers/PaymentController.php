@@ -65,7 +65,7 @@ class PaymentController extends Controller
     {
         return view('payments::customer.index', [
             'payments' => Payment::forCustomer($request->user())
-                ->with(['booking' => fn ($q) => $q->withoutGlobalScope('tenant')])
+                ->with(['booking' => fn ($q) => $q->withoutGlobalScope('tenant'), 'order' => fn ($q) => $q->withoutGlobalScope('tenant')])
                 ->latest()
                 ->paginate(15),
         ]);

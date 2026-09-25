@@ -101,6 +101,15 @@ Opening hours reuse `restaurants.opening_hours` (JSON `{day: "11:00–22:00"}`).
 
 `restaurants.reservation_duration_minutes` (default 90) sets the sitting length.
 
+## Phase 11 tables (Online Food Ordering)
+
+| Table | Purpose | Notes |
+|---|---|---|
+| orders | a food order | tenant, restaurant, nullable user / promotion; unique `reference`; status (9 states); fulfillment `pickup/delivery`; payment_method `online/cash`; payment_status `unpaid/paid/refunded`; customer name / phone, delivery_address, notes; currency, subtotal, discount_total, tax_rate, tax_inclusive, tax_total, delivery_fee, total; accepted/ready/completed/cancelled timestamps |
+| order_items | order lines (snapshots) | order FK (cascade), nullable menu_item FK (nullOnDelete), name, `modifiers` JSON `[{group,name,price}]`, unit_price (base + modifiers), quantity, line_total, notes |
+
+Changes to existing tables: `payments.booking_id` and `commissions.booking_id` are now nullable, and each gains a nullable `order_id` FK (exactly one of the two is set). `promotions` gains `applies_to` (`stays` default / `orders`), a nullable `restaurant_id` and `min_subtotal`. `restaurants` gains `ordering_enabled`, `tax_rate` (default 12) and `tax_inclusive` (default true).
+
 ## Seeding
 
 `php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin` **and** a refresh of every existing tenant's system roles, so newly added catalogue permissions reach already-provisioned businesses).

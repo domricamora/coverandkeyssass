@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * the checkout session — never from a browser redirect.
  */
 #[Fillable([
-    'tenant_id', 'booking_id', 'user_id', 'provider', 'checkout_session_id',
+    'tenant_id', 'booking_id', 'order_id', 'user_id', 'provider', 'checkout_session_id',
     'payment_intent_id', 'checkout_url', 'amount', 'currency', 'status',
 ])]
 class Payment extends Model
@@ -56,6 +56,12 @@ class Payment extends Model
     public function booking(): BelongsTo
     {
         return $this->belongsTo(Booking::class);
+    }
+
+    /** Set instead of booking_id for food orders (Phase 11). */
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(\App\Modules\Ordering\Models\Order::class);
     }
 
     /** Amount in centavos, the unit PayMongo uses. */

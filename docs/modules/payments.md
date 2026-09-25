@@ -16,6 +16,8 @@ Marketplace booking (pending, rooms held)
 
 Never confirmed from a browser redirect or from the webhook body: both only *trigger* a server-side lookup at PayMongo.
 
+**Food orders (Phase 11)** use the same pipeline. `payments.order_id` is set instead of `booking_id` (now nullable). `checkoutOrder()` → `/account/orders/{ref}/payment-return` → `markPaid()` sets `orders.payment_status = paid` (it does not transition the order; the kitchen accepts it). Moving an order to `refunded` refunds through PayMongo (`refundOrder()`), and a provider refusal vetoes it. See `ordering.md`.
+
 ## Models / tables
 
 | Model | Table | Notes |

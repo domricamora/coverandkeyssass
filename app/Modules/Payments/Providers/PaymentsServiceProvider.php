@@ -37,6 +37,12 @@ class PaymentsServiceProvider extends ServiceProvider
             }
         });
 
+        Event::listen(function (\App\Modules\Ordering\Events\OrderTransitioning $event): void {
+            if ($event->to === \App\Modules\Ordering\Models\Order::REFUNDED) {
+                app(PaymentService::class)->refundOrder($event->order);
+            }
+        });
+
         View::composer(['booking::bookings.show', 'customer::bookings.show'], function ($view): void {
             $booking = $view->getData()['booking'] ?? null;
 

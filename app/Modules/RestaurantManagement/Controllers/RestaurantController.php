@@ -222,6 +222,9 @@ class RestaurantController extends RestaurantManagementController
             'reservations_enabled' => ['nullable', 'boolean'],
             'reservation_duration_minutes' => ['nullable', 'integer', 'min:15', 'max:480'],
             'delivery_enabled' => ['nullable', 'boolean'],
+            'ordering_enabled' => ['nullable', 'boolean'],
+            'tax_inclusive' => ['nullable', 'boolean'],
+            'tax_rate' => ['nullable', 'numeric', 'min:0', 'max:50'],
             'cuisines' => ['nullable', 'array'],
             'cuisines.*' => ['integer', 'exists:cuisines,id'],
             'hours' => ['nullable', 'array'],
@@ -240,11 +243,14 @@ class RestaurantController extends RestaurantManagementController
             }
         }
 
-        return collect($validated)->except(['cuisines', 'hours', 'reservation_duration_minutes'])->all() + [
+        return collect($validated)->except(['cuisines', 'hours', 'reservation_duration_minutes', 'tax_rate'])->all() + [
             'opening_hours' => $hours ?: null,
             'reservation_duration_minutes' => (int) ($validated['reservation_duration_minutes'] ?? 0) ?: 90,
             'reservations_enabled' => $request->boolean('reservations_enabled'),
             'delivery_enabled' => $request->boolean('delivery_enabled'),
+            'ordering_enabled' => $request->boolean('ordering_enabled'),
+            'tax_inclusive' => $request->boolean('tax_inclusive'),
+            'tax_rate' => (float) ($validated['tax_rate'] ?? 0),
         ];
     }
 }

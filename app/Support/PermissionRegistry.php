@@ -85,6 +85,8 @@ class PermissionRegistry
                 'tables.manage' => 'Edit dining areas and tables',
                 'reservations.view' => 'View table reservations',
                 'reservations.manage' => 'Create, confirm, seat, cancel and no-show table reservations',
+                'orders.view' => 'View food orders',
+                'orders.manage' => 'Accept, prepare, complete, cancel and refund food orders',
             ],
         ];
     }

@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * `reversed` when the payment is refunded.
  */
 #[Fillable([
-    'tenant_id', 'booking_id', 'payment_id', 'commission_rate_id', 'gross', 'rate',
+    'tenant_id', 'booking_id', 'order_id', 'payment_id', 'commission_rate_id', 'gross', 'rate',
     'platform_fee', 'host_amount', 'status',
 ])]
 class Commission extends Model
@@ -42,5 +42,16 @@ class Commission extends Model
     public function booking(): BelongsTo
     {
         return $this->belongsTo(Booking::class);
+    }
+
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(\App\Modules\Ordering\Models\Order::class);
+    }
+
+    /** "Booking BK…" / "Order OR…" for ledger and admin screens. */
+    public function sourceLabel(): string
+    {
+        return $this->order_id ? 'Order '.$this->order?->reference : 'Booking '.$this->booking?->reference;
     }
 }

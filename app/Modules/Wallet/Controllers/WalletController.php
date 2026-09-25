@@ -23,7 +23,7 @@ class WalletController extends Controller
         return view('wallet::host.index', [
             'wallet' => $wallet,
             'transactions' => $wallet->transactions()->paginate(20),
-            'commissions' => Commission::query()->with('booking:id,reference')->latest('id')->limit(10)->get(),
+            'commissions' => Commission::query()->with(['booking:id,reference', 'order:id,reference'])->latest('id')->limit(10)->get(),
             'payouts' => Payout::query()->latest('id')->limit(10)->get(),
             'minPayout' => WalletService::MIN_PAYOUT,
         ]);

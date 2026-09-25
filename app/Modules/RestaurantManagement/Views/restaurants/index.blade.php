@@ -27,7 +27,8 @@
                         <td class="text-right">
                             <a href="{{ route('restaurants.show', $restaurant) }}" class="btn btn-sm btn-dark">Open</a>
                             <a href="{{ route('restaurants.menu', $restaurant) }}" class="btn btn-sm btn-ghost">Menu</a>
-                            <a href="{{ route('restaurants.tables', $restaurant) }}" class="btn btn-sm btn-ghost">Tables</a>
+                            <a href="{{ route('restaurants.orders.index', $restaurant) }}" class="btn btn-sm btn-ghost">Orders</a>
+                            <a href="{{ route('restaurants.reservations', $restaurant) }}" class="btn btn-sm btn-ghost">Reservations</a>
                         </td>
                     </tr>
                 @empty

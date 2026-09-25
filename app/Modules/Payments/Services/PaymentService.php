@@ -5,6 +5,8 @@ namespace App\Modules\Payments\Services;
 use App\Models\User;
 use App\Modules\Booking\Models\Booking;
 use App\Modules\Booking\Services\BookingService;
+use App\Modules\Ordering\Models\Order;
+use App\Modules\Ordering\Services\OrderService;
 use App\Modules\Payments\Events\PaymentPaid;
 use App\Modules\Payments\Events\PaymentRefunded;
 use App\Modules\Payments\Models\Payment;
@@ -31,6 +33,7 @@ class PaymentService
     public function __construct(
         private readonly PayMongoGateway $gateway,
         private readonly BookingService $bookings,
+        private readonly OrderService $orders,
         private readonly AuditLogger $audit,
     ) {}
 
@@ -46,56 +49,89 @@ class PaymentService
             $this->fail('This booking does not need a payment.');
         }
 
-        if (Payment::query()->where('booking_id', $booking->id)->where('status', Payment::PAID)->exists()) {
-            $this->fail('This booking is already paid.');
+        $booking->loadMissing('property');
+
+        return $this->openCheckout(['booking_id' => $booking->id], $user, (float) $booking->total, $booking->currency, $booking->reference, [
+            'name' => 'Stay at '.$booking->property->name,
+            'description' => $booking->check_in->format('M j').' – '.$booking->check_out->format('M j, Y').' · '.$booking->nights().' night(s)',
+            'label' => 'Booking',
+            'success_url' => route('account.payments.return', $booking->reference),
+            'cancel_url' => route('account.bookings.show', $booking->reference),
+        ]);
+    }
+
+    /** Start (or resume) a PayMongo checkout for a food order (Phase 11). Runs inside the order's tenant. */
+    public function checkoutOrder(Order $order, User $user): Payment
+    {
+        if (! $order->needsPayment()) {
+            $this->fail('This order does not need an online payment.');
+        }
+
+        return $this->openCheckout(['order_id' => $order->id], $user, (float) $order->total, $order->currency, $order->reference, [
+            'name' => 'Order from '.$order->restaurant->name,
+            'description' => $order->items()->sum('quantity').' item(s) · '.ucfirst($order->fulfillment),
+            'label' => 'Order',
+            'success_url' => route('account.orders.payment-return', $order->reference),
+            'cancel_url' => route('account.orders.show', $order->reference),
+        ]);
+    }
+
+    /**
+     * @param  array{booking_id: int}|array{order_id: int}  $payable
+     * @param  array{name: string, description: string, label: string, success_url: string, cancel_url: string}  $display
+     */
+    private function openCheckout(array $payable, User $user, float $total, string $currency, string $reference, array $display): Payment
+    {
+        [$column, $id] = [array_key_first($payable), reset($payable)];
+
+        if (Payment::query()->where($column, $id)->where('status', Payment::PAID)->exists()) {
+            $this->fail('This '.strtolower($display['label']).' is already paid.');
         }
 
         // Reuse an open checkout so a double click never opens two sessions.
-        $open = Payment::query()->where('booking_id', $booking->id)->where('status', Payment::PENDING)->whereNotNull('checkout_url')->latest('id')->first();
+        $open = Payment::query()->where($column, $id)->where('status', Payment::PENDING)->whereNotNull('checkout_url')->latest('id')->first();
 
         if ($open) {
             return $open;
         }
 
-        $amount = (int) round((float) $booking->total * 100);
-        $booking->loadMissing('property');
+        $amount = (int) round($total * 100);
 
         try {
             $session = $this->gateway->createCheckoutSession([
                 'line_items' => [[
-                    'name' => Str::limit('Stay at '.$booking->property->name, 250),
-                    'description' => $booking->check_in->format('M j').' – '.$booking->check_out->format('M j, Y').' · '.$booking->nights().' night(s)',
+                    'name' => Str::limit($display['name'], 250),
+                    'description' => $display['description'],
                     'amount' => $amount,
-                    'currency' => $booking->currency,
+                    'currency' => $currency,
                     'quantity' => 1,
                 ]],
                 'payment_method_types' => config('services.paymongo.methods'),
-                'description' => 'Booking '.$booking->reference,
-                'reference_number' => $booking->reference,
-                'success_url' => route('account.payments.return', $booking->reference),
-                'cancel_url' => route('account.bookings.show', $booking->reference),
+                'description' => $display['label'].' '.$reference,
+                'reference_number' => $reference,
+                'success_url' => $display['success_url'],
+                'cancel_url' => $display['cancel_url'],
                 'send_email_receipt' => false,
                 'show_description' => true,
                 'show_line_items' => true,
-                'metadata' => ['booking_reference' => $booking->reference],
+                'metadata' => [strtolower($display['label']).'_reference' => $reference],
             ]);
         } catch (RequestException $e) {
             report($e);
             $this->fail('The payment provider is unavailable right now. Please try again in a moment.');
         }
 
-        $payment = Payment::create([
-            'booking_id' => $booking->id,
+        $payment = Payment::create($payable + [
             'user_id' => $user->id,
             'checkout_session_id' => $session['id'],
             'payment_intent_id' => data_get($session, 'attributes.payment_intent.id'),
             'checkout_url' => data_get($session, 'attributes.checkout_url'),
             'amount' => $amount / 100,
-            'currency' => $booking->currency,
+            'currency' => $currency,
             'status' => Payment::PENDING,
         ]);
 
-        $this->audit->log('payment.checkout_started', $payment, null, ['booking' => $booking->reference, 'amount' => $payment->amount]);
+        $this->audit->log('payment.checkout_started', $payment, null, [strtolower($display['label']) => $reference, 'amount' => $payment->amount]);
 
         return $payment;
     }
@@ -152,14 +188,23 @@ class PaymentService
      */
     public function refundBooking(Booking $booking): void
     {
-        $payment = Payment::query()->where('booking_id', $booking->id)->where('status', Payment::PAID)->first();
+        $this->refundPaid(Payment::query()->where('booking_id', $booking->id)->where('status', Payment::PAID)->first(), 'Booking '.$booking->reference);
+    }
 
+    /** Same as refundBooking(), for a food order moving to `refunded`. */
+    public function refundOrder(Order $order): void
+    {
+        $this->refundPaid(Payment::query()->where('order_id', $order->id)->where('status', Payment::PAID)->first(), 'Order '.$order->reference);
+    }
+
+    private function refundPaid(?Payment $payment, string $label): void
+    {
         if (! $payment) {
             return;
         }
 
         try {
-            $refund = $this->gateway->createRefund($payment->provider_payment_id, $payment->amountInCentavos(), 'requested_by_customer', 'Booking '.$booking->reference);
+            $refund = $this->gateway->createRefund($payment->provider_payment_id, $payment->amountInCentavos(), 'requested_by_customer', $label);
         } catch (RequestException $e) {
             report($e);
             $this->fail('PayMongo did not accept the refund: '.(data_get($e->response->json(), 'errors.0.detail') ?? 'provider error').'.');
@@ -201,6 +246,12 @@ class PaymentService
                 $this->audit->log('payment.paid', $locked, null, ['amount' => $locked->amount, 'method' => $method]);
 
                 PaymentPaid::dispatch($locked);
+
+                if ($locked->order_id) {
+                    $this->orders->markPaid($locked->order);
+
+                    return true;
+                }
 
                 $booking = $locked->booking;
 

@@ -20,7 +20,7 @@ class PromotionController extends Controller
         abort_unless($request->user()->hasPermissionTo('promotions.manage'), 403);
 
         return view('booking::promotions.index', [
-            'promotions' => Promotion::query()->latest()->get(),
+            'promotions' => Promotion::query()->where('applies_to', Promotion::FOR_STAYS)->latest()->get(),
             'properties' => Property::query()->orderBy('name')->get(['id', 'name']),
         ]);
     }

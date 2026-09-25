@@ -9,13 +9,15 @@
 
         <div class="table-wrap card">
             <table class="table">
-                <thead><tr><th>Date</th><th>Booking</th><th>Method</th><th>Status</th><th class="text-right">Amount</th></tr></thead>
+                <thead><tr><th>Date</th><th>For</th><th>Method</th><th>Status</th><th class="text-right">Amount</th></tr></thead>
                 <tbody>
                     @forelse ($payments as $payment)
                         <tr>
                             <td>{{ ($payment->paid_at ?? $payment->created_at)->format('M j, Y') }}</td>
                             <td>
-                                @if ($payment->booking)
+                                @if ($payment->order)
+                                    <a href="{{ route('account.orders.show', $payment->order->reference) }}">{{ $payment->order->reference }}</a>
+                                @elseif ($payment->booking)
                                     <a href="{{ route('account.bookings.show', $payment->booking->reference) }}">{{ $payment->booking->reference }}</a>
                                 @endif
                             </td>

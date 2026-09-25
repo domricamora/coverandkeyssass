@@ -2,7 +2,6 @@
 
 namespace App\Modules\RestaurantManagement\Services;
 
-use App\Models\Tenant;
 use App\Models\User;
 use App\Modules\Marketplace\Models\Restaurant;
 use App\Modules\RestaurantManagement\Models\TableReservation;
@@ -186,15 +185,7 @@ class ReservationService
     /** Run a callback inside the tenant that owns $model (marketplace / customer portal). */
     public function asTenantOf(Model $model, Closure $callback): mixed
     {
-        $context = app(TenantContext::class);
-        $previous = $context->snapshot();
-        $context->set(Tenant::query()->findOrFail($model->tenant_id));
-
-        try {
-            return $callback();
-        } finally {
-            $context->restore($previous);
-        }
+        return app(TenantContext::class)->runAs($model, $callback);
     }
 
     private function duration(Restaurant $restaurant): int

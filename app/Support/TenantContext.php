@@ -56,4 +56,21 @@ class TenantContext
     {
         $this->tenant = $tenant;
     }
+
+    /**
+     * Run a callback inside the tenant that owns a tenant-owned row — for
+     * the marketplace, customer portal and webhooks, which have no tenant
+     * session. The previous context is always restored.
+     */
+    public function runAs(\Illuminate\Database\Eloquent\Model $owned, \Closure $callback): mixed
+    {
+        $previous = $this->snapshot();
+        $this->set(Tenant::query()->findOrFail($owned->tenant_id));
+
+        try {
+            return $callback();
+        } finally {
+            $this->restore($previous);
+        }
+    }
 }

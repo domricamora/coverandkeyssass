@@ -2,7 +2,7 @@
     <div class="dash-row-head">
         <div>
             <h1>Wallet</h1>
-            <p class="mt-1 text-sm" style="color:var(--text-3)">Online booking earnings after platform commission. Earnings unlock when the guest checks out.</p>
+            <p class="mt-1 text-sm" style="color:var(--text-3)">Online booking and food-order earnings after platform commission. Earnings unlock when the guest checks out or the order is completed.</p>
         </div>
     </div>
 
@@ -60,7 +60,7 @@
                 <tbody>
                     @forelse ($commissions as $commission)
                         <tr>
-                            <td>{{ $commission->booking?->reference }}</td>
+                            <td>{{ $commission->sourceLabel() }}</td>
                             <td>{{ number_format((float) $commission->gross, 2) }}</td>
                             <td>{{ number_format((float) $commission->platform_fee, 2) }} ({{ (float) $commission->rate }}%)</td>
                             <td>{{ number_format((float) $commission->host_amount, 2) }}</td>

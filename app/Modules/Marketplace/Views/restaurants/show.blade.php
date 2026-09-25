@@ -4,6 +4,7 @@
     $cuisines = $r->relationLoaded('cuisines') ? $r->cuisines : collect();
     $reviews = $r->relationLoaded('reviews') ? $r->reviews : collect();
     $hours = (array) ($r->opening_hours ?? []);
+    $ordering = app(\App\Modules\Ordering\Services\OrderService::class)->acceptsOrders($r);
 @endphp
 
 <x-public-layout :title="$title" :description="Str::limit(strip_tags($r->tagline ?: $r->description ?: $r->name), 150)">
@@ -62,7 +63,11 @@
                 @php($menu = $r->relationLoaded('menuCategories') ? $r->menuCategories->filter(fn ($c) => $c->items->isNotEmpty()) : collect())
                 @if ($menu->isNotEmpty())
                     <div class="listing-block">
-                        <h2>Menu</h2>
+                        <h2>Menu @if ($ordering)<a class="btn btn-sm btn-ghost" style="float:right;" href="{{ route('cart.show') }}">View cart</a>@endif</h2>
+                        @if (session('success'))<p class="muted" role="status">{{ session('success') }}</p>@endif
+                        @foreach (['modifiers', 'cart'] as $field)
+                            @error($field)<p role="alert" style="color:var(--danger, #b91c1c);">{{ $message }}</p>@enderror
+                        @endforeach
                         @foreach ($menu as $category)
                             <h3 style="margin:1rem 0 .5rem;">{{ $category->name }}</h3>
                             <ul class="menu-list" style="list-style:none;padding:0;margin:0;">
@@ -73,12 +78,38 @@
                                             <span>{{ $item->is_available ? $item->priceLabel() : 'Sold out' }}</span>
                                         </div>
                                         @if ($item->description)<p class="muted" style="margin:.25rem 0 0;">{{ $item->description }}</p>@endif
-                                        @foreach ($item->modifierGroups->filter(fn ($g) => $g->options->isNotEmpty()) as $group)
-                                            <p class="muted" style="margin:.25rem 0 0;font-size:.9rem;">
-                                                {{ $group->name }}:
-                                                {{ $group->options->map(fn ($o) => $o->name.((float) $o->price > 0 ? ' +'.\App\Modules\RestaurantManagement\Models\MenuItem::money((float) $o->price, $item->currency) : ''))->implode(', ') }}
-                                            </p>
-                                        @endforeach
+                                        @if ($ordering && $item->is_available)
+                                            <details style="margin-top:.35rem;">
+                                                <summary class="muted" style="cursor:pointer;">Add to order</summary>
+                                                <form method="POST" action="{{ route('cart.add', $r->slug) }}" style="display:grid;gap:6px;margin-top:6px;">
+                                                    @csrf
+                                                    <input type="hidden" name="item_id" value="{{ $item->id }}" />
+                                                    @foreach ($item->modifierGroups->filter(fn ($g) => $g->options->isNotEmpty()) as $group)
+                                                        <fieldset style="border:0;padding:0;margin:0;">
+                                                            <legend style="font-size:.9rem;"><strong>{{ $group->name }}</strong> <span class="muted">{{ $group->ruleLabel() }}</span></legend>
+                                                            @foreach ($group->options as $option)
+                                                                <label style="display:block;font-size:.9rem;">
+                                                                    <input type="{{ $group->max_select === 1 ? 'radio' : 'checkbox' }}" name="options[]" value="{{ $option->id }}" />
+                                                                    {{ $option->name }}@if ((float) $option->price > 0) +{{ \App\Modules\RestaurantManagement\Models\MenuItem::money((float) $option->price, $item->currency) }}@endif
+                                                                </label>
+                                                            @endforeach
+                                                        </fieldset>
+                                                    @endforeach
+                                                    <div style="display:flex;gap:6px;">
+                                                        <input type="number" name="quantity" min="1" max="50" value="1" class="form-input" style="width:70px" aria-label="Quantity" />
+                                                        <input type="text" name="notes" maxlength="255" class="form-input" placeholder="Notes (optional)" aria-label="Notes" />
+                                                        <button class="btn btn-sm btn-primary" type="submit">Add</button>
+                                                    </div>
+                                                </form>
+                                            </details>
+                                        @else
+                                            @foreach ($item->modifierGroups->filter(fn ($g) => $g->options->isNotEmpty()) as $group)
+                                                <p class="muted" style="margin:.25rem 0 0;font-size:.9rem;">
+                                                    {{ $group->name }}:
+                                                    {{ $group->options->map(fn ($o) => $o->name.((float) $o->price > 0 ? ' +'.\App\Modules\RestaurantManagement\Models\MenuItem::money((float) $o->price, $item->currency) : ''))->implode(', ') }}
+                                                </p>
+                                            @endforeach
+                                        @endif
                                     </li>
                                 @endforeach
                             </ul>

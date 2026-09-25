@@ -1,5 +1,18 @@
 # CHANGELOG.md
 
+## 2026-09-25 — Phase 11: Online Food Ordering (v0.11.0)
+
+(verified: 171 tests / 776 assertions)
+
+- New `App\Modules\Ordering`: `orders` and `order_items` (snapshot names, modifiers, prices and tax settings); `OrderService` (quote, place, 9-state machine, audit, customer notifications); session `CartService` (one restaurant per cart).
+- Server-side pricing only: every line is priced through `MenuItem::priceWith()`. Order promo codes use `promotions` (new `applies_to` column; stay and order codes are kept apart). Per-restaurant tax rate, inclusive (PH VAT default) or exclusive.
+- Public "Add to order" on the menu (modifier radios or checkboxes, qty, notes), `/cart`, and checkout for pickup or delivery, paid in cash or online (PayMongo).
+- Payments and Wallet generalised: `payments.order_id` / `commissions.order_id` sit beside `booking_id`. Online orders earn commission at the restaurant rate, released on completed and reversed on refund. A refund refused by PayMongo vetoes the transition.
+- Host order queue per restaurant (by stage, with actions), order detail, and order promo codes. Customer "Orders" tab with pay, cancel-while-pending and payment return.
+- `TenantContext::runAs()` replaces the duplicated tenant switch in BookingService and ReservationService.
+- Permissions `orders.view/manage` (owner, manager, front desk). Restaurant settings `ordering_enabled`, `tax_rate`, `tax_inclusive`.
+- 9 new Pest tests.
+
 ## 2026-09-25 — Phase 10: Restaurant Reservations (v0.10.0)
 
 (verified: 162 tests / 680 assertions, plus a live 8-process race for one table → exactly 1 reservation)

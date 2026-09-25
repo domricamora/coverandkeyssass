@@ -2,8 +2,8 @@
 
 ## Current Phase
 
-Phase 10 - Restaurant Reservations — **COMPLETE (verified)**
-Next: Phase 11 - Online Food Ordering
+Phase 11 - Online Food Ordering — **COMPLETE (verified)**
+Next: Phase 12 - Delivery
 
 ## Completed
 
@@ -19,16 +19,17 @@ Next: Phase 11 - Online Food Ordering
 - **Phase 08 — Host Wallet & Commissions**: `App\Modules\Wallet` — commission rates (global / listing / promotional, Super Admin screen + revenue totals), one commission per paid payment, host wallet with pending → available on check-out/no-show and reversal on refund, append-only ledger (sum = balances), payouts (host request, admin paid/reject), all row-locked; earning + paid status + booking confirmation commit atomically (webhook retry completes a failed attempt)
 - **Phase 09 — Restaurant Management**: `App\Modules\RestaurantManagement` — host restaurant profile (hours, cuisines, contact, photos, audited publish), menu builder (categories → items → modifier groups with min/max → options), `MenuItem::priceWith()` server-side pricing with rule enforcement, dining areas + tables, public menu on `/restaurant/{slug}`, permissions `menu.*`, `tables.*`
 - **Phase 10 — Restaurant Reservations**: `table_reservations` + `ReservationService` — slots from opening hours + sitting length, smallest-fit table allocation under `FOR UPDATE` lock on the restaurant tables (live 8-process race → exactly 1), pending/confirmed/seated/completed/cancelled/no_show with date guards, host day calendar + phone bookings, marketplace "Book a table" with slot picker, customer Tables tab + self-cancel, notifications, permissions `reservations.*`
-- Tests: Pest suite — **162 passed, 680 assertions** (Phase 10: 6, Phase 09: 10, Phase 05: 19, Phase 06: 7, Phase 07: 12, Phase 08: 10); previously **98 passed, 320 assertions** (`php artisan test`, real MySQL), including 24 Phase 04 coverage tests
+- **Phase 11 — Online Food Ordering**: `App\Modules\Ordering` — session cart, server-side pricing via `MenuItem::priceWith()`, order promo codes (`promotions.applies_to`), inclusive/exclusive tax, pickup/delivery, cash or PayMongo; 9-state order machine; snapshot `orders`/`order_items`; Payments + Wallet generalised (`order_id` beside `booking_id`) — commission on online orders, release on completed, reversal on refund, refused refund vetoes; host order queue + promo codes; customer Orders tab; `TenantContext::runAs()` shared tenant switch
+- Tests: Pest suite — **171 passed, 776 assertions** (Phase 11: 9, Phase 10: 6, Phase 09: 10, Phase 05: 19, Phase 06: 7, Phase 07: 12, Phase 08: 10); previously **98 passed, 320 assertions** (`php artisan test`, real MySQL), including 24 Phase 04 coverage tests
 - Documentation: docs/* updated per phase; `docs/modules/{marketplace,property-management}.md` completed; CHANGELOG carries Phase 01–08 entries
 
 ## In Progress
 
-- (nothing — Phase 11 not started)
+- (nothing — Phase 12 not started)
 
 ## Pending
 
-- Phases 11–38: ordering, delivery, room service, folio, housekeeping, maintenance, staff management, inventory, POS, accounting, CRM, marketing, loyalty, reviews, messaging, notifications, SaaS billing, super admin, marketplace administration, SEO, API, security audit, performance, testing, deployment, backups, monitoring, final audit
+- Phases 12–38: delivery, room service, folio, housekeeping, maintenance, staff management, inventory, POS, accounting, CRM, marketing, loyalty, reviews, messaging, notifications, SaaS billing, super admin, marketplace administration, SEO, API, security audit, performance, testing, deployment, backups, monitoring, final audit
 
 ## Known Issues
 
@@ -49,4 +50,4 @@ Claude Code (Opus)
 
 php artisan test
 
-Result: PASS (162 tests, 680 assertions, MySQL `hospitality_os_testing`)
+Result: PASS (171 tests, 776 assertions, MySQL `hospitality_os_testing`)
