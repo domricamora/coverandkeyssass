@@ -42,6 +42,13 @@
             Housekeeping
         </a>
     @endif
+    @php($workforceModule = \App\Models\Module::query()->where('slug', 'workforce')->first())
+    @if ($workforceModule && app(\App\Support\ModuleService::class)->isEnabled($workforceModule, $current->tenant()))
+        <a class="{{ str_starts_with((string) $route, 'staff.') || str_starts_with((string) $route, 'my-work.') ? 'is-active' : '' }}" href="{{ route(auth()->user()?->hasPermissionTo('staff.view') ? 'staff.index' : 'my-work.index') }}">
+            <svg class="side-nav__icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a4 4 0 00-5-3.9M9 20H2v-2a4 4 0 015-3.9m5-4.1a4 4 0 100-8 4 4 0 000 8z"/></svg>
+            {{ auth()->user()?->hasPermissionTo('staff.view') ? 'Staff' : 'My work' }}
+        </a>
+    @endif
     @if (auth()->user()?->hasPermissionTo('maintenance.view'))
         <a class="{{ str_starts_with((string) $route, 'maintenance.') ? 'is-active' : '' }}" href="{{ route('maintenance.index') }}">
             <svg class="side-nav__icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M14.7 6.3a4 4 0 00-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 005.4-5.4l-2.5 2.5-2.5-.5-.5-2.5 2.5-2.5z"/></svg>

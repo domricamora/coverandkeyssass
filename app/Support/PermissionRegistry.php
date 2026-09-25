@@ -84,6 +84,13 @@ class PermissionRegistry
                 'maintenance.work' => 'Open tickets, add notes and files, progress assigned tickets',
                 'maintenance.manage' => 'Assign, cost and close maintenance tickets',
             ],
+            'staff' => [
+                'staff.view' => 'View employees, the schedule, attendance and leave',
+                'staff.manage' => 'Add and edit employees, departments and positions',
+                'schedules.manage' => 'Schedule and cancel shifts',
+                'attendance.manage' => 'Clock staff in and out',
+                'leave.approve' => 'Approve or reject leave',
+            ],
             'wallet' => [
                 'wallet.view' => 'View the host wallet, commissions and payouts',
                 'payouts.request' => 'Request payouts from the host wallet',

@@ -142,6 +142,17 @@ Changes to existing tables: `payments.booking_id` and `commissions.booking_id` a
 
 `maintenance_tickets` gains `category` (default `other`), `cost`, `started_at`, `closed_at`, and an index `(tenant_id, status, priority)`. New table `maintenance_ticket_notes` (tenant, ticket, nullable user, body, is_system). Attachments are `media` rows (`mediable` = ticket, disk `local`, kind `image` / `document`).
 
+## Phase 17 tables (Staff Management)
+
+| Table | Purpose | Notes |
+|---|---|---|
+| departments | staff departments | tenant, unique `(tenant_id, name)` |
+| positions | job titles | tenant, nullable department, hourly_rate, unique `(tenant_id, name)` |
+| employees | staff records | tenant; nullable user (unique per tenant), department, position, property; unique `(tenant_id, employee_no)`; name, email, phone, hire_date, employment_type, status |
+| shifts | roster | tenant, employee, nullable property, starts_at / ends_at, status `scheduled/cancelled`, notes, created_by |
+| attendances | clock records | tenant, employee, nullable shift, clock_in_at / clock_out_at, minutes_worked, late_minutes, recorded_by |
+| leave_requests | time off | tenant, employee, type, starts_on / ends_on (inclusive), reason, status, decided_by / decided_at / decision_note |
+
 ## Seeding
 
 `php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin` **and** a refresh of every existing tenant's system roles, so newly added catalogue permissions reach already-provisioned businesses).

@@ -1,5 +1,17 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Phase 17: Staff Management (v0.17.0)
+
+(verified: 203 tests / 1066 assertions)
+
+- New `App\Modules\Workforce`: departments, positions, and employees (numbered, optionally linked to a member account whose tenant role gives their permissions).
+- Weekly roster of shifts: 15 minutes to 16 hours, no overlaps, not on approved leave, overnight shifts supported, row-locked per employee.
+- Attendance: clock in / out matched to the covering shift, with late minutes and minutes worked. One open clock-in at a time. Managers can clock staff in and out.
+- Leave: requests with overlap checks. Approval cancels the shifts inside the range. Reject with a note, or withdraw while pending.
+- "My work" self-service: shifts, assigned housekeeping tasks and maintenance tickets, clock button, leave.
+- Permissions `staff.view/manage`, `schedules.manage`, `attendance.manage`, `leave.approve`. Sidebar shows Staff or My work.
+- 6 new Pest tests.
+
 ## 2026-09-25 — Phase 16: Maintenance (v0.16.0)
 
 (verified: 197 tests / 1008 assertions)

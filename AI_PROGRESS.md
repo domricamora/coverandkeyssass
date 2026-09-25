@@ -2,8 +2,8 @@
 
 ## Current Phase
 
-Phase 16 - Maintenance — **COMPLETE (verified)**
-Next: Phase 17 - Staff Management
+Phase 17 - Staff Management — **COMPLETE (verified)**
+Next: Phase 18 - Inventory
 
 ## Completed
 
@@ -25,16 +25,17 @@ Next: Phase 17 - Staff Management
 - **Phase 14 — Guest Folio**: `App\Modules\Folio` — per-booking ledger (charges/payments/refunds, voids, never deletes); idempotent sync of room nights (early check-out aware), discount, PayMongo payments/refunds and room-charge orders; desk charges/payments/refunds; printable + guest read-only folio; permissions `folio.*`
 - **Phase 15 — Housekeeping**: `App\Modules\Housekeeping` (workforce) — room housekeeping status (out_of_order leaves sellable inventory), tasks (checkout clean auto-queued on check-out, start/complete/inspect, failed inspection → high-priority re-clean), member-only assignment + notifications, issue reports → maintenance tickets; board; permissions `housekeeping.*`; `staff` role = housekeeper
 - **Phase 16 — Maintenance**: `App\Modules\Maintenance` (workforce) — tickets (category, priority, assignment + notification, cost), workflow with reopen, notes thread with system notes, private attachments (local disk, authorised download), room hand-back to housekeeping on last resolve; permissions `maintenance.*`
-- Tests: Pest suite — **197 passed, 1008 assertions** (Phase 16: 4, Phase 15: 5, Phase 14: 7, Phase 13: 5, Phase 12: 6, Phase 11: 8, Phase 10: 6, Phase 09: 10, Phase 05: 19, Phase 06: 7, Phase 07: 12, Phase 08: 10); previously **98 passed, 320 assertions** (`php artisan test`, real MySQL), including 24 Phase 04 coverage tests
+- **Phase 17 — Staff Management**: `App\Modules\Workforce` — departments, positions, employees (linked member accounts = permissions), weekly roster (no overlap / max 16h / not on leave / overnight), attendance with late minutes, leave with approval cancelling shifts, "My work" self-service; permissions `staff.*`, `schedules.manage`, `attendance.manage`, `leave.approve`
+- Tests: Pest suite — **203 passed, 1066 assertions** (Phase 17: 6, Phase 16: 4, Phase 15: 5, Phase 14: 7, Phase 13: 5, Phase 12: 6, Phase 11: 8, Phase 10: 6, Phase 09: 10, Phase 05: 19, Phase 06: 7, Phase 07: 12, Phase 08: 10); previously **98 passed, 320 assertions** (`php artisan test`, real MySQL), including 24 Phase 04 coverage tests
 - Documentation: docs/* updated per phase; `docs/modules/{marketplace,property-management}.md` completed; CHANGELOG carries Phase 01–08 entries
 
 ## In Progress
 
-- (nothing — Phase 17 not started)
+- (nothing — Phase 18 not started)
 
 ## Pending
 
-- Phases 17–38: staff management, inventory, POS, accounting, CRM, marketing, loyalty, reviews, messaging, notifications, SaaS billing, super admin, marketplace administration, SEO, API, security audit, performance, testing, deployment, backups, monitoring, final audit
+- Phases 18–38: inventory, POS, accounting, CRM, marketing, loyalty, reviews, messaging, notifications, SaaS billing, super admin, marketplace administration, SEO, API, security audit, performance, testing, deployment, backups, monitoring, final audit
 
 ## Known Issues
 
@@ -49,10 +50,10 @@ Claude Code (Opus)
 
 ## Last Updated
 
-2026-09-25
+2026-09-26
 
 ## Last Successful Test
 
 php artisan test
 
-Result: PASS (197 tests, 1008 assertions, MySQL `hospitality_os_testing`)
+Result: PASS (203 tests, 1066 assertions, MySQL `hospitality_os_testing`)
