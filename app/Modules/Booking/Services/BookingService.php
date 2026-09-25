@@ -165,7 +165,7 @@ class BookingService
                     ], array_keys($quote['rates'])));
                 }
 
-                $promotion?->increment('used_count');
+                $promotion?->redeem($booking->reference);
 
                 return $booking;
             });
@@ -299,10 +299,10 @@ class BookingService
             return null;
         }
 
-        $promotion = Promotion::query()->where('applies_to', Promotion::FOR_STAYS)->where('code', strtoupper(trim($code)))->first();
+        $promotion = Promotion::lookup($code, Promotion::FOR_STAYS);
 
         $rejection = $promotion
-            ? $promotion->rejectionFor((int) $property->getKey(), $checkIn->toDateString(), $nights)
+            ? ($promotion->couponRejection() ?? $promotion->rejectionFor((int) $property->getKey(), $checkIn->toDateString(), $nights))
             : 'This promo code does not exist.';
 
         if ($rejection !== null) {

@@ -72,6 +72,59 @@ class Promotion extends Model
         };
     }
 
+    /** Personal single-use codes issued from this promotion (Marketing, Phase 22). */
+    public function coupons(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\App\Modules\Marketing\Models\Coupon::class);
+    }
+
+    /**
+     * Find a code for stays or orders: a shared promotion code, or a
+     * personal single-use coupon (Marketing, Phase 22) that redeems its
+     * promotion. A coupon rides along as the `redeemingCoupon` relation.
+     */
+    public static function lookup(?string $code, string $appliesTo): ?self
+    {
+        $code = strtoupper(trim((string) $code));
+
+        if ($code === '') {
+            return null;
+        }
+
+        if ($promotion = static::query()->where('applies_to', $appliesTo)->where('code', $code)->first()) {
+            return $promotion;
+        }
+
+        $coupon = \App\Modules\Marketing\Models\Coupon::query()->where('code', $code)->with('promotion')->first();
+
+        if (! $coupon || $coupon->promotion?->applies_to !== $appliesTo) {
+            return null;
+        }
+
+        return $coupon->promotion->setRelation('redeemingCoupon', $coupon);
+    }
+
+    public function couponRejection(): ?string
+    {
+        return $this->relationLoaded('redeemingCoupon') && $this->getRelation('redeemingCoupon')->used_at ? 'This coupon has already been used.' : null;
+    }
+
+    /** Count a use; a personal coupon is spent on the booking / order that used it. */
+    public function redeem(string $reference): void
+    {
+        $this->increment('used_count');
+
+        if ($this->relationLoaded('redeemingCoupon')) {
+            // Conditional update: two checkouts racing on one coupon — only one wins, the other rolls back.
+            $won = \App\Modules\Marketing\Models\Coupon::query()->whereKey($this->getRelation('redeemingCoupon')->id)->whereNull('used_at')
+                ->update(['used_at' => now(), 'used_on' => $reference]);
+
+            if ($won === 0) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['promo_code' => 'This coupon has already been used.']);
+            }
+        }
+    }
+
     public function discountOn(float $subtotal): float
     {
         $discount = $this->type === self::TYPE_PERCENT

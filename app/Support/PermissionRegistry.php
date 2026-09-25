@@ -110,6 +110,10 @@ class PermissionRegistry
                 'crm.view' => 'View guest profiles and segments',
                 'crm.manage' => 'Edit guest profiles, tags, notes and communication logs',
             ],
+            'marketing' => [
+                'marketing.view' => 'View campaigns, automations and promotions',
+                'marketing.manage' => 'Create and send campaigns, configure automations',
+            ],
             'wallet' => [
                 'wallet.view' => 'View the host wallet, commissions and payouts',
                 'payouts.request' => 'Request payouts from the host wallet',

@@ -45,6 +45,11 @@ return [
         'default_rate' => (float) env('COMMISSION_DEFAULT_RATE', 10),
     ],
 
+    // Marketing SMS (Phase 22): log | array. Add a carrier driver before sending real SMS.
+    'sms' => [
+        'driver' => env('SMS_DRIVER', 'log'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

@@ -179,7 +179,7 @@ class OrderService
                 $order->items()->create(collect($line)->except('item')->all());
             }
 
-            $quote['promotion']?->increment('used_count');
+            $quote['promotion']?->redeem($order->reference);
 
             return $order;
         });
@@ -493,8 +493,8 @@ class OrderService
             return null;
         }
 
-        $promotion = Promotion::query()->where('code', strtoupper(trim($code)))->first();
-        $rejection = $promotion ? $promotion->orderRejectionFor((int) $restaurant->id, $subtotal) : 'This promo code does not exist.';
+        $promotion = Promotion::lookup($code, Promotion::FOR_ORDERS);
+        $rejection = $promotion ? ($promotion->couponRejection() ?? $promotion->orderRejectionFor((int) $restaurant->id, $subtotal)) : 'This promo code does not exist.';
 
         if ($rejection !== null) {
             $this->fail('promo_code', $rejection);

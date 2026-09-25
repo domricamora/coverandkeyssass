@@ -1,5 +1,16 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Phase 22: Marketing (v0.22.0)
+
+(verified: 231 tests / 1336 assertions)
+
+- New `App\Modules\Marketing` (crm module): email and SMS campaigns to opted-in guests (everyone, a segment or a tag). Placeholders, personal single-use coupons, draft / schedule / send. Resumable, never doubled. Signed one-click unsubscribe. Every message is logged in the CRM history.
+- Coupons: personal codes that redeem a promotion on bookings and food orders (`Promotion::lookup()` / `redeem()`), spent with a race-safe conditional update. Shared discount codes stay plain promotions.
+- Automations via `php artisan marketing:run`: abandoned booking, abandoned cart (signed-in carts saved through Ordering's `CartChanged` event), review request, post-stay offer with coupon, customer reactivation. Each goes out once per guest; marketing follow-ups need consent.
+- Pluggable `SmsSender` (log / array drivers; carrier still to add). `config/services.php` gains `sms.driver`.
+- Permissions `marketing.view/manage`. Marketing link in the sidebar.
+- 7 new Pest tests.
+
 ## 2026-09-26 — Phase 21: CRM (v0.21.0)
 
 (verified: 224 tests / 1284 assertions)

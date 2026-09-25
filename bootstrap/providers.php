@@ -9,6 +9,7 @@ use App\Modules\Folio\Providers\FolioServiceProvider;
 use App\Modules\Housekeeping\Providers\HousekeepingServiceProvider;
 use App\Modules\Inventory\Providers\InventoryServiceProvider;
 use App\Modules\Maintenance\Providers\MaintenanceServiceProvider;
+use App\Modules\Marketing\Providers\MarketingServiceProvider;
 use App\Modules\Workforce\Providers\WorkforceServiceProvider;
 use App\Modules\Marketplace\Providers\MarketplaceServiceProvider;
 use App\Modules\Ordering\Providers\OrderingServiceProvider;
@@ -38,5 +39,6 @@ return [
     PosServiceProvider::class,
     AccountingServiceProvider::class,
     CrmServiceProvider::class,
+    MarketingServiceProvider::class,
 ];
 

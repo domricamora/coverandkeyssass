@@ -4,6 +4,7 @@ namespace App\Modules\Ordering\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Modules\Marketplace\Models\Restaurant;
+use App\Modules\Ordering\Events\CartChanged;
 use App\Modules\Ordering\Models\Order;
 use App\Modules\Ordering\Services\CartService;
 use App\Modules\Ordering\Services\OrderService;
@@ -47,6 +48,10 @@ class CartController extends Controller
         ]]));
 
         $replaced = $this->cart->add($listing, (int) $validated['item_id'], $validated['options'] ?? [], (int) $validated['quantity'], $validated['notes'] ?? null);
+
+        if ($request->user()) {
+            CartChanged::dispatch($request->user(), $listing, array_values($this->cart->get()['lines']));
+        }
 
         return back()->with('success', $replaced ? 'Your previous cart was replaced — carts hold one restaurant at a time.' : 'Added to your cart.');
     }
@@ -122,6 +127,7 @@ class CartController extends Controller
         ));
 
         $this->cart->clear();
+        CartChanged::dispatch($user, $listing, []);
 
         if ($order->needsPayment()) {
             $payment = $this->context->runAs($order, fn () => $this->payments->checkoutOrder($order, $user));

@@ -195,6 +195,16 @@ Changes to existing tables: `payments.booking_id` and `commissions.booking_id` a
 | crm_notes | staff notes | contact, author, body |
 | crm_interactions | communication history | contact, author, channel, direction, subject, body, occurred_at, unique `(tenant_id, source_key)` for system messages |
 
+## Phase 22 tables (Marketing)
+
+| Table | Purpose | Notes |
+|---|---|---|
+| marketing_campaigns | email / SMS blasts | tenant, name, channel, audience (`all` / `segment:key` / `tag:id`), subject, body, nullable promotion (coupons), status `draft/scheduled/sent`, scheduled_at, sent_at, sent / skipped counts |
+| marketing_recipients | who got a campaign | campaign + contact unique, address, coupon_code, sent_at |
+| coupons | personal single-use codes | tenant, promotion, nullable contact, unique `(tenant_id, code)`, used_at, used_on (reference) |
+| saved_carts | abandoned-cart source | tenant, user + restaurant unique, lines JSON |
+| marketing_automations | follow-up settings | tenant + type unique, enabled, delay_hours, subject, body, nullable promotion |
+
 ## Seeding
 
 `php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin` **and** a refresh of every existing tenant's system roles, so newly added catalogue permissions reach already-provisioned businesses).
