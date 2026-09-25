@@ -217,6 +217,19 @@ Changes to existing tables: `payments.booking_id` and `commissions.booking_id` a
 
 Also: the POS tender `gift_card` (refunds excluded), the folio payment method `gift_card`, and the ledger accounts `2200 Gift cards & store credit` and `6300 Loyalty rewards & credits`.
 
+## Phase 24 changes (Reviews)
+
+`reviews` gains:
+
+- `tenant_id` (backfilled from the listing)
+- unique nullable `booking_id` / `order_id` / `table_reservation_id`
+- nullable `room_type_id`
+- `rating_cleanliness/location/service/value/food/amenities`
+- `flagged_at`, `flag_reason`, `moderated_by`, `moderation_note`
+- index `(tenant_id, status)`
+
+The unique `(user_id, reviewable_type, reviewable_id)` becomes a plain index, so a guest can review each stay or meal. New table `review_item_ratings` (review, menu_item, rating; unique per review × dish).
+
 ## Seeding
 
 `php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin` **and** a refresh of every existing tenant's system roles, so newly added catalogue permissions reach already-provisioned businesses).

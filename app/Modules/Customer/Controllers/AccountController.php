@@ -52,11 +52,7 @@ class AccountController extends Controller
 
         return view('customer::bookings.show', [
             'booking' => $booking,
-            'hasReviewed' => Review::query()->withTrashed()
-                ->where('user_id', $request->user()->id)
-                ->where('reviewable_type', $booking->property->getMorphClass())
-                ->where('reviewable_id', $booking->property_id)
-                ->exists(),
+            'hasReviewed' => Review::query()->withTrashed()->where('booking_id', $booking->id)->exists(),
         ]);
     }
 
@@ -88,28 +84,10 @@ class AccountController extends Controller
             'rating' => ['required', 'integer', 'min:1', 'max:5'],
             'title' => ['nullable', 'string', 'max:120'],
             'comment' => ['required', 'string', 'max:3000'],
-        ]);
+        ] + collect(['cleanliness', 'location', 'service', 'value', 'amenities'])->mapWithKeys(fn ($c) => ['rating_'.$c => ['nullable', 'integer', 'min:1', 'max:5']])->all());
 
-        $this->bookings->asTenantOf($booking, function () use ($booking, $request, $validated): void {
-            $exists = Review::query()->withTrashed()
-                ->where('user_id', $request->user()->id)
-                ->where('reviewable_type', $booking->property->getMorphClass())
-                ->where('reviewable_id', $booking->property_id)
-                ->exists();
-
-            if ($exists) {
-                throw ValidationException::withMessages(['rating' => 'You have already reviewed this property.']);
-            }
-
-            // Verified stay, so the review goes live immediately.
-            Review::create($validated + [
-                'user_id' => $request->user()->id,
-                'reviewable_type' => $booking->property->getMorphClass(),
-                'reviewable_id' => $booking->property_id,
-                'status' => Review::STATUS_PUBLISHED,
-                'published_at' => now(),
-            ]);
-        });
+        // One verified review per stay (Phase 24 ReviewService), with category ratings.
+        $this->bookings->asTenantOf($booking, fn () => app(\App\Modules\Reviews\Services\ReviewService::class)->reviewStay($booking, $request->user(), $validated));
 
         return back()->with('success', 'Thanks — your review is live.');
     }

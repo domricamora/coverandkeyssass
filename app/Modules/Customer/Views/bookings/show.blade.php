@@ -60,6 +60,16 @@
                         @endfor
                     </select>
                 </label>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;">
+                    @foreach (['cleanliness', 'location', 'service', 'value', 'amenities'] as $category)
+                        <label>{{ ucfirst($category) }}
+                            <select class="form-input" name="rating_{{ $category }}">
+                                <option value="">—</option>
+                                @for ($i = 5; $i >= 1; $i--)<option value="{{ $i }}">{{ $i }}</option>@endfor
+                            </select>
+                        </label>
+                    @endforeach
+                </div>
                 <label>Title <input class="form-input" name="title" value="{{ old('title') }}"></label>
                 <label>Review <textarea class="form-input" name="comment" rows="4" required>{{ old('comment') }}</textarea></label>
                 @error('rating') <p class="muted" style="color:#b42318;margin:0;">{{ $message }}</p> @enderror

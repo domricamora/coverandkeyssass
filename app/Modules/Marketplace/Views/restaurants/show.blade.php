@@ -133,6 +133,7 @@
 
                 <div class="listing-block">
                     <h2>Guest reviews</h2>
+                    @include('reviews::summary')
 
                     @if ($reviews->isEmpty())
                         <p class="muted">No published reviews yet.</p>
@@ -149,6 +150,9 @@
                                         <span class="review__stars">@include('marketplace::partials.stars', ['rating' => $review->rating])</span>
                                     </div>
                                     <p class="review__body">{{ $review->comment }}</p>
+                                    @if ($review->host_response)
+                                        <div class="card" style="margin-top:10px;"><p class="muted" style="margin:0;"><strong>Response from the restaurant:</strong> {{ $review->host_response }}</p></div>
+                                    @endif
                                 </li>
                             @endforeach
                         </ul>

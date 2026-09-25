@@ -1,5 +1,17 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Phase 24: Reviews (v0.24.0)
+
+(verified: 241 tests / 1428 assertions)
+
+- New `App\Modules\Reviews`: verified reviews per stay (property + room type), completed food order (restaurant + per-dish stars) and table visit, once each. Overall plus category ratings (cleanliness, location, service, value, food, amenities).
+- Aggregates on listing pages: overall, category bars, room-type ratings, favourite dishes, host rating across the business, and the host's reply under each review.
+- Host screen: filters, public replies (first reply notifies the guest), report abuse. Super Admin moderation: keep / publish or hide with a note, reported reviews first. Hidden reviews leave the ratings.
+- Fix: listing ratings now recalculate when a review changes outside a tenant context (Super Admin moderation). `ReviewObserver` resolves the listing without the tenant scope.
+- `reviews` gains the owning business (backfilled), verification links, category ratings and moderation fields. One review per booking replaces one per listing. The customer-portal stay review now goes through `ReviewService`.
+- Permissions `reviews.view/reply`. Reviews link in the sidebar, and in the admin dashboard.
+- 4 new Pest tests.
+
 ## 2026-09-26 — Phase 23: Loyalty (v0.23.0)
 
 (verified: 237 tests / 1381 assertions)

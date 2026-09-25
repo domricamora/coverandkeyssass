@@ -40,6 +40,7 @@ class CustomerOrderController extends Controller
         return view('ordering::account.show', [
             'order' => $order,
             'items' => $this->context->runAs($order, fn () => $order->load('driver')->items()->get()),
+            'reviewed' => \App\Modules\Marketplace\Models\Review::query()->withTrashed()->where('order_id', $order->id)->exists(),
             'onlinePayments' => PaymentService::enabled(),
         ]);
     }
@@ -55,6 +56,26 @@ class CustomerOrderController extends Controller
         $this->context->runAs($order, fn () => $this->orders->transition($order, Order::CANCELLED, 'Cancelled by customer'));
 
         return back()->with('success', 'Order '.$order->reference.' cancelled.'.($order->payment_status === Order::PAID ? ' The restaurant will refund your payment.' : ''));
+    }
+
+    /** Review a completed order: restaurant + category ratings + per-dish stars (Phase 24). */
+    public function review(Request $request, string $order)
+    {
+        $order = $this->find($request, $order);
+
+        $validated = $request->validate([
+            'rating' => ['required', 'integer', 'min:1', 'max:5'],
+            'rating_food' => ['nullable', 'integer', 'min:1', 'max:5'],
+            'rating_service' => ['nullable', 'integer', 'min:1', 'max:5'],
+            'rating_value' => ['nullable', 'integer', 'min:1', 'max:5'],
+            'comment' => ['required', 'string', 'max:3000'],
+            'items' => ['nullable', 'array'],
+            'items.*' => ['nullable', 'integer', 'min:1', 'max:5'],
+        ]);
+
+        $this->context->runAs($order, fn () => app(\App\Modules\Reviews\Services\ReviewService::class)->reviewOrder($order, $request->user(), $validated, array_filter($validated['items'] ?? [])));
+
+        return back()->with('success', 'Thanks for your review!');
     }
 
     public function pay(Request $request, string $order)

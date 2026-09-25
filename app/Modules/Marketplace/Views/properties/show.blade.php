@@ -117,9 +117,10 @@
 
                 <div class="listing-block">
                     <h2>Guest reviews</h2>
+                    @include('reviews::summary')
 
                     @if ($reviews->isEmpty())
-                        <p class="muted">No published reviews yet. Guests can leave a review after their stay — moderation arrives with the Reviews module.</p>
+                        <p class="muted">No published reviews yet. Guests can leave a verified review after their stay.</p>
                     @else
                         <ul class="reviews">
                             @foreach ($reviews as $review)

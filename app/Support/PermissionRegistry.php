@@ -118,6 +118,10 @@ class PermissionRegistry
                 'loyalty.view' => 'View loyalty members, rewards and gift cards',
                 'loyalty.manage' => 'Run the programme, redeem rewards, sell and void gift cards',
             ],
+            'reviews' => [
+                'reviews.view' => 'Read guest reviews of the business',
+                'reviews.reply' => 'Reply to and report reviews',
+            ],
             'wallet' => [
                 'wallet.view' => 'View the host wallet, commissions and payouts',
                 'payouts.request' => 'Request payouts from the host wallet',

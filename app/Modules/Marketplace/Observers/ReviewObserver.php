@@ -30,7 +30,9 @@ class ReviewObserver
 
     private function refresh(Review $review): void
     {
-        $listing = $review->reviewable;
+        // Without the tenant scope: moderation (Super Admin) runs with no tenant context,
+        // and the listing's ratings must still follow.
+        $listing = $review->reviewable()->withoutGlobalScope('tenant')->first();
 
         if ($listing) {
             $this->metrics->recalculateRating($listing);

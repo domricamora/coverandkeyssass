@@ -24,6 +24,7 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/', [CustomerOrderController::class, 'index'])->name('index');
         Route::get('/{order}', [CustomerOrderController::class, 'show'])->name('show');
         Route::post('/{order}/cancel', [CustomerOrderController::class, 'cancel'])->name('cancel');
+        Route::post('/{order}/review', [CustomerOrderController::class, 'review'])->name('review');
         Route::post('/{order}/pay', [CustomerOrderController::class, 'pay'])->middleware('throttle:10,1')->name('pay');
         Route::get('/{order}/payment-return', [CustomerOrderController::class, 'paymentReturn'])->name('payment-return');
     });

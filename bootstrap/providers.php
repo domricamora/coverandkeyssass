@@ -18,6 +18,7 @@ use App\Modules\Payments\Providers\PaymentsServiceProvider;
 use App\Modules\Pos\Providers\PosServiceProvider;
 use App\Modules\PropertyManagement\Providers\PropertyManagementServiceProvider;
 use App\Modules\RestaurantManagement\Providers\RestaurantManagementServiceProvider;
+use App\Modules\Reviews\Providers\ReviewsServiceProvider;
 use App\Modules\Wallet\Providers\WalletServiceProvider;
 use App\Providers\AppServiceProvider;
 
@@ -42,5 +43,6 @@ return [
     CrmServiceProvider::class,
     MarketingServiceProvider::class,
     LoyaltyServiceProvider::class,
+    ReviewsServiceProvider::class,
 ];
 

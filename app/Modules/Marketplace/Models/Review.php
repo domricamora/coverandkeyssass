@@ -18,7 +18,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * recalculated from published reviews only.
  */
 #[Fillable([
-    'user_id', 'reviewable_type', 'reviewable_id', 'rating', 'title', 'comment',
+    'tenant_id', 'user_id', 'booking_id', 'order_id', 'table_reservation_id', 'room_type_id',
+    'reviewable_type', 'reviewable_id', 'rating', 'rating_cleanliness', 'rating_location', 'rating_service',
+    'rating_value', 'rating_food', 'rating_amenities', 'title', 'comment',
     'status', 'host_response', 'responded_at', 'published_at',
 ])]
 class Review extends Model
@@ -38,6 +40,7 @@ class Review extends Model
             'rating' => 'integer',
             'responded_at' => 'datetime',
             'published_at' => 'datetime',
+            'flagged_at' => 'datetime',
         ];
     }
 
@@ -54,6 +57,19 @@ class Review extends Model
     public function reviewable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    /** Category ratings (Phase 24); overall stays in `rating`. */
+    public const CATEGORIES = ['cleanliness', 'location', 'service', 'value', 'food', 'amenities'];
+
+    public function itemRatings(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\App\Modules\Reviews\Models\ReviewItemRating::class);
+    }
+
+    public function roomType(): BelongsTo
+    {
+        return $this->belongsTo(\App\Modules\PropertyManagement\Models\RoomType::class)->withoutGlobalScope('tenant');
     }
 
     public function scopePublished(Builder $query): Builder

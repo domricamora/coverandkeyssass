@@ -44,5 +44,30 @@
         <div class="card" style="padding:16px;">
             @include('ordering::partials.summary')
         </div>
+
+        @if ($order->status === 'completed' && ! $reviewed)
+            <form method="POST" action="{{ route('account.orders.review', $order->reference) }}" class="card" style="padding:18px;display:grid;gap:8px;margin-top:16px;">
+                @csrf
+                <h2 style="font-size:1.1rem;margin:0;">How was your meal?</h2>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;">
+                    @foreach (['rating' => 'Overall', 'rating_food' => 'Food', 'rating_service' => 'Service', 'rating_value' => 'Value'] as $field => $label)
+                        <label>{{ $label }}
+                            <select class="form-input" name="{{ $field }}" @if ($field === 'rating') required @endif>
+                                @if ($field !== 'rating')<option value="">—</option>@endif
+                                @for ($i = 5; $i >= 1; $i--)<option value="{{ $i }}">{{ $i }}</option>@endfor
+                            </select>
+                        </label>
+                    @endforeach
+                </div>
+                @foreach ($items->whereNotNull('menu_item_id')->unique('menu_item_id') as $line)
+                    <label>{{ $line->name }}
+                        <select class="form-input" name="items[{{ $line->menu_item_id }}]"><option value="">—</option>@for ($i = 5; $i >= 1; $i--)<option value="{{ $i }}">{{ $i }} ★</option>@endfor</select>
+                    </label>
+                @endforeach
+                <textarea class="form-input" name="comment" rows="3" required placeholder="Tell others what you liked" aria-label="Review">{{ old('comment') }}</textarea>
+                @error('rating')<p class="muted" style="color:#b42318;margin:0;">{{ $message }}</p>@enderror
+                <button class="btn btn-primary" type="submit">Publish review</button>
+            </form>
+        @endif
     </div>
 </x-public-layout>

@@ -85,6 +85,17 @@ class GuestReservationController extends Controller
         return back()->with('success', 'Reservation '.$reservation->reference.' cancelled.');
     }
 
+    /** Review a table visit (Phase 24). */
+    public function review(Request $request, string $reservation)
+    {
+        $reservation = TableReservation::forCustomer($request->user())->where('reference', $reservation)->firstOrFail();
+        $validated = $request->validate(['rating' => ['required', 'integer', 'min:1', 'max:5'], 'comment' => ['required', 'string', 'max:3000']]);
+
+        $this->reservations->asTenantOf($reservation, fn () => app(\App\Modules\Reviews\Services\ReviewService::class)->reviewVisit($reservation, $request->user(), $validated));
+
+        return back()->with('success', 'Thanks for your review!');
+    }
+
     public static function acceptsReservations(Restaurant $restaurant, ModuleService $modules): bool
     {
         if (! $restaurant->reservations_enabled) {

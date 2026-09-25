@@ -74,4 +74,5 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/restaurant/{restaurant}/reserve', [GuestReservationController::class, 'store'])->name('marketplace.restaurants.reserve');
     Route::get('/account/reservations', [GuestReservationController::class, 'index'])->name('account.reservations.index');
     Route::post('/account/reservations/{reservation}/cancel', [GuestReservationController::class, 'cancel'])->name('account.reservations.cancel');
+    Route::post('/account/reservations/{reservation}/review', [GuestReservationController::class, 'review'])->name('account.reservations.review');
 });

@@ -5,14 +5,14 @@
 ## Snapshot
 
 - Date: 2026-09-26
-- Phase: **23 COMPLETE (verified)** → next **24 — Reviews**
-- Tests: PASS — 237 tests, 1381 assertions, MySQL `hospitality_os_testing`
+- Phase: **24 COMPLETE (verified)** → next **25 — Messaging**
+- Tests: PASS — 241 tests, 1428 assertions, MySQL `hospitality_os_testing`
 - Git: local `master` — gh CLI installed but NOT authenticated; if `gh auth login` runs, create private repo + push
 
 ## Environment (ready)
 
 - Windows WAMP PHP 8.3.14 (`C:\wamp64\bin\php\php8.3.14`), Composer 2.10.3, MySQL 9.1.0 (root / no password).
-- Dev DB `hospitality_os` (migrated through Phase 23; modules/permissions/roles re-seeded), test DB `hospitality_os_testing`.
+- Dev DB `hospitality_os` (migrated through Phase 24; modules/permissions/roles re-seeded), test DB `hospitality_os_testing`.
 - The default `php` on PATH is 7.4 — run everything via: `cmd.exe /c "cd /d C:\wamp64\www\ck && _ai\run.bat <cmd>"`.
 - Frontend build: `node node_modules/vite/bin/vite.js build` (the `&` in the path breaks npm shims).
 - Dev URL: `http://localhost/ck/public`. No Python on this machine; use PHP / bash.
@@ -24,12 +24,12 @@
 - **SMS carrier**: `SmsSender` only logs; add a Semaphore / Twilio driver before real SMS.
 - **Scheduler**: add `marketing:run` (every 15 min) and `accounting:sync` (daily) to the production schedule / cron.
 
-## Next actions (Phase 24 — Reviews)
+## Next actions (Phase 25 — Messaging)
 
-1. Read master plan PHASE 24. Reviews already exist since Phase 03 (`reviews` table, rating aggregates via observers) with verified stay reviews from the customer portal (Phase 06).
-2. Likely additions: restaurant reviews after completed orders / table visits, host responses, moderation (publish / hide / report), photos, category ratings, review request link (Marketing automation exists), aggregates.
+1. Scope: threads + messages + attachments + read status + notifications for Guest ↔ Host, Guest ↔ Restaurant, Guest ↔ Support (platform), Staff ↔ Management.
+2. Threads belong to a business (tenant) or the platform (support); participants = guest user and business side (members with a permission), optional subject link (booking / order / reservation). Attachments: private local disk like maintenance. Read receipts per participant. Notify the other side (database notification) and log to CRM interactions for guest threads.
 3. Tests → `php artisan test` green → docs → commit.
 
 ## Last command run
 
-`_ai\run.bat php artisan test` → PASS (237 tests, 1381 assertions).
+`_ai\run.bat php artisan test` → PASS (241 tests, 1428 assertions).

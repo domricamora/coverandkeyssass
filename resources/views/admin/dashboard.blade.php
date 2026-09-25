@@ -9,6 +9,7 @@
             <a href="{{ route('admin.tenants.index') }}" class="btn btn-dark btn-sm">Tenants</a>
             <a href="{{ route('admin.commissions.index') }}" class="btn btn-dark btn-sm">Commissions</a>
             <a href="{{ route('admin.payouts.index') }}" class="btn btn-dark btn-sm">Payouts</a>
+            <a href="{{ route('admin.reviews.index') }}" class="btn btn-dark btn-sm">Reviews</a>
         </div>
     </div>
 
