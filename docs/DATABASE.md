@@ -129,6 +129,15 @@ Changes to existing tables: `payments.booking_id` and `commissions.booking_id` a
 |---|---|---|
 | folio_entries | per-booking ledger | tenant + booking FKs; type `charge/payment/refund`; category; description; quantity × unit_amount = amount (negative for discounts); service_date; reference; nullable `source_key` unique per booking (derived lines); posted_by; voided_at / void_reason / voided_by (never deleted) |
 
+## Phase 15 tables (Housekeeping)
+
+| Table | Purpose | Notes |
+|---|---|---|
+| housekeeping_tasks | cleaning queue | tenant, property, room, nullable booking; type; status `pending/in_progress/completed/cancelled`; priority; due_on; notes; assigned_to / created_by; started / completed; inspected_by / inspected_at / inspection_passed / inspection_notes |
+| maintenance_tickets | repair jobs (workflow in Phase 16) | tenant, property, nullable room; unique reference; title, description; priority `low/normal/high/urgent`; status `open/in_progress/on_hold/resolved/closed`; room_out_of_order; reported_by / assigned_to; resolved_at |
+
+`rooms` gains `housekeeping_status` (default `clean`), `housekeeping_updated_at`, and an index `(property_id, housekeeping_status)`.
+
 ## Seeding
 
 `php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin` **and** a refresh of every existing tenant's system roles, so newly added catalogue permissions reach already-provisioned businesses).

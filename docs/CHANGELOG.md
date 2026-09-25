@@ -1,5 +1,16 @@
 # CHANGELOG.md
 
+## 2026-09-25 — Phase 15: Housekeeping (v0.15.0)
+
+(verified: 193 tests / 961 assertions)
+
+- New `App\Modules\Housekeeping` (workforce module): `rooms.housekeeping_status` (dirty, cleaning, clean, inspected, maintenance, out_of_order) and `housekeeping_tasks`.
+- Check-out makes the rooms dirty and queues a checkout clean. Tasks follow start → complete → inspect. A failed inspection sends the room back to dirty and queues a high-priority re-clean for the same housekeeper.
+- Assignment only to members of the business, with a database notification. Housekeepers work their own or unassigned tasks; managers override.
+- "Report issue" opens a `maintenance_tickets` row (base of Phase 16) and sets the room to maintenance or out of order. Out-of-order rooms leave `Room::sellable()`, so they cannot be booked.
+- Housekeeping board with a room grid, task queue, "My tasks" and open tickets. Permissions `housekeeping.view/work/manage`. The `staff` role becomes the housekeeping role.
+- 5 new Pest tests.
+
 ## 2026-09-25 — Phase 14: Guest Folio (v0.14.0)
 
 (verified: 188 tests / 918 assertions)

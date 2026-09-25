@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 #[Fillable([
     'tenant_id', 'property_id', 'room_type_id', 'room_number', 'name', 'floor',
-    'status', 'notes',
+    'status', 'notes', 'housekeeping_status',
 ])]
 class Room extends Model
 {
@@ -40,10 +40,28 @@ class Room extends Model
         return [self::STATUS_ACTIVE, self::STATUS_MAINTENANCE, self::STATUS_INACTIVE];
     }
 
+    // Housekeeping status (Phase 15), independent of the sellable `status`.
+    public const HK_DIRTY = 'dirty';
+
+    public const HK_CLEANING = 'cleaning';
+
+    public const HK_CLEAN = 'clean';
+
+    public const HK_INSPECTED = 'inspected';
+
+    public const HK_MAINTENANCE = 'maintenance';
+
+    public const HK_OUT_OF_ORDER = 'out_of_order';
+
+    public const HK_STATUSES = [self::HK_DIRTY, self::HK_CLEANING, self::HK_CLEAN, self::HK_INSPECTED, self::HK_MAINTENANCE, self::HK_OUT_OF_ORDER];
+
+    protected $attributes = ['housekeeping_status' => self::HK_CLEAN];
+
     protected function casts(): array
     {
         return [
             'floor' => 'integer',
+            'housekeeping_updated_at' => 'datetime',
         ];
     }
 
@@ -70,9 +88,10 @@ class Room extends Model
     // Scopes
     // ------------------------------------------------------------------
 
+    /** Active rooms, minus those housekeeping has taken out of order (Phase 15). */
     public function scopeSellable(Builder $query): Builder
     {
-        return $query->where('status', self::STATUS_ACTIVE);
+        return $query->where('status', self::STATUS_ACTIVE)->where('housekeeping_status', '!=', self::HK_OUT_OF_ORDER);
     }
 
     // ------------------------------------------------------------------

@@ -74,6 +74,11 @@ class PermissionRegistry
                 'folio.manage' => 'Post folio charges, payments and refunds',
                 'folio.void' => 'Void folio lines',
             ],
+            'housekeeping' => [
+                'housekeeping.view' => 'View the housekeeping board',
+                'housekeeping.work' => 'Start and finish cleaning tasks, report room issues',
+                'housekeeping.manage' => 'Create, assign and inspect tasks, set room status',
+            ],
             'wallet' => [
                 'wallet.view' => 'View the host wallet, commissions and payouts',
                 'payouts.request' => 'Request payouts from the host wallet',
