@@ -1,5 +1,16 @@
 # CHANGELOG.md
 
+## 2026-09-25 — Phase 12: Delivery (v0.12.0)
+
+(verified: 176 tests / 820 assertions)
+
+- New `App\Modules\Delivery`: `delivery_zones` (named area or radius around the restaurant; fee, free-over, minimum order, ride ETA, pause) and `delivery_drivers`.
+- Checkout: delivery needs an active zone that covers the drop-off point (haversine against the restaurant's coordinates; browser "share my location"). The fee comes from the zone and the minimum order is enforced. Optional scheduled delivery or pickup (prep time up to 7 days ahead).
+- Dispatch: drivers can be assigned to accepted delivery orders. Out-for-delivery is refused without a driver, and a driver cannot be cleared while the order is on the road. Assignments are audited.
+- ETAs: set on acceptance (scheduled time, or prep plus ride) and on dispatch (ride). Delivered time is recorded. The customer sees ETA, driver and delivered time.
+- Host delivery setup screen (zones, prep time, coordinates, drivers); driver dropdown on the order queue and detail. New permission `delivery.manage` (owner, manager).
+- 6 new Pest tests. The Phase 11 delivery test moved to zone-based delivery.
+
 ## 2026-09-25 — Phase 11: Online Food Ordering (v0.11.0)
 
 (verified: 171 tests / 776 assertions)

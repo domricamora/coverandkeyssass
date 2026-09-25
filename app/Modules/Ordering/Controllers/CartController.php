@@ -76,6 +76,7 @@ class CartController extends Controller
             'quote' => $quote,
             'error' => $error,
             'onlinePayments' => PaymentService::enabled(),
+            'zones' => $listing ? $this->context->runAs($listing, fn () => $listing->deliveryZones()->active()->get()) : collect(),
         ]);
     }
 
@@ -98,6 +99,10 @@ class CartController extends Controller
             'payment_method' => ['required', Rule::in([Order::PAY_ONLINE, Order::PAY_CASH])],
             'customer_phone' => ['required', 'string', 'max:40'],
             'delivery_address' => ['nullable', 'string', 'max:500'],
+            'delivery_zone_id' => ['nullable', 'integer'],
+            'delivery_lat' => ['nullable', 'numeric', 'between:-90,90'],
+            'delivery_lng' => ['nullable', 'numeric', 'between:-180,180'],
+            'scheduled_for' => ['nullable', 'date'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'promo_code' => ['nullable', 'string', 'max:40'],
         ]);

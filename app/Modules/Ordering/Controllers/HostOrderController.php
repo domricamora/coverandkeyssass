@@ -3,6 +3,7 @@
 namespace App\Modules\Ordering\Controllers;
 
 use App\Modules\Booking\Models\Promotion;
+use App\Modules\Delivery\Models\Driver;
 use App\Modules\Ordering\Models\Order;
 use App\Modules\Ordering\Services\OrderService;
 use App\Modules\RestaurantManagement\Controllers\RestaurantManagementController;
@@ -27,7 +28,8 @@ class HostOrderController extends RestaurantManagementController
 
         return view('ordering::host.index', [
             'restaurant' => $restaurant,
-            'open' => (clone $base)->whereIn('status', Order::OPEN)->oldest()->get()->groupBy('status'),
+            'open' => (clone $base)->whereIn('status', Order::OPEN)->with('driver')->orderByRaw('COALESCE(scheduled_for, created_at)')->get()->groupBy('status'),
+            'drivers' => Driver::query()->active()->get(),
             'recent' => (clone $base)->whereNotIn('status', Order::OPEN)->latest()->limit(20)->get(),
             'promotions' => Promotion::query()->where('applies_to', Promotion::FOR_ORDERS)
                 ->where(fn ($q) => $q->whereNull('restaurant_id')->orWhere('restaurant_id', $restaurant->id))
@@ -41,11 +43,12 @@ class HostOrderController extends RestaurantManagementController
         $this->authorizeTo($request, 'orders.view');
         $restaurant = $this->resolveRestaurant($restaurant);
 
-        $order = Order::query()->where('restaurant_id', $restaurant->id)->where('reference', $order)->with('items')->firstOrFail();
+        $order = Order::query()->where('restaurant_id', $restaurant->id)->where('reference', $order)->with(['items', 'zone', 'driver'])->firstOrFail();
 
         return view('ordering::host.show', [
             'restaurant' => $restaurant,
             'order' => $order,
+            'drivers' => Driver::query()->active()->get(),
             'title' => 'Order '.$order->reference,
         ]);
     }
@@ -65,6 +68,19 @@ class HostOrderController extends RestaurantManagementController
         $this->orders->transition($order, $validated['status'], $validated['reason'] ?? null);
 
         return back()->with('success', 'Order '.$order->reference.' is now '.strtolower($order->statusLabel()).'.');
+    }
+
+    public function assignDriver(Request $request, string $restaurant, string $order)
+    {
+        $this->authorizeTo($request, 'orders.manage');
+        $restaurant = $this->resolveRestaurant($restaurant);
+
+        $order = Order::query()->where('restaurant_id', $restaurant->id)->where('reference', $order)->firstOrFail();
+        $driverId = $request->validate(['driver_id' => ['nullable', 'integer']])['driver_id'] ?? null;
+
+        $this->orders->assignDriver($order, $driverId ? Driver::query()->findOrFail($driverId) : null);
+
+        return back()->with('success', $order->driver_id ? 'Driver assigned to '.$order->reference.'.' : 'Driver cleared.');
     }
 
     public function storePromotion(Request $request, string $restaurant)

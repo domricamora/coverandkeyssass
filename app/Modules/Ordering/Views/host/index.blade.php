@@ -16,6 +16,7 @@
     </div>
 
     <x-input-error :messages="$errors->get('status')" />
+    <x-input-error :messages="$errors->get('driver_id')" />
 
     <div class="grid grid-cols-3 gap-4 mt-4">
         @foreach ($stages as $status => $label)
@@ -26,6 +27,19 @@
                         <a href="{{ route('restaurants.orders.show', [$restaurant, $order->reference]) }}"><strong style="color:var(--text)">{{ $order->reference }}</strong></a>
                         · {{ $order->customer_name }} · {{ (int) $order->items_sum_quantity }} item(s) · {{ $order->money($order->total) }}
                         <br><small style="color:var(--text-3)">{{ ucfirst($order->fulfillment) }} · {{ $order->payment_method === 'online' ? 'online '.$order->payment_status : 'cash' }} · {{ $order->created_at->diffForHumans() }}</small>
+                        @if ($order->scheduled_for)<br><small><strong>Scheduled {{ $order->scheduled_for->format('D g:i A') }}</strong></small>@endif
+                        @if ($order->estimated_at)<br><small style="color:var(--text-3)">ETA {{ $order->estimated_at->format('g:i A') }}</small>@endif
+                        @if ($canManage && $order->fulfillment === Order::DELIVERY && $order->status !== Order::PENDING)
+                            <form method="POST" action="{{ route('restaurants.orders.driver', [$restaurant, $order->reference]) }}" class="flex gap-1 mt-2">
+                                @csrf
+                                <select name="driver_id" class="form-input" aria-label="Driver for {{ $order->reference }}" onchange="this.form.submit()">
+                                    <option value="">{{ $order->driver ? 'Clear driver' : 'Assign driver…' }}</option>
+                                    @foreach ($drivers as $driver)
+                                        <option value="{{ $driver->id }}" @selected($order->driver_id === $driver->id)>{{ $driver->name }}</option>
+                                    @endforeach
+                                </select>
+                            </form>
+                        @endif
                         @if ($canManage)
                             <div class="flex gap-1 mt-2">
                                 @foreach ($order->nextStates() as $to)

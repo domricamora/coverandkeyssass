@@ -38,4 +38,5 @@ Route::middleware(['auth', 'tenant.context', 'module.active:restaurant'])
         Route::post('/promotions/{promotion}/toggle', [HostOrderController::class, 'togglePromotion'])->name('promotions.toggle');
         Route::get('/{order}', [HostOrderController::class, 'show'])->name('show');
         Route::post('/{order}/status', [HostOrderController::class, 'transition'])->name('transition');
+        Route::post('/{order}/driver', [HostOrderController::class, 'assignDriver'])->name('driver');
     });

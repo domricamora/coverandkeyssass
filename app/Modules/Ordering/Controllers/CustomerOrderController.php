@@ -39,7 +39,7 @@ class CustomerOrderController extends Controller
 
         return view('ordering::account.show', [
             'order' => $order,
-            'items' => $this->context->runAs($order, fn () => $order->items()->get()),
+            'items' => $this->context->runAs($order, fn () => $order->load('driver')->items()->get()),
             'onlinePayments' => PaymentService::enabled(),
         ]);
     }

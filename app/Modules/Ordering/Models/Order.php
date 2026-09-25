@@ -22,7 +22,8 @@ use Illuminate\Support\Str;
 #[Fillable([
     'tenant_id', 'restaurant_id', 'user_id', 'promotion_id', 'reference', 'status',
     'fulfillment', 'payment_method', 'payment_status', 'customer_name', 'customer_phone',
-    'delivery_address', 'notes', 'currency', 'subtotal', 'discount_total', 'tax_rate',
+    'delivery_address', 'delivery_zone_id', 'driver_id', 'delivery_lat', 'delivery_lng',
+    'scheduled_for', 'estimated_at', 'notes', 'currency', 'subtotal', 'discount_total', 'tax_rate',
     'tax_inclusive', 'tax_total', 'delivery_fee', 'total',
 ])]
 class Order extends Model
@@ -76,6 +77,12 @@ class Order extends Model
             'ready_at' => 'datetime',
             'completed_at' => 'datetime',
             'cancelled_at' => 'datetime',
+            'dispatched_at' => 'datetime',
+            'delivered_at' => 'datetime',
+            'scheduled_for' => 'datetime',
+            'estimated_at' => 'datetime',
+            'delivery_lat' => 'decimal:7',
+            'delivery_lng' => 'decimal:7',
         ];
     }
 
@@ -102,6 +109,16 @@ class Order extends Model
     public function items(): HasMany
     {
         return $this->hasMany(OrderItem::class);
+    }
+
+    public function zone(): BelongsTo
+    {
+        return $this->belongsTo(\App\Modules\Delivery\Models\DeliveryZone::class, 'delivery_zone_id');
+    }
+
+    public function driver(): BelongsTo
+    {
+        return $this->belongsTo(\App\Modules\Delivery\Models\Driver::class);
     }
 
     public function customer(): BelongsTo

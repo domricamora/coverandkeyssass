@@ -2,6 +2,7 @@
 
 use App\Modules\Booking\Providers\BookingServiceProvider;
 use App\Modules\Customer\Providers\CustomerServiceProvider;
+use App\Modules\Delivery\Providers\DeliveryServiceProvider;
 use App\Modules\Marketplace\Providers\MarketplaceServiceProvider;
 use App\Modules\Ordering\Providers\OrderingServiceProvider;
 use App\Modules\Payments\Providers\PaymentsServiceProvider;
@@ -20,5 +21,6 @@ return [
     WalletServiceProvider::class,
     RestaurantManagementServiceProvider::class,
     OrderingServiceProvider::class,
+    DeliveryServiceProvider::class,
 ];
 

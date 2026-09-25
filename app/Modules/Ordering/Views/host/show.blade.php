@@ -12,6 +12,7 @@
 
     <x-input-error :messages="$errors->get('status')" />
     <x-input-error :messages="$errors->get('payment')" />
+    <x-input-error :messages="$errors->get('driver_id')" />
 
     <div class="grid grid-cols-3 gap-4 mt-4">
         <div class="card p-6" style="grid-column:span 2">
@@ -20,7 +21,28 @@
         <div class="card p-6 text-sm space-y-2" style="color:var(--text-2)">
             <p><span class="badge badge-amber">{{ $order->statusLabel() }}</span></p>
             <p><strong>{{ $order->customer_name }}</strong><br>{{ $order->customer_phone }}</p>
-            @if ($order->delivery_address)<p><strong>Deliver to</strong><br>{{ $order->delivery_address }}</p>@endif
+            @if ($order->delivery_address)
+                <p><strong>Deliver to</strong> ({{ $order->zone?->name ?? 'zone removed' }})<br>{{ $order->delivery_address }}
+                    @if ($order->delivery_lat)<br><a href="https://maps.google.com/?q={{ $order->delivery_lat }},{{ $order->delivery_lng }}" target="_blank" rel="noopener">Open pin in maps</a>@endif
+                </p>
+            @endif
+            @if ($order->scheduled_for)<p><strong>Scheduled</strong> {{ $order->scheduled_for->format('D, M j · g:i A') }}</p>@endif
+            @if ($order->estimated_at)<p><strong>ETA</strong> {{ $order->estimated_at->format('g:i A') }}</p>@endif
+            @if ($order->fulfillment === 'delivery')
+                <p><strong>Driver</strong> {{ $order->driver?->name ?? 'not assigned' }}{{ $order->driver?->phone ? ' · '.$order->driver->phone : '' }}</p>
+                @if (auth()->user()->hasPermissionTo('orders.manage') && ! in_array($order->status, ['pending', 'delivered', 'completed', 'cancelled', 'refunded'], true))
+                    <form method="POST" action="{{ route('restaurants.orders.driver', [$restaurant, $order->reference]) }}" class="flex gap-2">
+                        @csrf
+                        <select name="driver_id" class="form-input" aria-label="Driver">
+                            <option value="">No driver</option>
+                            @foreach ($drivers as $driver)
+                                <option value="{{ $driver->id }}" @selected($order->driver_id === $driver->id)>{{ $driver->name }}</option>
+                            @endforeach
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-ghost">Save</button>
+                    </form>
+                @endif
+            @endif
             @if ($order->notes)<p><strong>Notes</strong><br>{{ $order->notes }}</p>@endif
             @if ($order->cancellation_reason)<p><strong>Cancelled</strong> — {{ $order->cancellation_reason }}</p>@endif
             @if (auth()->user()->hasPermissionTo('orders.manage'))

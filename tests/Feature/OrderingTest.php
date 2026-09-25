@@ -152,20 +152,6 @@ it('rejects bad modifier choices, unavailable items and closed restaurants', fun
     $this->post(route('cart.add', $restaurant->slug), ['item_id' => $burger->id, 'options' => [$single->id], 'quantity' => 1])->assertNotFound();
 });
 
-it('requires a delivery address and a delivering restaurant for delivery', function () {
-    [, , $restaurant, $burger] = kitchen(['delivery_enabled' => false]);
-    $lines = [['item_id' => $burger->id, 'quantity' => 1]];
-
-    expect(fn () => placeOrder($restaurant, $lines, ['fulfillment' => Order::DELIVERY, 'delivery_address' => 'Room 5']))->toThrow(ValidationException::class);
-
-    MarketplaceFixtures::asListing($restaurant);
-    $restaurant->update(['delivery_enabled' => true]);
-    MarketplaceFixtures::asTenant(null);
-
-    expect(fn () => placeOrder($restaurant->refresh(), $lines, ['fulfillment' => Order::DELIVERY]))->toThrow(ValidationException::class)
-        ->and(placeOrder($restaurant, $lines, ['fulfillment' => Order::DELIVERY, 'delivery_address' => 'Station 2'])->delivery_address)->toBe('Station 2');
-});
-
 it('walks pickup and delivery orders through their states', function () {
     [, , $restaurant, $burger] = kitchen();
     $lines = [['item_id' => $burger->id, 'quantity' => 1]];
@@ -175,8 +161,14 @@ it('walks pickup and delivery orders through their states', function () {
         ->and(fn () => moveOrder($pickup, Order::OUT_FOR_DELIVERY))->toThrow(ValidationException::class);
     expect(moveOrder($pickup, Order::COMPLETED)->completed_at)->not->toBeNull();
 
-    $delivery = placeOrder($restaurant, $lines, ['fulfillment' => Order::DELIVERY, 'delivery_address' => 'Station 2']);
-    moveOrder($delivery, Order::ACCEPTED, Order::PREPARING, Order::READY, Order::OUT_FOR_DELIVERY, Order::DELIVERED, Order::COMPLETED);
+    MarketplaceFixtures::asListing($restaurant);
+    $zone = $restaurant->deliveryZones()->create(['name' => 'Station 2', 'fee' => 0]);
+    $driver = \App\Modules\Delivery\Models\Driver::create(['name' => 'Jun']);
+    MarketplaceFixtures::asTenant(null);
+
+    $delivery = moveOrder(placeOrder($restaurant, $lines, ['fulfillment' => Order::DELIVERY, 'delivery_address' => 'Beach front', 'delivery_zone_id' => $zone->id]), Order::ACCEPTED, Order::PREPARING, Order::READY);
+    app(TenantContext::class)->runAs($delivery, fn () => app(OrderService::class)->assignDriver($delivery, $driver));
+    moveOrder($delivery, Order::OUT_FOR_DELIVERY, Order::DELIVERED, Order::COMPLETED);
     expect($delivery->status)->toBe(Order::COMPLETED);
 
     // Cash orders never become refundable through PayMongo; cancelled is terminal.

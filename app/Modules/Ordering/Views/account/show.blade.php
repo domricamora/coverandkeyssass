@@ -16,6 +16,14 @@
                 <strong>Status: {{ $order->statusLabel() }}</strong>
                 <p class="muted" style="margin:4px 0 0;">Payment: {{ ucfirst($order->payment_status) }}</p>
                 @if ($order->delivery_address)<p class="muted" style="margin:4px 0 0;">Deliver to: {{ $order->delivery_address }}</p>@endif
+                @if ($order->scheduled_for)<p class="muted" style="margin:4px 0 0;">Scheduled for {{ $order->scheduled_for->format('D, M j · g:i A') }}</p>@endif
+                @if ($order->estimated_at && in_array($order->status, \App\Modules\Ordering\Models\Order::OPEN, true))
+                    <p style="margin:4px 0 0;"><strong>Estimated {{ $order->fulfillment === 'delivery' ? 'arrival' : 'ready' }}: {{ $order->estimated_at->format('g:i A') }}</strong></p>
+                @endif
+                @if ($order->status === 'out_for_delivery' && $order->driver)
+                    <p class="muted" style="margin:4px 0 0;">On the way with {{ $order->driver->name }}{{ $order->driver->phone ? ' · '.$order->driver->phone : '' }}</p>
+                @endif
+                @if ($order->delivered_at)<p class="muted" style="margin:4px 0 0;">Delivered {{ $order->delivered_at->format('g:i A') }}</p>@endif
             </div>
             <div style="display:flex;gap:8px;">
                 @if ($order->needsPayment() && $onlinePayments)

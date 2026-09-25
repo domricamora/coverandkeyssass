@@ -27,7 +27,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'address_line', 'city', 'region', 'country_code', 'latitude', 'longitude',
     'phone', 'email', 'price_level', 'opening_hours', 'highlights',
     'reservations_enabled', 'reservation_duration_minutes', 'delivery_enabled', 'ordering_enabled',
-    'tax_rate', 'tax_inclusive', 'status', 'is_featured', 'published_at',
+    'tax_rate', 'tax_inclusive', 'prep_minutes', 'status', 'is_featured', 'published_at',
 ])]
 class Restaurant extends Model
 {
@@ -55,6 +55,7 @@ class Restaurant extends Model
             'ordering_enabled' => 'boolean',
             'tax_rate' => 'decimal:2',
             'tax_inclusive' => 'boolean',
+            'prep_minutes' => 'integer',
             'is_featured' => 'boolean',
             'published_at' => 'datetime',
             'avg_rating' => 'decimal:2',
@@ -120,6 +121,11 @@ class Restaurant extends Model
     public function tables(): HasMany
     {
         return $this->hasMany(\App\Modules\RestaurantManagement\Models\RestaurantTable::class)->orderBy('label');
+    }
+
+    public function deliveryZones(): HasMany
+    {
+        return $this->hasMany(\App\Modules\Delivery\Models\DeliveryZone::class);
     }
 
     public function publish(): void

@@ -87,6 +87,7 @@ class PermissionRegistry
                 'reservations.manage' => 'Create, confirm, seat, cancel and no-show table reservations',
                 'orders.view' => 'View food orders',
                 'orders.manage' => 'Accept, prepare, complete, cancel and refund food orders',
+                'delivery.manage' => 'Manage delivery zones, prep time and drivers',
             ],
         ];
     }

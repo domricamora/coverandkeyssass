@@ -8,7 +8,7 @@
         </div>
 
         @if ($error)<p role="alert" class="card" style="padding:12px;color:var(--danger, #b91c1c);">{{ $error }}</p>@endif
-        @foreach (['cart', 'fulfillment', 'payment_method', 'delivery_address', 'customer_phone', 'promo_code', 'modifiers'] as $field)
+        @foreach (['cart', 'fulfillment', 'payment_method', 'delivery_address', 'delivery_zone_id', 'customer_phone', 'promo_code', 'modifiers'] as $field)
             @error($field)<p role="alert" class="card" style="padding:12px;color:var(--danger, #b91c1c);">{{ $message }}</p>@enderror
         @endforeach
 
@@ -56,11 +56,27 @@
                     <fieldset style="display:flex;gap:16px;border:0;padding:0;margin:0;">
                         <legend class="muted">How do you want it?</legend>
                         <label><input type="radio" name="fulfillment" value="pickup" x-model="mode" /> Pickup</label>
-                        @if ($listing->delivery_enabled)
+                        @if ($listing->delivery_enabled && $zones->isNotEmpty())
                             <label><input type="radio" name="fulfillment" value="delivery" x-model="mode" /> Delivery</label>
                         @endif
                     </fieldset>
-                    <textarea name="delivery_address" rows="2" class="form-input" placeholder="Delivery address" aria-label="Delivery address" x-show="mode === 'delivery'">{{ old('delivery_address') }}</textarea>
+                    <div x-show="mode === 'delivery'" style="display:grid;gap:8px;"
+                         x-data="{ lat: '{{ old('delivery_lat') }}', lng: '{{ old('delivery_lng') }}', locating: false,
+                                   locate() { this.locating = true; navigator.geolocation?.getCurrentPosition(p => { this.lat = p.coords.latitude.toFixed(7); this.lng = p.coords.longitude.toFixed(7); this.locating = false }, () => this.locating = false) } }">
+                        <select name="delivery_zone_id" class="form-input" aria-label="Delivery area">
+                            @foreach ($zones as $zone)
+                                <option value="{{ $zone->id }}" @selected((int) old('delivery_zone_id') === $zone->id)>{{ $zone->name }} — {{ $zone->termsLabel() }}</option>
+                            @endforeach
+                        </select>
+                        <textarea name="delivery_address" rows="2" class="form-input" placeholder="Delivery address / landmark" aria-label="Delivery address">{{ old('delivery_address') }}</textarea>
+                        <input type="hidden" name="delivery_lat" :value="lat" />
+                        <input type="hidden" name="delivery_lng" :value="lng" />
+                        <button type="button" class="btn btn-sm btn-ghost" @click="locate()" x-text="lat ? 'Location shared ✓' : (locating ? 'Locating…' : 'Share my location (needed for radius zones)')"></button>
+                        <p class="muted" style="margin:0;">The delivery fee is added at checkout from the area you choose.</p>
+                    </div>
+                    <label class="muted" for="scheduled_for">Schedule for later (optional)</label>
+                    <input id="scheduled_for" type="datetime-local" name="scheduled_for" value="{{ old('scheduled_for') }}" class="form-input" min="{{ now()->addMinutes($listing->prep_minutes)->format('Y-m-d\TH:i') }}" />
+                    @error('scheduled_for')<p role="alert" style="color:var(--danger, #b91c1c);margin:0;">{{ $message }}</p>@enderror
                     <input type="text" name="customer_phone" value="{{ old('customer_phone') }}" required class="form-input" placeholder="Mobile number" aria-label="Mobile number" />
                     <textarea name="notes" rows="2" class="form-input" placeholder="Notes for the restaurant (optional)" aria-label="Notes">{{ old('notes') }}</textarea>
                     <fieldset style="display:flex;gap:16px;border:0;padding:0;margin:0;">
