@@ -43,7 +43,7 @@ class NotifyServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             Artisan::command('notifications:trials', function (): void {
                 $sent = 0;
-                TenantModule::query()->with('module')
+                TenantModule::query()->withoutGlobalScope('tenant')->with('module')
                     ->whereBetween('trial_ends_at', [now(), now()->addDays(3)])
                     ->get()
                     ->each(function (TenantModule $subscription) use (&$sent): void {

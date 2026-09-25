@@ -135,6 +135,7 @@ it('warns owners about ending trials once a day', function () {
     $manager = MarketplaceFixtures::member($tenant, 'manager');
     $subscription = \App\Models\TenantModule::query()->where('tenant_id', $tenant->id)->firstOrFail();
     $subscription->forceFill(['trial_ends_at' => now()->addDays(2)])->save();
+    MarketplaceFixtures::asTenant(null); // cron has no tenant context
 
     $this->artisan('notifications:trials')->assertSuccessful();
     $this->artisan('notifications:trials')->assertSuccessful();
