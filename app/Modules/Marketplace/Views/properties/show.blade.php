@@ -5,14 +5,16 @@
     $highlights = (array) ($p->highlights ?? []);
     $amenities = $p->relationLoaded('amenities') ? $p->amenities : collect();
     $reviews = $p->relationLoaded('reviews') ? $p->reviews : collect();
+    $crumbs = ['Stays' => route('marketplace.hotels')];
+    if ($p->location) {
+        $crumbs[$p->location->name] = route('marketplace.locations.show', $p->location->slug);
+    }
+    $crumbs[$p->name] = null;
 @endphp
 
-<x-public-layout :title="$title" :description="Str::limit(strip_tags($p->tagline ?: $p->description ?: $p->name), 150)">
+<x-public-layout :title="$title" :description="Str::limit(strip_tags($p->tagline ?: $p->description ?: $p->name), 155)"
+    :image="$gallery[0] ?? null" :canonical="$url" :breadcrumbs="$crumbs" :schema="[\App\Support\Seo::property($p)]">
     <div class="listing-page container">
-        <a class="back-link" href="{{ url()->previous() !== url()->current() ? url()->previous() : route('marketplace.hotels') }}">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-            Back to results
-        </a>
 
         <div class="listing-head">
             <h1>{{ $p->name }}</h1>

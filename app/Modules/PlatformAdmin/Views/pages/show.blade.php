@@ -1,4 +1,4 @@
-<x-public-layout :title="$page->title" :description="$page->meta_description" :show-search="false">
+<x-public-layout :title="$page->title" :description="$page->meta_description" :show-search="false" :breadcrumbs="[$page->title => null]" :noindex="! $page->is_published">
     <article class="container section" style="max-width:780px;">
         @unless ($page->is_published)<p class="card" style="padding:8px 12px;">Draft preview — only Super Admins can see this.</p>@endunless
         <h1>{{ $page->title }}</h1>

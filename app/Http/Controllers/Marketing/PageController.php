@@ -19,6 +19,16 @@ use Illuminate\Support\Collection;
  */
 class PageController extends Controller
 {
+    /** Shown on /pricing and emitted as FAQPage structured data from the same array. */
+    public const PRICING_FAQ = [
+        'Is there a free plan?' => 'Yes. The foundation (accounts, team roles, audit trail and a marketplace listing) is free for every business. You only pay for the operational modules you switch on.',
+        'Can I try a module before paying?' => 'Modules with a trial period can be switched on without a payment method. You are invoiced only if you keep the module after the trial ends.',
+        'Is yearly billing cheaper?' => 'Yearly billing costs ten times the monthly price, so two months are free.',
+        'What happens if a payment fails?' => 'The invoice moves to past due and the module keeps working through a grace period. After that the module is suspended until the invoice is paid, and your data is kept.',
+        'Do you take a commission on marketplace bookings?' => 'Online bookings and orders paid through the marketplace carry a platform commission. It is deducted before the balance reaches your host wallet, and every deduction is itemised.',
+        'Which payment methods do guests have?' => 'Guests pay online by card, GCash or Maya through PayMongo. Restaurants can also accept cash on pickup and delivery orders.',
+    ];
+
     public function __construct(private readonly MarketplaceSearchService $marketplace) {}
 
     public function home(): View
@@ -57,6 +67,7 @@ class PageController extends Controller
             'sampleStack' => $modules->whereIn('slug', $stack),
             'sampleTotal' => (int) $modules->whereIn('slug', $stack)->sum('monthly_price_cents'),
             'roadmap' => self::roadmap(),
+            'faqs' => self::PRICING_FAQ,
         ]);
     }
 

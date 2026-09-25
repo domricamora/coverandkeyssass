@@ -5,14 +5,14 @@
 ## Snapshot
 
 - Date: 2026-09-26
-- Phase: **29 COMPLETE (verified)** → next **30 — SEO**
-- Tests: PASS — 269 tests, 1738 assertions, MySQL `hospitality_os_testing`
+- Phase: **30 COMPLETE (verified)** → next **31 — API**
+- Tests: PASS — 275 tests, 1779 assertions, MySQL `hospitality_os_testing`
 - Git: local `master` — gh CLI installed but NOT authenticated; if `gh auth login` runs, create private repo + push
 
 ## Environment (ready)
 
 - Windows WAMP PHP 8.3.14 (`C:\wamp64\bin\php\php8.3.14`), Composer 2.10.3, MySQL 9.1.0 (root / no password).
-- Dev DB `hospitality_os` (migrated through Phase 29; local Super Admin admin@coverandkeys.test), test DB `hospitality_os_testing`.
+- Dev DB `hospitality_os` (migrated through Phase 30; local Super Admin admin@coverandkeys.test), test DB `hospitality_os_testing`.
 - The default `php` on PATH is 7.4 — run everything via: `cmd.exe //c "_ai\run.bat php artisan <cmd>"` from the repo root.
 - Frontend build: `node node_modules/vite/bin/vite.js build` (the `&` in the path breaks npm shims).
 - Dev URL: `http://localhost/ck/public`. No Python on this machine; use PHP / bash (prefer the Write tool for files containing quotes — bash heredocs have broken on apostrophes).
@@ -26,12 +26,12 @@
 - **Scheduler**: add `marketing:run` (every 15 min), `accounting:sync`, `notifications:trials` and `billing:run` (daily) to the production schedule / cron.
 - **Before running `billing:run` on dev / prod data**: it expires every module whose trial ended and that has no subscription. Existing demo tenants have old trials — grant them (Super Admin, no trial) or subscribe them first.
 
-## Next actions (Phase 30 — SEO)
+## Next actions (Phase 31 — API)
 
-1. Master plan PHASE 30: SEO titles, meta descriptions, canonical URLs, Open Graph, Twitter cards, Schema.org (Hotel, Restaurant, LocalBusiness, Product, Offer, Review, AggregateRating, BreadcrumbList, FAQ), breadcrumbs, sitemap, robots.txt.
-2. Existing: `x-public-layout` takes `title` + `description`; CMS pages have meta descriptions; listing pages at `/property/{slug}`, `/restaurant/{slug}`, destinations `/hotels/{location}`.
+1. Master plan PHASE 31: read the plan section and build the API.
+2. Design polish pass (user request 2026-09-26) is in progress alongside: see CHANGELOG entries after Phase 30.
 3. Tests → `php artisan test` green → docs → commit.
 
 ## Last command run
 
-`_ai\run.bat php artisan test` → PASS (269 tests, 1738 assertions).
+`_ai\run.bat php artisan test` → PASS (275 tests, 1779 assertions).

@@ -2,13 +2,30 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         @include('layouts.partials.head')
-        <title>{{ $title ? $title.' — '.config('app.name') : config('app.name').' — Hospitality operating system' }}</title>
-        <meta name="description" content="{{ $description ?? 'Cover & Keys runs the whole property: stays, restaurants, housekeeping and guests in one hospitality operating system.' }}">
+        @php
+            $seoDescription = $description ?: 'Cover & Keys runs the whole property: stays, restaurants, housekeeping and guests in one hospitality operating system.';
+            $seoCanonical = $canonical ?? url()->current();
+            $seoImage = $image ? url($image) : null;
+            $seoJsonLd = $jsonLd();
+        @endphp
+        <title>{{ $title ? $title.' | '.config('app.name') : config('app.name').' | Hospitality operating system' }}</title>
+        <meta name="description" content="{{ $seoDescription }}">
+        @if ($noindex)<meta name="robots" content="noindex, follow">@endif
+        <link rel="canonical" href="{{ $seoCanonical }}">
         <meta property="og:type" content="website">
-        <meta property="og:title" content="{{ $title ?? config('app.name') }}">
         <meta property="og:site_name" content="{{ config('app.name') }}">
-        <meta name="twitter:card" content="summary_large_image">
-        <link rel="canonical" href="{{ url()->current() }}">
+        <meta property="og:title" content="{{ $title ?? config('app.name') }}">
+        <meta property="og:description" content="{{ $seoDescription }}">
+        <meta property="og:url" content="{{ $seoCanonical }}">
+        <meta property="og:locale" content="{{ str_replace('-', '_', app()->getLocale()) }}">
+        <meta name="twitter:card" content="{{ $seoImage ? 'summary_large_image' : 'summary' }}">
+        <meta name="twitter:title" content="{{ $title ?? config('app.name') }}">
+        <meta name="twitter:description" content="{{ $seoDescription }}">
+        @if ($seoImage)
+            <meta property="og:image" content="{{ $seoImage }}">
+            <meta name="twitter:image" content="{{ $seoImage }}">
+        @endif
+        @if ($seoJsonLd)<script type="application/ld+json">{!! $seoJsonLd !!}</script>@endif
     </head>
     <body class="public-body">
         <a class="skip-link" href="#main">Skip to content</a>
@@ -90,6 +107,22 @@
                 <div role="status" style="background:var(--gold);color:#1a1a1a;text-align:center;padding:8px 16px;font-weight:500;">{{ $announcement }}</div>
             @endif
             @include('layouts.partials.messages')
+            @if ($breadcrumbs !== [])
+                <nav class="crumbs container" aria-label="Breadcrumb">
+                    <ol>
+                        <li><a href="{{ route('home') }}">Home</a></li>
+                        @foreach ($breadcrumbs as $label => $url)
+                            <li>
+                                @if ($url && ! $loop->last)
+                                    <a href="{{ $url }}">{{ $label }}</a>
+                                @else
+                                    <span aria-current="page">{{ $label }}</span>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ol>
+                </nav>
+            @endif
             {{ $slot }}
         </main>
 

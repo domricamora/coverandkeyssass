@@ -5,14 +5,12 @@
     $reviews = $r->relationLoaded('reviews') ? $r->reviews : collect();
     $hours = (array) ($r->opening_hours ?? []);
     $ordering = app(\App\Modules\Ordering\Services\OrderService::class)->acceptsOrders($r);
+    $crumbs = ['Restaurants' => route('marketplace.restaurants.index'), $r->name => null];
 @endphp
 
-<x-public-layout :title="$title" :description="Str::limit(strip_tags($r->tagline ?: $r->description ?: $r->name), 150)">
+<x-public-layout :title="$title" :description="Str::limit(strip_tags($r->tagline ?: $r->description ?: $r->name), 155)"
+    :image="$gallery[0] ?? null" :canonical="route('marketplace.restaurants.show', $r->slug)" :breadcrumbs="$crumbs" :schema="[\App\Support\Seo::restaurant($r)]">
     <div class="listing-page container">
-        <a class="back-link" href="{{ route('marketplace.restaurants.index') }}">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
-            All restaurants
-        </a>
 
         <div class="listing-head">
             <h1>{{ $r->name }}</h1>

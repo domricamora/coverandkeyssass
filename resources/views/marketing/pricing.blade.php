@@ -1,4 +1,5 @@
-<x-public-layout :title="$title" description="Module pricing for Cover & Keys — pay for the modules your property runs, with trials on every operational module." :show-search="false">
+<x-public-layout :title="$title" description="Module pricing for Cover & Keys. Pay only for the modules your property runs, with free trials on operational modules." :show-search="false"
+    :breadcrumbs="['Pricing' => null]" :schema="[...\App\Support\Seo::productOffers($modules->where('monthly_price_cents', '>', 0)), \App\Support\Seo::faq($faqs)]">
     <section class="container section">
         <div class="section-head">
             <span class="eyebrow">Pricing</span>
@@ -110,6 +111,18 @@
                 Prices are in Philippine pesos, billed monthly, and configured by the platform team.
                 Module limits and promotional rates are set per business in the Super Admin area.
             </p>
+        </div>
+    </section>
+
+    <section class="container section">
+        <h2>Common questions</h2>
+        <div class="faq">
+            @foreach ($faqs as $question => $answer)
+                <details class="faq__item">
+                    <summary>{{ $question }}</summary>
+                    <p>{{ $answer }}</p>
+                </details>
+            @endforeach
         </div>
     </section>
 

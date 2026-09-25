@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\TenantController as AdminTenantController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SeoController;
 use App\Http\Controllers\TenantController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +18,8 @@ Route::get('/', [MarketingPageController::class, 'home'])->name('home');
 Route::get('/features', [MarketingPageController::class, 'features'])->name('marketing.features');
 Route::get('/pricing', [MarketingPageController::class, 'pricing'])->name('marketing.pricing');
 Route::get('/contact', [MarketingPageController::class, 'contact'])->name('marketing.contact');
+Route::get('/robots.txt', [SeoController::class, 'robots'])->name('seo.robots');
+Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');
 
 // ---------------------------------------------------------------------
 // Tenant (host) area

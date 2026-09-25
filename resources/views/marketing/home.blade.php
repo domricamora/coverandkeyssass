@@ -1,4 +1,4 @@
-<x-public-layout :title="$title" description="Cover & Keys is the hospitality operating system for hotels, resorts, B&Bs and restaurants — marketplace, front desk, housekeeping and back office in one platform.">
+<x-public-layout :title="$title" description="Cover & Keys is the hospitality operating system for hotels, resorts, B&Bs and restaurants — marketplace, front desk, housekeeping and back office in one platform." :schema="[\App\Support\Seo::website()]">
     <section class="hero">
         <div class="hero__bg" style="background-image: radial-gradient(120% 90% at 12% 8%, #1f1f22 0%, #121213 45%, #0a0a0b 100%);"></div>
         <div class="container hero__inner">

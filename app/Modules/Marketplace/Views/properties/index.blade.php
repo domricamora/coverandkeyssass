@@ -1,4 +1,13 @@
-<x-public-layout :title="$title" description="Browse published stays with live filters for destination, property type, guests, price and amenities.">
+@php
+    $destination ??= null;
+    // Filtered result sets are near-duplicates of the base page: keep them out of the index.
+    $filtered = collect(request()->except('page'))->filter(fn ($v) => filled($v))->isNotEmpty();
+    $crumbs = $destination ? ['Stays' => route('marketplace.hotels'), $destination->name => null] : ['Stays' => null];
+@endphp
+<x-public-layout :title="$title"
+    :description="$destination ? Str::limit($destination->description ?: 'Hotels, resorts and B&Bs in '.$destination->name.' with live availability and verified guest reviews.', 155) : 'Browse published stays with live filters for destination, property type, guests, price and amenities.'"
+    :canonical="$destination ? route('marketplace.locations.show', $destination->slug) : route('marketplace.hotels')"
+    :breadcrumbs="$crumbs" :noindex="$filtered">
     <div class="results-page">
         <div class="filter-bar">
             <form class="filter-bar__form" method="GET" action="{{ route('marketplace.hotels') }}">

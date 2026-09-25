@@ -2,8 +2,8 @@
 
 ## Current Phase
 
-Phase 29 - Marketplace Administration — **COMPLETE (verified)**
-Next: Phase 30 - SEO
+Phase 30 - SEO — **COMPLETE (verified)**
+Next: Phase 31 - API
 
 ## Completed
 
@@ -38,12 +38,13 @@ Next: Phase 30 - SEO
 - **Phase 27 — SaaS Billing**: `App\Modules\Billing` — per-module subscriptions (monthly / yearly = 10×, dependencies auto-added), invoices (idempotent, trial-prorated, mid-period adds), coupons (race-safe), `billing:run` (renew, past due, suspend after grace, restore on payment, expire unpaid trials), PayMongo + manual payment, usage & plan limits enforced, owner Billing page + Super Admin billing; permissions `billing.*`
 - **Phase 28 — Super Admin**: `App\Modules\PlatformAdmin` — platform KPI dashboard + admin nav, listing approve / suspend / reinstate, cross-business bookings / orders / payments, refunds via the state machines, module pricing editor, CMS pages (safe Markdown, footer links), platform settings (support contact, announcement, default commission), CSV reports (formula-safe), audit log viewer, hosts / customers filter
 - **Phase 29 — Marketplace Administration**: featured (dated) / sponsored (labelled) / ranking boost with one ranked "recommended" order, listing + host verification badges, taxonomy CRUD (locations, property categories, cuisines, amenities), guest listing reports + moderation queue
-- Tests: Pest suite — **269 passed, 1738 assertions** (Phase 29: 4, Phase 28: 6, Phase 27: 8, Phase 26: 6, Phase 25: 4, Phase 24: 4, Phase 23: 6, Phase 22: 7, Phase 21: 4, Phase 20: 6, Phase 19: 5, Phase 18: 6, Phase 17: 6, Phase 16: 4, Phase 15: 5, Phase 14: 7, Phase 13: 5, Phase 12: 6, Phase 11: 8, Phase 10: 6, Phase 09: 10, Phase 05: 19, Phase 06: 7, Phase 07: 12, Phase 08: 10); previously **98 passed, 320 assertions** (`php artisan test`, real MySQL), including 24 Phase 04 coverage tests
+- **Phase 30 — SEO**: meta / canonical / Open Graph / Twitter tags, schema.org JSON-LD via `App\Support\Seo` (lodging types + Offer/Product, Restaurant + Menu, AggregateRating, Review, BreadcrumbList, FAQPage, WebSite SearchAction), visible breadcrumbs, `sitemap.xml`, environment-aware `robots.txt`, noindex on filtered results; fix: dark-theme headings inherited slate-900
+- Tests: Pest suite — **275 passed, 1779 assertions** (Phase 30: 6, Phase 29: 4, Phase 28: 6, Phase 27: 8, Phase 26: 6, Phase 25: 4, Phase 24: 4, Phase 23: 6, Phase 22: 7, Phase 21: 4, Phase 20: 6, Phase 19: 5, Phase 18: 6, Phase 17: 6, Phase 16: 4, Phase 15: 5, Phase 14: 7, Phase 13: 5, Phase 12: 6, Phase 11: 8, Phase 10: 6, Phase 09: 10, Phase 05: 19, Phase 06: 7, Phase 07: 12, Phase 08: 10); previously **98 passed, 320 assertions** (`php artisan test`, real MySQL), including 24 Phase 04 coverage tests
 - Documentation: docs/* updated per phase; `docs/modules/{marketplace,property-management}.md` completed; CHANGELOG carries Phase 01–08 entries
 
 ## In Progress
 
-- (nothing — Phase 30 not started)
+- (nothing — Phase 31 not started)
 
 ## Pending
 
@@ -68,4 +69,4 @@ Claude Code (Opus)
 
 php artisan test
 
-Result: PASS (245 tests, 1477 assertions, MySQL `hospitality_os_testing`)
+Result: PASS (275 tests, 1779 assertions, MySQL `hospitality_os_testing`)

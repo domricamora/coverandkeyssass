@@ -1,5 +1,23 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Phase 30: SEO (v0.30.0)
+
+(verified: 275 tests / 1779 assertions)
+
+- The public layout now emits a meta description, canonical URL, Open Graph and Twitter tags (with the listing's cover image) and an optional robots `noindex`. It also renders one JSON-LD `@graph`.
+- New `App\Support\Seo` builds the schema.org nodes:
+  - Hotel / Resort / B&B / Hostel / LodgingBusiness for stays, with an Offer and Product for the nightly rate.
+  - Restaurant with its Menu and priced MenuItems.
+  - AggregateRating and Review.
+  - BreadcrumbList.
+  - FAQPage and Product + Offer on the pricing page.
+  - WebSite + SearchAction on the home page.
+- Visible breadcrumbs on stays, destinations, listings, restaurants, pricing and CMS pages.
+- Pricing page FAQ. The visible FAQ and the FAQPage markup come from the same array.
+- `/sitemap.xml` (published listings, destinations, marketing and CMS pages) and a dynamic `/robots.txt`: fully closed outside production, private areas fenced in production. The static `public/robots.txt` is removed.
+- Filtered search results are `noindex, follow`, and `/search` canonicalises to `/hotels`.
+- Fix: public-page headings inherited `slate-900` from the Tailwind body rule and were near-invisible on the dark theme.
+- 6 new Pest tests.
 ## 2026-09-26 — Phase 29: Marketplace Administration (v0.29.0)
 
 (verified: 269 tests / 1738 assertions)
