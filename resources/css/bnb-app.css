@@ -38,7 +38,7 @@
 
   --gold:      #c9a227;               /* primary accent */
   --gold-soft: #d9bd6a;               /* on-dark accent text */
-  --gold-dim:  rgba(201, 162, 39, .14);
+  --gold-dim:  rgba(214, 183, 122, .14);
   --gold-deep: #a8861d;               /* hover/pressed gold */
 
   --brown:      #6b4f3a;              /* secondary accent */
@@ -263,7 +263,7 @@ textarea.form-input { resize: vertical; }
   padding: 13px 18px; border-radius: var(--radius); font-weight: 600; font-size: .92rem;
   box-shadow: var(--shadow); animation: flash-in .25s ease;
 }
-.flash-success { background: var(--surface-2); color: var(--gold-soft); border: 1px solid rgba(201, 162, 39, .35); }
+.flash-success { background: var(--surface-2); color: var(--gold-soft); border: 1px solid rgba(214, 183, 122, .35); }
 .flash-warning { background: var(--amber-bg); color: var(--amber); border: 1px solid #e9d8a6; }
 .flash-error { background: var(--red-bg); color: var(--red); border: 1px solid #eccdc6; }
 @keyframes flash-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }

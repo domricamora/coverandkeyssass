@@ -22,10 +22,26 @@ class DashboardController extends Controller
             ->orderBy('created_at')
             ->get();
 
+        $properties = \App\Modules\Marketplace\Models\Property::query();
+        $restaurants = \App\Modules\Marketplace\Models\Restaurant::query();
+        $activeModules = app(\App\Support\ModuleService::class)->activeForTenant($tenant)
+            ->filter(fn ($tm) => $tm->module && ! $tm->module->is_core && $tm->expires_at === null);
+
+        // Onboarding steps, each ticked from real data.
+        $steps = [
+            ['done' => $members->count() > 1, 'label' => 'Invite your team and give each member a role', 'route' => 'team'],
+            ['done' => $activeModules->isNotEmpty(), 'label' => 'Switch on the modules your business runs', 'route' => 'billing.index'],
+            ['done' => (clone $properties)->exists() || (clone $restaurants)->exists(), 'label' => 'Add your first property or restaurant', 'route' => 'properties.index'],
+            ['done' => (clone $properties)->where('status', 'published')->exists() || (clone $restaurants)->where('status', 'published')->exists(), 'label' => 'Publish a listing to the marketplace', 'route' => 'properties.index'],
+        ];
+
         return view('dashboard', [
             'tenant' => $tenant,
             'members' => $members,
             'userRole' => $request->user()->tenantRole($tenant),
+            'listings' => (clone $properties)->count() + (clone $restaurants)->count(),
+            'activeModules' => $activeModules,
+            'steps' => $steps,
         ]);
     }
 

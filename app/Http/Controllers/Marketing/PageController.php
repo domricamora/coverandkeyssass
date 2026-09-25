@@ -68,6 +68,9 @@ class PageController extends Controller
             'sampleTotal' => (int) $modules->whereIn('slug', $stack)->sum('monthly_price_cents'),
             'roadmap' => self::roadmap(),
             'faqs' => self::PRICING_FAQ,
+            // Standard marketplace rate: the global rule, else the platform default.
+            'commission' => (float) (\App\Modules\Wallet\Models\CommissionRate::query()->where('kind', \App\Modules\Wallet\Models\CommissionRate::GLOBAL)->latest('id')->value('rate')
+                ?? \App\Modules\Wallet\Models\CommissionRate::defaultRate()),
         ]);
     }
 
@@ -97,20 +100,19 @@ class PageController extends Controller
     }
 
     /**
-     * Delivery roadmap shown on the marketing pages. Mirrors the master
-     * plan phase list — statuses are updated as each phase actually ships.
+     * Delivery roadmap shown on the marketing pages, grouped from the master
+     * plan phases. Update the statuses when a phase actually ships.
      */
     public static function roadmap(): array
     {
         return [
-            ['phase' => 1, 'title' => 'Foundation', 'status' => 'complete', 'summary' => 'Accounts, multi-tenancy, RBAC, audit trail, Super Admin.'],
-            ['phase' => 2, 'title' => 'Module engine', 'status' => 'complete', 'summary' => 'Enable/disable modules per business, pricing, limits, dependencies.'],
-            ['phase' => 3, 'title' => 'Marketplace', 'status' => 'current', 'summary' => 'Public search, destinations, property and restaurant detail pages, wish lists.'],
-            ['phase' => 4, 'title' => 'Property management', 'status' => 'next', 'summary' => 'Host-side property, room type and room inventory management.'],
-            ['phase' => 5, 'title' => 'Booking engine', 'status' => 'planned', 'summary' => 'Availability, reservations, rate plans — no double bookings.'],
-            ['phase' => 7, 'title' => 'PayMongo payments', 'status' => 'planned', 'summary' => 'Payment intents, verified webhooks, refunds.'],
-            ['phase' => 9, 'title' => 'Restaurant operations', 'status' => 'planned', 'summary' => 'Menus, table reservations, online ordering, room service.'],
-            ['phase' => 15, 'title' => 'Housekeeping & maintenance', 'status' => 'planned', 'summary' => 'Room status board, cleaning tasks, maintenance tickets.'],
+            ['phases' => '01-08', 'title' => 'Stays and payments', 'status' => 'complete', 'summary' => 'Marketplace, property and room inventory, booking engine, guest portal, PayMongo, host wallet and payouts.'],
+            ['phases' => '09-14', 'title' => 'Restaurants', 'status' => 'complete', 'summary' => 'Menus, table reservations, online ordering, delivery, room service and the guest folio.'],
+            ['phases' => '15-19', 'title' => 'Operations', 'status' => 'complete', 'summary' => 'Housekeeping, maintenance, staff rosters, inventory and purchasing, point of sale.'],
+            ['phases' => '20-27', 'title' => 'Back office and guests', 'status' => 'complete', 'summary' => 'Double-entry accounting, CRM, campaigns, loyalty, reviews, messaging, notifications and SaaS billing.'],
+            ['phases' => '28-30', 'title' => 'Platform', 'status' => 'complete', 'summary' => 'Super Admin control centre, marketplace placement and moderation, SEO and structured data.'],
+            ['phases' => '31', 'title' => 'Public API', 'status' => 'next', 'summary' => 'Token-authenticated REST API for channel managers, apps and integrations.'],
+            ['phases' => '32-38', 'title' => 'Hardening and launch', 'status' => 'planned', 'summary' => 'Security audit, performance, deployment, backups and monitoring.'],
         ];
     }
 }

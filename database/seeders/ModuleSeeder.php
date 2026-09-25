@@ -19,7 +19,7 @@ class ModuleSeeder extends Seeder
             [
                 'slug' => 'core',
                 'name' => 'Core',
-                'description' => 'Platform foundation — tenant management, team, roles, and audit.',
+                'description' => 'Platform foundation: tenant management, team, roles and audit.',
                 'category' => 'foundation',
                 'icon' => 'shield-check',
                 'is_core' => true,

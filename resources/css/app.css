@@ -305,3 +305,1077 @@ select.filter-bar__input {
         transform: none;
     }
 }
+/* ============================================================================
+   Marketing site components (design pass, 2026-09-26)
+   One radius scale (--radius / --radius-lg), one accent (gold), ink surfaces.
+   ========================================================================== */
+.hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+/* Live marketplace counts: plain numerals on a hairline band, no cards. */
+.stat-band {
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-raised);
+}
+
+.stat-band__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin: 0 auto;
+}
+
+.stat-band__grid > div {
+    padding: 22px 24px;
+}
+
+.stat-band__grid > div + div {
+    border-left: 1px solid var(--border);
+}
+
+.stat-band dt {
+    font-size: 0.82rem;
+    color: var(--text-3);
+}
+
+.stat-band dd {
+    margin: 4px 0 0;
+    font-family: var(--font-display);
+    font-size: 2rem;
+    line-height: 1.1;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Module catalogue: two-column rows instead of a wall of identical cards. */
+.module-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 40px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.module-list__item {
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    gap: 16px;
+    align-items: start;
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+}
+
+.module-list__icon {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius);
+    background: var(--gold-dim);
+    color: var(--gold-soft);
+}
+
+.module-list__body h3 {
+    margin: 0 0 2px;
+    color: var(--text);
+}
+
+.module-list__body p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-3);
+}
+
+.module-list__price {
+    display: grid;
+    justify-items: end;
+    gap: 2px;
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+
+.module-list__price strong {
+    color: var(--text);
+}
+
+.module-list__price span,
+.module-list__price small {
+    font-size: 0.78rem;
+    color: var(--text-3);
+}
+
+/* Roadmap: one row per phase group, status on the right. */
+.roadmap {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--border);
+}
+
+.roadmap__item {
+    display: grid;
+    grid-template-columns: 120px minmax(0, 1fr) auto;
+    gap: 20px;
+    align-items: baseline;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.roadmap__phases {
+    font-family: "Geist Mono", ui-monospace, monospace;
+    font-size: 0.8rem;
+    color: var(--text-3);
+}
+
+.roadmap__item h3 {
+    margin: 0 0 2px;
+    color: var(--text);
+}
+
+.roadmap__item p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-3);
+    max-width: 70ch;
+}
+
+.roadmap__status {
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--text-3);
+}
+
+.roadmap__item--complete .roadmap__status {
+    color: var(--gold-soft);
+    border-color: rgba(214, 183, 122, 0.35);
+    background: var(--gold-dim);
+}
+
+.roadmap__item--next .roadmap__status {
+    color: var(--ink-900);
+    background: var(--gold);
+    border-color: var(--gold);
+}
+
+.roadmap__item--planned h3,
+.roadmap__item--planned p {
+    opacity: 0.7;
+}
+
+/* Features page */
+.feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.feature__head {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.feature__head h3 {
+    margin: 0;
+}
+
+.feature__head .feature__ico {
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.feature__price {
+    margin: 2px 0 0;
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.feature__list {
+    display: grid;
+    gap: 10px;
+    margin: 14px 0 0;
+    padding: 14px 0 0;
+    list-style: none;
+    border-top: 1px solid var(--border);
+}
+
+.feature__list li {
+    display: grid;
+    grid-template-columns: 15px minmax(0, 1fr);
+    gap: 10px;
+    font-size: 0.9rem;
+    color: var(--text-2);
+}
+
+.feature__list svg {
+    margin-top: 3px;
+    color: var(--gold-soft);
+}
+
+.feature__list .muted {
+    display: block;
+}
+
+/* Pricing plans */
+.plan-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    align-items: stretch;
+}
+
+.plan {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 26px;
+}
+
+.plan--featured {
+    border-color: rgba(214, 183, 122, 0.45);
+    box-shadow: 0 0 0 1px rgba(214, 183, 122, 0.18), 0 18px 40px -24px rgba(214, 183, 122, 0.35);
+}
+
+.plan__name {
+    font-family: var(--font);
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-2);
+    margin: 0;
+}
+
+.plan__price {
+    margin: 4px 0 0;
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    line-height: 1.1;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+}
+
+.plan__price span {
+    display: block;
+    margin-top: 4px;
+    font-family: var(--font);
+    font-size: 0.82rem;
+    color: var(--text-3);
+}
+
+.plan__lede {
+    color: var(--text-3);
+    margin: 4px 0 8px;
+}
+
+.plan__list {
+    display: grid;
+    gap: 10px;
+    margin: 6px 0 20px;
+    padding: 16px 0 0;
+    list-style: none;
+    border-top: 1px solid var(--border);
+    font-size: 0.92rem;
+    color: var(--text-2);
+}
+
+.plan__list li {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.plan__list svg {
+    flex-shrink: 0;
+    color: var(--gold-soft);
+}
+
+.plan__item-price {
+    margin-left: auto;
+    color: var(--text-3);
+    font-variant-numeric: tabular-nums;
+}
+
+.plan .btn {
+    margin-top: auto;
+}
+
+.plan__note {
+    margin: 10px 0 0;
+    font-size: 0.8rem;
+    color: var(--text-4);
+}
+
+/* Pricing catalogue table */
+.price-table tbody th {
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 0.9rem;
+    color: var(--text);
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border);
+}
+
+.price-table .price-table__group th {
+    padding-top: 22px;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: var(--text);
+    background: transparent;
+}
+
+.price-table__name {
+    display: inline-flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.price-table__name svg {
+    color: var(--gold-soft);
+}
+
+.price-table .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 900px) {
+    .module-list,
+    .feature-grid,
+    .plan-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .roadmap__item {
+        grid-template-columns: 1fr auto;
+    }
+
+    .roadmap__phases {
+        grid-column: 1 / -1;
+    }
+
+    .stat-band__grid > div {
+        padding: 16px 12px;
+    }
+
+    .stat-band dd {
+        font-size: 1.5rem;
+    }
+}
+
+/* `.section` resets horizontal padding; keep the container gutter when both apply. */
+.container.section {
+    padding-left: 24px;
+    padding-right: 24px;
+}
+
+.module-list__price span {
+    display: inline;
+}
+
+/* ============================================================================
+   App shell fixes (design pass, 2026-09-26)
+   ========================================================================== */
+/* Sidebar icons had no size and filled their row. */
+.side-nav__icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+/* Initial avatars: sized and filled so the white initial is visible. */
+.avatar {
+    width: 44px;
+    height: 44px;
+    font-size: 1rem;
+    background: var(--brown);
+    color: var(--bone);
+}
+
+.avatar--sm {
+    width: 30px;
+    height: 30px;
+    font-size: 0.8rem;
+}
+
+/* ============================================================================
+   Type system: Playfair for display, Geist for UI and body (classy + modern).
+   Lining, tabular figures everywhere numbers are compared.
+   ========================================================================== */
+:root {
+    --font: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+body {
+    font-family: var(--font);
+    font-feature-settings: "ss01" on;
+    letter-spacing: -0.005em;
+}
+
+.stat__value,
+.plan__price,
+.stat-band dd,
+.table td,
+.price-table .num {
+    font-variant-numeric: lining-nums tabular-nums;
+}
+
+h1, h2, .stat__value, .plan__price, .stat-band dd {
+    font-variant-numeric: lining-nums;
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Dashboard overview */
+.dash-kicker {
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-3);
+}
+
+.stat-grid--4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.overview-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.overview-card {
+    padding: 24px;
+}
+
+.overview-card .dash-h2 {
+    margin: 0;
+}
+
+.overview-card__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.progress {
+    height: 4px;
+    margin: 14px 0 6px;
+    border-radius: 999px;
+    background: var(--soft-2);
+    overflow: hidden;
+}
+
+.progress span {
+    display: block;
+    height: 100%;
+    background: var(--gold);
+    transform-origin: left;
+    transition: transform 400ms var(--ease-out);
+}
+
+.checklist {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.checklist__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 52px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.checklist__item:last-child {
+    border-bottom: 0;
+}
+
+.checklist__mark {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 1.5px solid var(--input-border);
+}
+
+.checklist__item.is-done .checklist__mark {
+    border-color: var(--gold);
+    background: var(--gold);
+    color: var(--ink-900);
+}
+
+.checklist__label {
+    flex: 1;
+    font-size: 0.93rem;
+    color: var(--text);
+}
+
+.checklist__item.is-done .checklist__label {
+    color: var(--text-3);
+}
+
+.kv {
+    display: grid;
+    gap: 0;
+    margin: 12px 0 0;
+}
+
+.kv > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
+}
+
+.kv > div:last-child {
+    border-bottom: 0;
+}
+
+.kv dt {
+    color: var(--text-3);
+}
+
+.kv dd {
+    margin: 0;
+    font-weight: 600;
+    color: var(--text);
+    text-align: right;
+}
+
+@media (max-width: 1024px) {
+    .stat-grid--4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .overview-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ------------------------------------------------------------ hero media --- */
+.hero--media .hero__bg {
+    background-size: cover;
+    background-position: center;
+}
+
+.hero__video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Keep the legibility gradients above the video. */
+.hero--media .hero__bg::before,
+.hero--media .hero__bg::after {
+    z-index: 1;
+}
+
+.hero--media .hero__inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: min(78dvh, 720px);
+}
+
+.hero--media .hero__inner > p {
+    color: var(--bone);
+}
+
+@media (max-width: 767px) {
+    .hero--media .hero__inner {
+        min-height: 0;
+        padding-top: 72px;
+        padding-bottom: 64px;
+    }
+}
+
+.hero--media .hero__inner {
+    z-index: 2;
+}
+
+.hero--media .hero__inner {
+    align-items: flex-start;
+}
+
+.stat-band__grid > div:first-child {
+    padding-left: 0;
+}
+
+/* ---------------------------------------------- listing gallery mosaic --- */
+/* Main photo left, remaining photos stacked right (desktop); stacked on phones. */
+@media (min-width: 768px) {
+    .gallery:has(.thumb-row) {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+        gap: 10px;
+    }
+
+    .gallery:has(.thumb-row) .gallery__main {
+        height: 100%;
+        aspect-ratio: auto;
+        min-height: 420px;
+        border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+    }
+
+    .gallery:has(.thumb-row) .thumb-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        grid-auto-rows: 1fr;
+        margin: 0;
+    }
+
+    .gallery:has(.thumb-row) .thumb-row__item {
+        aspect-ratio: auto;
+        border: 0;
+        border-radius: 0;
+    }
+
+    .gallery:has(.thumb-row) .thumb-row__item:first-child {
+        border-top-right-radius: var(--radius-lg);
+    }
+
+    .gallery:has(.thumb-row) .thumb-row__item:last-child {
+        border-bottom-right-radius: var(--radius-lg);
+    }
+
+    /* Only the first two extra photos fit the mosaic. */
+    .gallery:has(.thumb-row) .thumb-row__item:nth-child(n + 3) {
+        display: none;
+    }
+}
+
+.thumb-row__item img {
+    transition: transform 300ms var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .thumb-row__item:hover img {
+        transform: scale(1.03);
+    }
+}
+
+/* ============================================================================
+   Square geometry (owner preference: modern and classy, no rounded corners).
+   The bnb stylesheet hardcodes radii in many places, so this is one global
+   override rather than per-component edits. Avatars and checklist marks stay
+   circular: the circle is their meaning, not decoration.
+   ========================================================================== */
+:root {
+    --radius-sm: 0;
+    --radius: 0;
+    --radius-lg: 0;
+}
+
+*:not(.avatar):not(.checklist__mark),
+*::before,
+*::after {
+    border-radius: 0 !important;
+}
+
+/* ============================================================================
+   Responsive navigation (drawers) and small-screen fixes
+   ========================================================================== */
+.nav-menu-btn {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    min-width: 44px;
+    justify-content: center;
+    padding: 0 12px;
+    border: 1px solid var(--input-border);
+    background: var(--input-bg);
+    color: var(--text);
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.nav-menu-btn:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+}
+
+.mobile-nav {
+    display: none;
+}
+
+.dash-row-head {
+    flex-wrap: wrap;
+}
+
+@media (max-width: 900px) {
+    .nav-menu-btn {
+        display: inline-flex;
+    }
+
+    /* Public header: the drawer carries the links. */
+    .site-header .nav-links {
+        display: none;
+    }
+
+    .mobile-nav.is-open {
+        display: grid;
+        padding: 8px 16px 16px;
+        border-top: 1px solid var(--border);
+        background: var(--bg);
+    }
+
+    .mobile-nav a:not(.btn) {
+        display: flex;
+        align-items: center;
+        min-height: 48px;
+        border-bottom: 1px solid var(--border);
+        color: var(--text);
+        font-weight: 500;
+    }
+
+    .mobile-nav .btn {
+        margin-top: 12px;
+    }
+
+    /* Dashboard: sidebar becomes a drawer under the header. */
+    .dash__side {
+        display: none;
+    }
+
+    .dash__side.is-open {
+        display: block;
+    }
+
+    .dash__side.is-open .side-nav {
+        flex-direction: column;
+        flex-wrap: nowrap;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .dash__side.is-open .side-nav a {
+        min-height: 44px;
+    }
+}
+
+@media (max-width: 620px) {
+    /* Guest CTAs live in the drawer on phones. */
+    .site-header .nav > .nav-user__link,
+    .site-header .nav > .btn {
+        display: none;
+    }
+
+    .price-table th:nth-child(2),
+    .price-table td:nth-child(2) {
+        display: none;
+    }
+
+    .container,
+    .container.section {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .hero__inner {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+}
+
+/* Report-a-listing form must fit narrow screens. */
+form[action*="/report"] {
+    width: min(360px, calc(100vw - 40px));
+    min-width: 0 !important;
+}
+
+/* ============================================================================
+   Palette v2: cool ink + champagne (design pass, 2026-09-26)
+   - Ink: cool near-black with a faint blue cast (modern, recedes behind photos)
+   - Accent: desaturated champagne, the complement of the sea blues in the
+     imagery; one accent, used sparingly
+   - Neutrals: cool greys matched to the ink; every text token >= 4.5:1 on its surface
+   ========================================================================== */
+:root {
+    --ink-900: #0b0c0e;
+    --ink-800: #111317;
+    --ink-700: #171a1f;
+    --ink-500: #2a2e36;
+    --hairline: #23262d;
+
+    --bone: #f3f1ec;
+    --mist: #c9ccd1;
+    --smoke: #9a9fa7;
+    --ash: #7d828b;
+
+    --gold: #d6b77a;
+    --gold-soft: #e4cfa3;
+    --gold-deep: #b8975a;
+    --gold-dim: rgba(214, 183, 122, 0.12);
+
+    --brown: #2a2e36;
+    --brown-soft: #c9ccd1;
+
+    --amber: #8a6a1f;  --amber-bg: #f6efdf;
+    --green: #2f6b4f;  --green-bg: #e6f0ea;
+    --red:   #a3372f;  --red-bg: #f8e7e5;
+    --blue:  #28576b;  --blue-bg: #e4eef2;
+
+    --bg: var(--ink-900);
+    --bg-raised: var(--ink-800);
+    --surface: var(--ink-700);
+    --surface-2: var(--ink-800);
+    --border: var(--hairline);
+    --input-border: #33373f;
+}
+
+.dash-body,
+.admin-body {
+    --bg: #f6f6f4;
+    --bg-raised: #efefec;
+    --surface: #ffffff;
+    --surface-2: #ffffff;
+    --border: #e3e3df;
+    --text: #111317;
+    --text-2: #3a3f47;
+    --text-3: #626771;
+    --text-4: #7d828b;
+    --soft: #f0f0ed;
+    --soft-2: #e7e7e3;
+    --input-border: #c9cbcf;
+}
+
+/* Tailwind body rule set slate-50; the app theme owns the background. */
+body.dash-body {
+    background: var(--bg);
+    color: var(--text);
+}
+
+/* Light surfaces: champagne is too pale as text, so accents read in ink. */
+.dash-body .eyebrow,
+.admin-body .eyebrow {
+    color: var(--gold-deep);
+}
+
+.dash-body .side-nav a.is-active,
+.admin-body .side-nav a.is-active {
+    background: var(--ink-800);
+    color: var(--bone);
+}
+
+.dash-body .side-nav a.is-active .side-nav__icon {
+    color: var(--gold);
+}
+
+.avatar {
+    background: var(--ink-500);
+    color: var(--gold-soft);
+}
+
+.btn-primary:hover {
+    background: var(--gold-soft);
+}
+
+/* Search filters: a toggle on phones/tablets, always open on desktop. */
+.filter-toggle {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    .filter-toggle {
+        display: inline-flex;
+        margin-bottom: 12px;
+    }
+
+    .filter-rail {
+        display: none;
+    }
+
+    .filter-rail.is-open {
+        display: block;
+    }
+}
+
+/* Report form opens as a small popover anchored to its trigger (right-aligned). */
+details:has(> form[action*="/report"]) {
+    position: relative;
+}
+
+form[action*="/report"] {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    z-index: 20;
+}
+
+/* Any table inside a card scrolls sideways instead of widening the page. */
+.card:has(> .table),
+.card:has(> table) {
+    overflow-x: auto;
+}
+
+/* Grid/flex children must be allowed to shrink below their content width. */
+.listing-body > * {
+    min-width: 0;
+}
+
+@media (max-width: 620px) {
+    .dash__main .flex {
+        flex-wrap: wrap;
+    }
+
+    .dash__main .form-input {
+        max-width: 100%;
+    }
+}
+
+/* Native controls follow the theme: dark public site, light dashboards.
+   Without this, <option> lists render light text on a white system popup. */
+body.public-body {
+    color-scheme: dark;
+}
+
+body.dash-body,
+body.admin-body {
+    color-scheme: light;
+}
+
+select,
+option,
+optgroup {
+    font-family: var(--font);
+}
+
+select option,
+select optgroup {
+    background-color: var(--surface);
+    color: var(--text);
+}
+
+select option:checked {
+    background-color: var(--gold-dim);
+}
+
+/* Display type: Instrument Sans (replaces Playfair). Light weight, tight
+   tracking: classy through restraint rather than ornament. */
+:root {
+    --font-display: "Instrument Sans", "Geist", -apple-system, sans-serif;
+}
+
+h1,
+h2,
+.stat__value,
+.plan__price,
+.stat-band dd {
+    font-family: var(--font-display);
+    font-weight: 500;
+    letter-spacing: -0.025em;
+}
+
+.hero__inner h1 {
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 1.02;
+}
+
+/* ------------------------------------------------------------- sidebar --- */
+.side-nav {
+    gap: 1px;
+}
+
+.side-nav a {
+    gap: 10px;
+    min-height: 36px;
+    padding: 7px 10px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+
+.side-nav__icon {
+    width: 17px;
+    height: 17px;
+    opacity: 0.8;
+}
+
+.side-nav__business {
+    margin: 0 10px 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-display);
+    font-size: 1.02rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--text);
+}
+
+.side-nav__head {
+    margin: 18px 10px 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-4);
+}
+
+.side-nav__rule {
+    margin: 14px 10px;
+    border-color: var(--border);
+}
+
+.side-nav__badge {
+    margin-left: auto;
+    min-width: 20px;
+    padding: 1px 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-align: center;
+    background: var(--gold);
+    color: var(--ink-900);
+    font-variant-numeric: tabular-nums;
+}
+
+/* One control height so labels and controls line up in inline filter rows. */
+.form-input:not(textarea) {
+    height: 44px;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.form-input--sm:not(textarea) {
+    height: 34px;
+}
+
+.flex > div > .form-label:first-child,
+.flex > label.form-label:first-child {
+    margin-top: 0;
+}

@@ -1,60 +1,57 @@
 <x-public-layout :title="$title" description="Module pricing for Cover & Keys. Pay only for the modules your property runs, with free trials on operational modules." :show-search="false"
     :breadcrumbs="['Pricing' => null]" :schema="[...\App\Support\Seo::productOffers($modules->where('monthly_price_cents', '>', 0)), \App\Support\Seo::faq($faqs)]">
+    @php
+        $check = '<svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>';
+    @endphp
+
     <section class="container section">
         <div class="section-head">
             <span class="eyebrow">Pricing</span>
             <h1>Pay for the modules you run</h1>
             <p>
-                The foundation (accounts, multi-tenancy, RBAC, audit trail) is included with every
-                business. Everything else is a module you can switch on — each with a trial period
-                where the module defines one. Prices come straight from the module engine, so this
-                page can never fall out of date.
+                The foundation is free for every business. Everything else is a module you switch
+                on when you need it, most with a free trial. Prices below are read live from the
+                module catalogue.
             </p>
         </div>
 
-        <div class="grid grid-3">
-            <div class="card feature">
-                <span class="feature__ico" aria-hidden="true">
-                    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 4v5c0 4.5-3 8-7 9-4-1-7-4.5-7-9V7l7-4z"/></svg>
-                </span>
-                <h3>Foundation</h3>
-                <p class="stat__value" style="font-size:1.6rem;">Free</p>
-                <p>Every business account includes the platform core.</p>
-                <ul class="amenities" style="grid-template-columns:1fr;gap:8px;">
-                    <li><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Multiple properties &amp; sub-accounts</li>
-                    <li><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Team, roles &amp; granular permissions</li>
-                    <li><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Audit trail for privileged actions</li>
-                    <li><svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg> Marketplace listing &amp; wish lists</li>
+        <div class="plan-grid">
+            <div class="card plan">
+                <h2 class="plan__name">Foundation</h2>
+                <p class="plan__price">Free</p>
+                <p class="plan__lede">The platform core, included with every business account.</p>
+                <ul class="plan__list">
+                    <li>{!! $check !!} Multiple properties and restaurants</li>
+                    <li>{!! $check !!} Team, roles and granular permissions</li>
+                    <li>{!! $check !!} Audit trail for privileged actions</li>
+                    <li>{!! $check !!} Marketplace listing and guest wish lists</li>
                 </ul>
-                <a class="btn btn-primary btn-block mt-4" href="{{ route('register') }}">Create an account</a>
+                <a class="btn btn-outline btn-block" href="{{ route('register') }}">Get started</a>
             </div>
 
-            <div class="card feature">
-                <span class="feature__ico" aria-hidden="true">
-                    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-5h6v5"/></svg>
-                </span>
-                <h3>Typical stay stack</h3>
-                <p class="stat__value" style="font-size:1.6rem;">₱{{ number_format($sampleTotal / 100, 0) }}<span style="font-size:.9rem;color:var(--text-3);"> / month</span></p>
-                <p>{{ $sampleStack->pluck('name')->implode(' + ') }} — the bundle most hotels start with.</p>
-                <ul class="amenities" style="grid-template-columns:1fr;gap:8px;">
+            <div class="card plan plan--featured">
+                <h2 class="plan__name">Typical hotel stack</h2>
+                <p class="plan__price">₱{{ number_format($sampleTotal / 100, 0) }}<span>/ month</span></p>
+                <p class="plan__lede">What most hotels switch on first.</p>
+                <ul class="plan__list">
                     @foreach ($sampleStack as $module)
-                        <li>
-                            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                            <span>{{ $module->name }} — ₱{{ number_format($module->monthly_price_cents / 100, 0) }}</span>
-                        </li>
+                        <li>{!! $check !!} <span>{{ $module->name }}</span> <span class="plan__item-price">₱{{ number_format($module->monthly_price_cents / 100, 0) }}</span></li>
                     @endforeach
                 </ul>
-                <p class="muted mt-2">Modules are enabled per business; enabling one automatically enables the modules it depends on.</p>
+                <a class="btn btn-primary btn-block" href="{{ route('register') }}">Get started</a>
+                <p class="plan__note">Enabling a module also enables the modules it depends on.</p>
             </div>
 
-            <div class="card feature">
-                <span class="feature__ico" aria-hidden="true">
-                    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 17l6-6 4 4 8-8M21 7v6h-6"/></svg>
-                </span>
-                <h3>Marketplace commission</h3>
-                <p class="stat__value" style="font-size:1.6rem;">Phase 08</p>
-                <p>Host wallet, commissions and payouts land with the finance phase — platform-wide rates with per-property overrides.</p>
-                <p class="muted">Until then, published listings carry no platform booking fee.</p>
+            <div class="card plan">
+                <h2 class="plan__name">Marketplace bookings</h2>
+                <p class="plan__price">{{ rtrim(rtrim(number_format($commission, 2), '0'), '.') }}%<span>per paid booking or order</span></p>
+                <p class="plan__lede">Commission on guest payments taken through the marketplace. No listing fee.</p>
+                <ul class="plan__list">
+                    <li>{!! $check !!} Deducted before funds reach your host wallet</li>
+                    <li>{!! $check !!} Every deduction itemised in the wallet ledger</li>
+                    <li>{!! $check !!} Reversed automatically on refunds</li>
+                    <li>{!! $check !!} Request payouts from your dashboard</li>
+                </ul>
             </div>
         </div>
     </section>
@@ -62,55 +59,43 @@
     <section class="section section--raised">
         <div class="container">
             <div class="section-head">
-                <span class="eyebrow">Full catalogue</span>
                 <h2>Every module and its monthly price</h2>
+                <p>Yearly billing is ten times the monthly price. Prices are in Philippine pesos.</p>
             </div>
 
-            @forelse ($grouped as $category => $items)
-                <div class="listing-block">
-                    <h2>{{ Str::headline($category) }}</h2>
-                    <div class="card table-wrap">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Module</th>
-                                    <th scope="col">What it does</th>
-                                    <th scope="col">Trial</th>
-                                    <th scope="col">Monthly</th>
-                                </tr>
-                            </thead>
+            @if ($grouped->isEmpty())
+                <div class="empty">The module catalogue has not been seeded yet.</div>
+            @else
+                <div class="card table-wrap">
+                    <table class="table price-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Module</th>
+                                <th scope="col">What it does</th>
+                                <th scope="col">Trial</th>
+                                <th scope="col" class="num">Monthly</th>
+                            </tr>
+                        </thead>
+                        @foreach ($grouped as $category => $items)
                             <tbody>
+                                <tr class="price-table__group"><th colspan="4" scope="colgroup">{{ Str::headline($category) }}</th></tr>
                                 @foreach ($items as $module)
                                     <tr>
-                                        <td>
-                                            <strong>{{ $module->name }}</strong>
-                                            @if ($module->is_core)
-                                                <span class="badge badge-amber">Core</span>
-                                            @endif
-                                        </td>
+                                        <th scope="row">
+                                            <span class="price-table__name">@include('marketing.partials.module-icon', ['slug' => $module->slug, 'size' => 18]) {{ $module->name }}</span>
+                                        </th>
                                         <td>{{ $module->description }}</td>
-                                        <td>{{ $module->trial_days > 0 ? $module->trial_days.' days' : '—' }}</td>
-                                        <td>
-                                            @if ($module->monthly_price_cents === 0)
-                                                <strong>Free</strong>
-                                            @else
-                                                <strong>₱{{ number_format($module->monthly_price_cents / 100, 0) }}</strong>
-                                            @endif
+                                        <td>{{ $module->trial_days > 0 ? $module->trial_days.' days' : 'None' }}</td>
+                                        <td class="num">
+                                            <strong>{{ $module->monthly_price_cents === 0 ? 'Free' : '₱'.number_format($module->monthly_price_cents / 100, 0) }}</strong>
                                         </td>
                                     </tr>
                                 @endforeach
                             </tbody>
-                        </table>
-                    </div>
+                        @endforeach
+                    </table>
                 </div>
-            @empty
-                <div class="empty">The module catalogue has not been seeded yet.</div>
-            @endforelse
-
-            <p class="muted mt-4">
-                Prices are in Philippine pesos, billed monthly, and configured by the platform team.
-                Module limits and promotional rates are set per business in the Super Admin area.
-            </p>
+            @endif
         </div>
     </section>
 
@@ -130,10 +115,10 @@
         <div class="container section host-cta__inner">
             <div>
                 <h2>Try any operational module free</h2>
-                <p>Modules with a trial period can be switched on for a business without a payment method.</p>
+                <p>Modules with a trial can be switched on without a payment method.</p>
             </div>
-            <div style="display:flex;gap:12px;flex-wrap:wrap;">
-                <a class="btn btn-primary" href="{{ route('register') }}">Create your account</a>
+            <div class="hero__actions">
+                <a class="btn btn-primary" href="{{ route('register') }}">Get started</a>
                 <a class="btn btn-light" href="{{ route('marketing.contact') }}">Talk to us</a>
             </div>
         </div>

@@ -2,9 +2,9 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
     <head>
         @include('layouts.partials.head')
-        <title>{{ config('app.name') }} — {{ $title ?? 'Dashboard' }}</title>
+        <title>{{ $title ?? 'Dashboard' }} | {{ config('app.name') }}</title>
     </head>
-    <body class="h-full dash-body">
+    <body class="h-full dash-body" x-data="{ nav: false }" @keydown.escape.window="nav = false">
         <a class="skip-link" href="#main">Skip to content</a>
 
         <header class="site-header">
@@ -22,6 +22,10 @@
                 </a>
 
                 <div class="nav-user">
+                    <button type="button" class="nav-menu-btn" aria-controls="dash-side" :aria-expanded="nav.toString()" aria-expanded="false" @click="nav = ! nav">
+                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
+                        <span>Menu</span>
+                    </button>
                     @if (auth()->user()->isPlatformAdmin())
                         <a class="nav-user__link" href="{{ route('admin.dashboard') }}">Admin</a>
                     @endif
@@ -49,7 +53,7 @@
         </header>
 
         <div class="dash container">
-            <aside class="dash__side">
+            <aside class="dash__side" id="dash-side" :class="{ 'is-open': nav }">
                 <nav class="side-nav">
                     @include('layouts.partials.sidebar-links')
                 </nav>

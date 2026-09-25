@@ -1,5 +1,42 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Design pass: marketing site, dashboards, demo media (v0.30.1)
+
+(verified: 275 tests / 1779 assertions; screens checked at 390 and 1440 px in headless Chrome)
+
+- Visual system:
+  - Palette v2: cool ink with a champagne accent (was mustard gold on warm brown).
+  - Square geometry: no rounded corners, except avatars.
+  - Type: Instrument Sans for display (replaces Playfair) and Geist for UI, with lining tabular numerals.
+- Marketing:
+  - Home hero with a royalty-free video: Pexels 4069480, 720p, 20 s, 4 MB, poster image. It loads only on wide screens without reduced motion.
+  - Plain-numeral stat band.
+  - Module catalogue as two-column rows with a distinct icon per module.
+  - The roadmap now shows what has actually shipped (Phases 1–30), shared between the home and features pages.
+  - Features page redesigned.
+  - Pricing: three plan cards (Foundation, typical hotel stack, live marketplace commission rate), one grouped catalogue table and the FAQ.
+  - One label per signup CTA ("Get started"). Em-dashes removed from the copy.
+- Demo data:
+  - 30 royalty-free Unsplash photos, three per listing, in `public/img/demo` (credits in `CREDITS.md`).
+  - Demo businesses have every module enabled with no trial.
+  - Each demo property has two bookable room types and rooms, so "Request to book" works.
+- Dashboard:
+  - Overview with a setup checklist driven by real data and four stats.
+  - Sidebar grouped into Front of house / Operations / Guests / Finance. Links are hidden when the user lacks the permission, and so are empty headings.
+  - Mobile drawer navigation, both public and dashboard.
+  - Collapsible search filters on phones.
+  - Tables scroll inside their cards.
+  - Controls share one 44 px height.
+  - Native selects and date pickers follow the dark/light theme.
+- Fixes:
+  - Public headings inherited `slate-900` and were invisible on the dark theme.
+  - Sidebar icons had no size.
+  - Avatars had no background.
+  - Container gutters were lost on `.container.section`.
+  - The Tailwind content paths missed `app/Modules/**` views.
+  - `ModuleService::enableForTenant()` now clears `expires_at`. Re-enabling an expired module used to leave it locked.
+  - The 403 page shows the real reason (for example, an inactive module) and links signed-in users back to their dashboard.
+  - The module-inactive message had an operator-precedence bug.
 ## 2026-09-26 — Phase 30: SEO (v0.30.0)
 
 (verified: 275 tests / 1779 assertions)

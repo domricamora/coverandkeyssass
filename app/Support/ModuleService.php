@@ -48,6 +48,8 @@ class ModuleService
                             'status' => 'active',
                             'activated_at' => now(),
                             'trial_ends_at' => $trialDays > 0 ? now()->addDays($trialDays) : null,
+                            // An explicit enable lifts a previous expiry/suspension; isEnabled() requires null.
+                            'expires_at' => $overrides['expires_at'] ?? null,
                             'limits' => $overrides['limits'] ?? $module->default_limits,
                             'price_cents' => $overrides['price_cents'] ?? null,
                         ],

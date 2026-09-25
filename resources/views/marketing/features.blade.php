@@ -1,53 +1,51 @@
-<x-public-layout :title="$title" description="Every Cover & Keys module explained — what ships today and what is next on the roadmap." :show-search="false">
+<x-public-layout :title="$title" description="Every Cover & Keys module explained: what each one does, what it costs and what ships next." :show-search="false" :breadcrumbs="['Features' => null]">
     <section class="container section">
         <div class="section-head">
             <span class="eyebrow">Platform</span>
             <h1>Features</h1>
             <p>
-                Cover &amp; Keys is a modular hospitality platform. Each module below is
-                independently enable-able per business, with its own limits, trial period and
-                dependencies — all managed from the Super Admin area.
+                Every module can be switched on per business, with its own limits, trial period and
+                dependencies. Turn on what your property runs today and add the rest as you grow.
             </p>
         </div>
 
         @forelse ($grouped as $category => $items)
             <div class="listing-block">
                 <h2>{{ Str::headline($category) }}</h2>
-                <div class="grid grid-3">
+                <div class="feature-grid">
                     @foreach ($items as $module)
-                        <div class="card feature">
-                            <h3>{{ $module->name }}</h3>
+                        <article class="card feature feature--module">
+                            <header class="feature__head">
+                                <span class="feature__ico">@include('marketing.partials.module-icon', ['slug' => $module->slug, 'size' => 22])</span>
+                                <div>
+                                    <h3>{{ $module->name }}</h3>
+                                    <p class="feature__price">
+                                        @if ($module->monthly_price_cents === 0)
+                                            Included in every account
+                                        @else
+                                            ₱{{ number_format($module->monthly_price_cents / 100, 0) }} / month
+                                        @endif
+                                    </p>
+                                </div>
+                            </header>
                             <p>{{ $module->description }}</p>
 
                             @if ($module->features->isNotEmpty())
-                                <ul class="amenities" style="grid-template-columns:1fr;gap:8px;margin-top:10px;">
+                                <ul class="feature__list">
                                     @foreach ($module->features as $feature)
                                         <li>
-                                            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5"/></svg>
                                             <span>
                                                 <strong>{{ $feature->name }}</strong>
                                                 @if ($feature->description)
-                                                    <span class="muted" style="display:block;">{{ $feature->description }}</span>
+                                                    <span class="muted">{{ $feature->description }}</span>
                                                 @endif
                                             </span>
                                         </li>
                                     @endforeach
                                 </ul>
                             @endif
-
-                            <p class="meta-row mt-2">
-                                @if ($module->monthly_price_cents === 0)
-                                    <span class="badge badge-amber">Included in every account</span>
-                                @else
-                                    <span class="chip-inline">₱{{ number_format($module->monthly_price_cents / 100, 0) }} / month</span>
-                                @endif
-                                @if (! $module->is_core)
-                                    <span class="chip-inline">Module</span>
-                                @else
-                                    <span class="chip-inline">Core</span>
-                                @endif
-                            </p>
-                        </div>
+                        </article>
                     @endforeach
                 </div>
             </div>
@@ -59,30 +57,11 @@
     <section class="section section--raised">
         <div class="container">
             <div class="section-head">
-                <span class="eyebrow">Roadmap</span>
                 <h2>Delivery order</h2>
-                <p>Phases from the master plan, with the ones already shipped verified by tests.</p>
+                <p>Phases from the master plan. A phase is marked shipped only after its tests pass.</p>
             </div>
 
-            <div class="host-card-grid">
-                @foreach ($roadmap as $item)
-                    <div class="host-os-card {{ $item['status'] === 'planned' ? 'locked' : '' }}">
-                        <span class="os-icon" aria-hidden="true"><strong>{{ str_pad((string) $item['phase'], 2, '0', STR_PAD_LEFT) }}</strong></span>
-                        <span class="os-label">
-                            <strong>{{ $item['title'] }}</strong>
-                            <span>{{ $item['summary'] }}</span>
-                        </span>
-                        <span class="os-badge">
-                            @switch($item['status'])
-                                @case('complete') Shipped @break
-                                @case('current') In progress @break
-                                @case('next') Next up @break
-                                @default Planned
-                            @endswitch
-                        </span>
-                    </div>
-                @endforeach
-            </div>
+            @include('marketing.partials.roadmap')
         </div>
     </section>
 
@@ -90,10 +69,10 @@
         <div class="container section host-cta__inner">
             <div>
                 <h2>Pick the modules your property actually runs</h2>
-                <p>Start with the foundation and the marketplace, then switch modules on as you grow.</p>
+                <p>Start with the free foundation and the marketplace, then switch modules on as you grow.</p>
             </div>
-            <div style="display:flex;gap:12px;flex-wrap:wrap;">
-                <a class="btn btn-primary" href="{{ route('register') }}">Create your account</a>
+            <div class="hero__actions">
+                <a class="btn btn-primary" href="{{ route('register') }}">Get started</a>
                 <a class="btn btn-light" href="{{ route('marketing.pricing') }}">See pricing</a>
             </div>
         </div>

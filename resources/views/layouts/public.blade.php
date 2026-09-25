@@ -27,7 +27,7 @@
         @endif
         @if ($seoJsonLd)<script type="application/ld+json">{!! $seoJsonLd !!}</script>@endif
     </head>
-    <body class="public-body">
+    <body class="public-body" x-data="{ nav: false }" @keydown.escape.window="nav = false">
         <a class="skip-link" href="#main">Skip to content</a>
 
         <header class="site-header">
@@ -72,6 +72,11 @@
                     <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/></svg>
                 </a>
 
+                <button type="button" class="nav-menu-btn" aria-controls="mobile-nav" aria-expanded="false" :aria-expanded="nav.toString()" @click="nav = ! nav">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></svg>
+                    <span class="sr-only">Menu</span>
+                </button>
+
                 @auth
                     <details class="menu">
                         <summary class="menu__btn">
@@ -100,6 +105,16 @@
                     <a class="btn btn-primary btn-sm" href="{{ route('register') }}">Get started</a>
                 @endauth
             </div>
+            <nav class="mobile-nav" id="mobile-nav" :class="{ 'is-open': nav }" aria-label="Mobile">
+                <a href="{{ route('marketplace.hotels') }}">Stays</a>
+                <a href="{{ route('marketplace.restaurants.index') }}">Restaurants</a>
+                <a href="{{ route('marketing.features') }}">Features</a>
+                <a href="{{ route('marketing.pricing') }}">Pricing</a>
+                @guest
+                    <a href="{{ route('login') }}">Sign in</a>
+                    <a class="btn btn-primary" href="{{ route('register') }}">Get started</a>
+                @endguest
+            </nav>
         </header>
 
         <main id="main">
@@ -139,7 +154,7 @@
                         </span>
                         <span class="brand__name">{{ config('app.name') }}</span>
                     </div>
-                    <p class="footer-tag">The hospitality operating system for hotels, resorts and restaurants — marketplace, front desk and back office in one platform.</p>
+                    <p class="footer-tag">The hospitality operating system for hotels, resorts and restaurants. Marketplace, front desk and back office in one platform.</p>
                 </div>
                 <div>
                     <h2>Explore</h2>

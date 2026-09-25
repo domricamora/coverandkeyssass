@@ -34,7 +34,7 @@ class EnsureModuleActive
         $module = Module::query()->where('slug', $slug)->first();
 
         if (! $module || ! $this->modules->isEnabled($module, $tenant)) {
-            abort(403, 'The "'.$module?->name ?? $slug.'" module is not active for this business.');
+            abort(403, 'The '.($module->name ?? $slug).' module is not active for this business. An owner can switch it on from Billing.');
         }
 
         return $next($request);

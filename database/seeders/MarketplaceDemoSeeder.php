@@ -31,7 +31,7 @@ use Illuminate\Support\Str;
  */
 class MarketplaceDemoSeeder extends Seeder
 {
-    /** Abstract sample illustrations shipped with the app (no stock photos). */
+    /** Fallback illustrations for listings without photos in public/img/demo. */
     private const SAMPLE_IMAGES = [
         'img/sample/coast.svg',
         'img/sample/ridge.svg',
@@ -58,6 +58,7 @@ class MarketplaceDemoSeeder extends Seeder
 
             $tenant = $this->tenant($business);
             $owner = $this->owner($business, $tenant);
+            $this->enableAllModules($tenant);
 
             $context->set($tenant);
 
@@ -486,6 +487,7 @@ class MarketplaceDemoSeeder extends Seeder
         );
 
         $this->attachMedia($property, $index);
+        $this->seedRooms($property);
     }
 
     private function restaurant(User $owner, array $definition, int $index): void
@@ -641,23 +643,94 @@ class MarketplaceDemoSeeder extends Seeder
         return (int) $id;
     }
 
-    /** Cover + gallery from the bundled sample illustrations. */
+    /**
+     * Cover + gallery. Uses the royalty-free photos in public/img/demo
+     * (`{listing-slug}-{n}.jpg`, see public/img/demo/CREDITS.md) and falls
+     * back to the bundled illustrations for listings without photos.
+     * Re-running replaces earlier illustration-only galleries with photos.
+     */
     private function attachMedia(Model $listing, int $index): void
     {
-        if ($listing->media()->exists()) {
+        $photos = glob(public_path('img/demo/'.Str::slug($listing->name).'-*.jpg')) ?: [];
+        sort($photos);
+
+        $existing = $listing->media()->get();
+        $onlyIllustrations = $existing->isNotEmpty() && $existing->every(fn ($m) => str_starts_with($m->path, 'img/sample/'));
+
+        if ($existing->isNotEmpty() && ! ($photos !== [] && $onlyIllustrations)) {
             return;
         }
 
-        $images = self::SAMPLE_IMAGES;
+        $listing->media()->delete();
 
-        for ($slot = 0; $slot < 3; $slot++) {
+        $paths = $photos !== []
+            ? array_map(fn ($file) => 'img/demo/'.basename($file), $photos)
+            : array_map(fn ($slot) => self::SAMPLE_IMAGES[($index + $slot) % count(self::SAMPLE_IMAGES)], [0, 1, 2]);
+
+        foreach (array_values($paths) as $slot => $path) {
             $listing->media()->create([
                 'disk' => 'public',
-                'path' => $images[($index + $slot) % count($images)],
-                'alt' => $listing->name.' — sample illustration',
+                'path' => $path,
+                'alt' => $listing->name.($slot === 0 ? '' : ' photo '.($slot + 1)),
                 'is_cover' => $slot === 0,
                 'sort_order' => $slot,
             ]);
+        }
+    }
+
+    /**
+     * Two bookable room types with a few rooms each, priced from the listing,
+     * so the marketplace "Request to book" flow and the front desk work live.
+     */
+    private function seedRooms(Property $property): void
+    {
+        $base = (float) $property->base_price;
+        $types = [
+            ['Standard '.($property->bedrooms > 1 ? 'Suite' : 'Room'), 'Queen bed, rain shower and a private terrace.', 2, 1, 'Queen', 28, $base, 3],
+            ['Deluxe '.($property->bedrooms > 1 ? 'Family Suite' : 'Room'), 'King bed, lounge corner and the best view on the property.', max(3, (int) $property->max_guests), 2, 'King + sofa bed', 42, round($base * 1.45, -2), 2],
+        ];
+
+        foreach ($types as $sort => [$name, $description, $guests, $beds, $config, $size, $price, $count]) {
+            $type = \App\Modules\PropertyManagement\Models\RoomType::query()->updateOrCreate(
+                ['property_id' => $property->id, 'name' => $name],
+                [
+                    'tenant_id' => $property->tenant_id,
+                    'description' => $description,
+                    'max_guests' => $guests,
+                    'beds' => $beds,
+                    'bed_configuration' => $config,
+                    'size_sqm' => $size,
+                    'base_price' => $price,
+                    'weekend_price' => $property->weekend_price ? round($price * 1.15, -2) : null,
+                    'currency' => $property->currency,
+                    'min_stay_nights' => 1,
+                    'status' => \App\Modules\PropertyManagement\Models\RoomType::STATUS_ACTIVE,
+                    'sort_order' => $sort,
+                ],
+            );
+
+            for ($n = 1; $n <= $count; $n++) {
+                \App\Modules\PropertyManagement\Models\Room::query()->updateOrCreate(
+                    ['property_id' => $property->id, 'room_number' => (string) (($sort + 1) * 100 + $n)],
+                    [
+                        'tenant_id' => $property->tenant_id,
+                        'room_type_id' => $type->id,
+                        'floor' => $sort + 1,
+                        'status' => \App\Modules\PropertyManagement\Models\Room::STATUS_ACTIVE,
+                        'housekeeping_status' => \App\Modules\PropertyManagement\Models\Room::HK_CLEAN,
+                    ],
+                );
+            }
+        }
+    }
+
+    /** Demo businesses get every module, paid-up and without a trial clock, so every screen is explorable. */
+    private function enableAllModules(Tenant $tenant): void
+    {
+        $modules = app(\App\Support\ModuleService::class);
+
+        foreach (\App\Models\Module::query()->where('is_core', false)->get() as $module) {
+            $modules->enableForTenant($module, $tenant, ['trial_days' => 0]);
         }
     }
 }

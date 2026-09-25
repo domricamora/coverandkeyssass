@@ -13,7 +13,11 @@
     $hasFilters = collect($filters)->filter(fn ($value) => is_array($value) ? count($value) : filled($value))->isNotEmpty();
 @endphp
 
-<form class="card filter-rail" method="GET" action="{{ $action }}">
+<div x-data="{ open: false }">
+<button type="button" class="btn btn-outline btn-block filter-toggle" aria-controls="filter-rail" aria-expanded="false" :aria-expanded="open.toString()" @click="open = ! open">
+    Filters @if ($hasFilters)<span class="filter-bar__count">on</span>@endif
+</button>
+<form class="card filter-rail" id="filter-rail" :class="{ 'is-open': open }" method="GET" action="{{ $action }}">
     @if (! empty($filters['q']))
         <input type="hidden" name="q" value="{{ $filters['q'] }}">
     @endif
@@ -110,3 +114,4 @@
         <a class="btn btn-ghost btn-block" href="{{ $action }}">Clear all</a>
     @endif
 </form>
+</div>
