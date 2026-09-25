@@ -2,6 +2,7 @@
 
 use App\Modules\Accounting\Providers\AccountingServiceProvider;
 use App\Modules\Booking\Providers\BookingServiceProvider;
+use App\Modules\Crm\Providers\CrmServiceProvider;
 use App\Modules\Customer\Providers\CustomerServiceProvider;
 use App\Modules\Delivery\Providers\DeliveryServiceProvider;
 use App\Modules\Folio\Providers\FolioServiceProvider;
@@ -36,5 +37,6 @@ return [
     InventoryServiceProvider::class,
     PosServiceProvider::class,
     AccountingServiceProvider::class,
+    CrmServiceProvider::class,
 ];
 

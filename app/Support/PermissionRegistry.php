@@ -106,6 +106,10 @@ class PermissionRegistry
                 'accounting.view' => 'View the books, reports, invoices and expenses',
                 'accounting.manage' => 'Book expenses, issue invoices and record payments',
             ],
+            'crm' => [
+                'crm.view' => 'View guest profiles and segments',
+                'crm.manage' => 'Edit guest profiles, tags, notes and communication logs',
+            ],
             'wallet' => [
                 'wallet.view' => 'View the host wallet, commissions and payouts',
                 'payouts.request' => 'Request payouts from the host wallet',

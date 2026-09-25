@@ -1,5 +1,15 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Phase 21: CRM (v0.21.0)
+
+(verified: 224 tests / 1284 assertions)
+
+- New `App\Modules\Crm` (crm module): guest contacts folded from bookings, food orders and table reservations (matched by account → email → phone, idempotent), with cached metrics (stays, orders, table visits, lifetime spend, first seen, last active).
+- Profiles show live booking, order and table history, tags, notes, a VIP flag, marketing consent with timestamp, and communication history (de-duplicated by source key for system senders).
+- Seven segments: VIP, Frequent Guest, Inactive, High Spender, New Customer, Restaurant Customer, Hotel Customer. The list has counts, tag and search filters.
+- Permissions `crm.view/manage` (owner, manager, front desk). "Guests" link in the sidebar.
+- 4 new Pest tests.
+
 ## 2026-09-26 — Phase 20: Accounting (v0.20.0)
 
 (verified: 220 tests / 1243 assertions)

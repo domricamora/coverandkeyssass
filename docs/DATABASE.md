@@ -186,6 +186,15 @@ Changes to existing tables: `payments.booking_id` and `commissions.booking_id` a
 | invoices / invoice_lines / invoice_payments | receivables | unique `(tenant_id, number)`, customer, issue / due dates, status `draft/issued/paid/void`, tax_rate, subtotal / tax_total / total / amount_paid; lines (qty × unit); payments (paid_on, amount, method, reference) |
 | supplier_payments | payables settled | tenant, supplier (restrict), paid_on, amount, method, reference |
 
+## Phase 21 tables (CRM)
+
+| Table | Purpose | Notes |
+|---|---|---|
+| crm_contacts | guests per business | tenant; nullable user (unique per tenant), unique email per tenant, phone; source; is_vip; marketing_consent + consent_at; cached bookings / orders / reservations counts, total_spend, first_seen_at, last_activity_at |
+| crm_tags + crm_contact_tag | tags | unique name per tenant; pivot primary key |
+| crm_notes | staff notes | contact, author, body |
+| crm_interactions | communication history | contact, author, channel, direction, subject, body, occurred_at, unique `(tenant_id, source_key)` for system messages |
+
 ## Seeding
 
 `php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin` **and** a refresh of every existing tenant's system roles, so newly added catalogue permissions reach already-provisioned businesses).

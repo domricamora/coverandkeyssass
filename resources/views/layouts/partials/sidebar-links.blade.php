@@ -61,6 +61,12 @@
             Inventory
         </a>
     @endif
+    @if (auth()->user()?->hasPermissionTo('crm.view'))
+        <a class="{{ str_starts_with((string) $route, 'crm.') ? 'is-active' : '' }}" href="{{ route('crm.index') }}">
+            <svg class="side-nav__icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+            Guests
+        </a>
+    @endif
     @if (auth()->user()?->hasPermissionTo('accounting.view'))
         <a class="{{ str_starts_with((string) $route, 'accounting.') ? 'is-active' : '' }}" href="{{ route('accounting.index') }}">
             <svg class="side-nav__icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m-6 4h6m-6 4h4M5 3h14a1 1 0 011 1v16l-3-2-3 2-3-2-3 2-3-2V4a1 1 0 011-1z"/></svg>
