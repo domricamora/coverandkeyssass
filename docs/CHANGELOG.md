@@ -1,5 +1,17 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Phase 38: Final system audit (v0.38.0)
+
+(verified: 305 tests / 1965 assertions; 34/34 pages pass browser QA; `composer audit` and `npm audit` clean; live backup restore; live API sweep)
+
+- `docs/FINAL_AUDIT.md`: a verdict with evidence for each of the 28 areas in the master plan.
+- 21 areas pass outright. Unproven parts are marked **INCOMPLETE**, as the plan requires:
+  - PayMongo sandbox run (payments and subscriptions)
+  - first production deploy and smoke test
+  - off-site backup copy
+  - SMS delivery driver
+  - push delivery worker
+- Also listed before launch: real SMTP configuration, and pushing the local commits to the git remote.
 ## 2026-09-26 — Phase 37: Monitoring (v0.37.0)
 
 (verified: 305 tests / 1965 assertions)

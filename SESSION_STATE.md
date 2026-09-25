@@ -5,7 +5,7 @@
 ## Snapshot
 
 - Date: 2026-09-26
-- Phase: **37 COMPLETE (verified)** → next **38 — Final system audit**
+- Phase: **38 COMPLETE (verified) — all master-plan phases done.** Remaining: the INCOMPLETE items in `docs/FINAL_AUDIT.md`
 - Tests: PASS — 305 tests, 1965 assertions, MySQL `hospitality_os_testing`
 - Git: `master` → origin <https://github.com/domricamora/coverandkeyssass.git> — **not pushed yet**: the auto-mode classifier blocks `git push` from the agent; the owner runs `git push -u origin master:main` (or adds a Bash permission rule)
 
@@ -28,7 +28,7 @@
 ## Next actions
 
 1. Design pass + follow-ups DONE (2026-09-26): cinematic video hero; browser QA of 33 pages at 390/768/1440 (no console errors, no 4xx/5xx, no overflow); responsive module grids; live demo operations (`DemoOperationsSeeder`, covered by `DemoSeedTest`).
-2. Phase 31 — API DONE (`docs/API.md`). Phase 32 — Security audit DONE (`docs/SECURITY.md`, accepted risk: CSP script-src still inline/eval). Phase 33 — Performance DONE (`docs/PERFORMANCE.md`; deferred: tenant-aware queued notifications → Phase 35). Phase 34 — Testing DONE (`docs/TESTING.md`). Phase 35 — Production deployment DONE (`docs/DEPLOYMENT.md`, `deploy.sh`, `.env.production.example`, root `.htaccess`, schedule in `routes/console.php`). Phase 36 — Backups DONE (`docs/BACKUPS.md`; set BACKUP_OFFSITE_DISK + BACKUP_PASSWORD before go-live). Phase 37 — Monitoring DONE (`docs/MONITORING.md`). **Now: Phase 38 — Final system audit** (master plan, last phase). Keep the demo seeder extended for any new screen (memory: demo-data-live).
+2. Phase 31 — API DONE (`docs/API.md`). Phase 32 — Security audit DONE (`docs/SECURITY.md`, accepted risk: CSP script-src still inline/eval). Phase 33 — Performance DONE (`docs/PERFORMANCE.md`; deferred: tenant-aware queued notifications → Phase 35). Phase 34 — Testing DONE (`docs/TESTING.md`). Phase 35 — Production deployment DONE (`docs/DEPLOYMENT.md`, `deploy.sh`, `.env.production.example`, root `.htaccess`, schedule in `routes/console.php`). Phase 36 — Backups DONE (`docs/BACKUPS.md`; set BACKUP_OFFSITE_DISK + BACKUP_PASSWORD before go-live). Phase 37 — Monitoring DONE (`docs/MONITORING.md`). Phase 38 — Final audit DONE (`docs/FINAL_AUDIT.md`). **Now: close the INCOMPLETE items**: (1) PayMongo sandbox run, (2) production deploy + smoke test, (3) off-site backups + BACKUP_PASSWORD, (4) SMS driver, (5) push worker, (6) SMTP, (7) owner pushes git (`git push -u origin master:main`). Keep the demo seeder extended for any new screen (memory: demo-data-live).
 3. Browser QA script: `node qa.mjs <email|-> <outdir> <width> <shoot 0|1> <paths… | @sidebar>` (session scratchpad; recreate from CHANGELOG notes if the scratchpad is gone).
 4. Owner preferences live in memory: design-direction (square, ink + champagne, Instrument Sans + Geist), demo-data-live, git-autonomy.
 
