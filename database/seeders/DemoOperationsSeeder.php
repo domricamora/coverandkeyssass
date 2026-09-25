@@ -119,6 +119,7 @@ class DemoOperationsSeeder extends Seeder
 
             if (Booking::query()->exists()) {
                 $this->settleFolios($owner);
+                $this->extras($owner, $guests);
                 $context->forget();
 
                 continue;
@@ -138,6 +139,7 @@ class DemoOperationsSeeder extends Seeder
             }
 
             $this->settleFolios($owner);
+            $this->extras($owner, $guests);
             app(CrmService::class)->sync();
             $context->forget();
         }
@@ -252,6 +254,175 @@ class DemoOperationsSeeder extends Seeder
                 $owner,
                 $checkedOut ? 'Settled at check-out' : 'Deposit at check-in',
             );
+        }
+    }
+
+    /**
+     * More of the platform, each part idempotent on its own so re-running the
+     * seeder fills in whatever an older demo database is missing.
+     */
+    private function extras(User $owner, $guests): void
+    {
+        $this->dining($guests);
+        $this->deliverySetup();
+        $this->promotions();
+        $this->loyaltyProgram();
+        $this->campaigns($owner);
+        $this->rota($owner);
+        $this->purchasing($owner);
+        $this->conversations($owner, $guests);
+    }
+
+    /** Dining areas + tables, then upcoming table reservations for reservable restaurants. */
+    private function dining($guests): void
+    {
+        foreach (Restaurant::query()->get() as $restaurant) {
+            if (\App\Modules\RestaurantManagement\Models\RestaurantTable::query()->where('restaurant_id', $restaurant->id)->exists()) {
+                continue;
+            }
+
+            foreach ([['Main dining room', ['T1' => 2, 'T2' => 2, 'T3' => 4, 'T4' => 4, 'T5' => 6]], ['Terrace', ['P1' => 2, 'P2' => 4, 'P3' => 8]]] as $sort => [$areaName, $tables]) {
+                $area = \App\Modules\RestaurantManagement\Models\DiningArea::query()->create(['restaurant_id' => $restaurant->id, 'name' => $areaName, 'sort_order' => $sort]);
+                foreach ($tables as $label => $seats) {
+                    \App\Modules\RestaurantManagement\Models\RestaurantTable::query()->create(['restaurant_id' => $restaurant->id, 'dining_area_id' => $area->id, 'label' => $label, 'seats' => $seats, 'status' => 'active']);
+                }
+            }
+
+            if (! $restaurant->reservations_enabled || $guests->isEmpty()) {
+                continue;
+            }
+
+            $service = app(\App\Modules\RestaurantManagement\Services\ReservationService::class);
+            foreach ([[1, '19:00', 2], [1, '19:30', 4], [2, '12:30', 3], [3, '20:00', 6], [5, '18:30', 2]] as $n => [$days, $time, $party]) {
+                $guest = $guests[($n + 1) % $guests->count()];
+                rescue(fn () => $service->reserve($restaurant, [
+                    'date' => today()->addDays($days)->toDateString(),
+                    'time' => $time,
+                    'party_size' => $party,
+                    'guest_name' => $guest->name,
+                    'guest_email' => $guest->email,
+                    'special_requests' => $n === 0 ? 'Anniversary dinner, a quiet table please.' : null,
+                ], \App\Modules\RestaurantManagement\Models\TableReservation::SOURCE_MARKETPLACE, $guest), report: false);
+            }
+        }
+    }
+
+    private function deliverySetup(): void
+    {
+        foreach (Restaurant::query()->where('delivery_enabled', true)->get() as $restaurant) {
+            if (\App\Modules\Delivery\Models\DeliveryZone::query()->where('restaurant_id', $restaurant->id)->exists()) {
+                continue;
+            }
+
+            foreach ([['Town centre', 3, 49, 300, 30], ['Beachfront strip', 6, 89, 500, 45]] as $sort => [$name, $km, $fee, $min, $eta]) {
+                \App\Modules\Delivery\Models\DeliveryZone::query()->create(['restaurant_id' => $restaurant->id, 'name' => $name, 'radius_km' => $km, 'fee' => $fee, 'min_order' => $min, 'free_over' => 1500, 'eta_minutes' => $eta, 'is_active' => true, 'sort_order' => $sort]);
+            }
+        }
+
+        if (Restaurant::query()->where('delivery_enabled', true)->exists() && ! \App\Modules\Delivery\Models\Driver::query()->exists()) {
+            \App\Modules\Delivery\Models\Driver::query()->create(['name' => 'Arnel Dizon', 'phone' => '+63 917 330 1142', 'vehicle' => 'Motorbike', 'is_active' => true]);
+            \App\Modules\Delivery\Models\Driver::query()->create(['name' => 'Jomar Pascual', 'phone' => '+63 918 204 7710', 'vehicle' => 'Motorbike', 'is_active' => true]);
+        }
+    }
+
+    private function promotions(): void
+    {
+        if (\App\Modules\Booking\Models\Promotion::query()->exists()) {
+            return;
+        }
+
+        $promo = \App\Modules\Booking\Models\Promotion::class;
+        $promo::query()->create(['code' => 'RAINYDAYS', 'name' => 'Rainy season stays', 'type' => $promo::TYPE_PERCENT, 'value' => 15, 'starts_on' => today(), 'ends_on' => today()->addMonths(2), 'min_nights' => 2, 'max_uses' => 100, 'is_active' => true, 'applies_to' => $promo::FOR_STAYS]);
+
+        if ($restaurant = Restaurant::query()->first()) {
+            $promo::query()->create(['code' => 'FIRSTBITE', 'name' => 'First order ₱150 off', 'type' => $promo::TYPE_FIXED, 'value' => 150, 'starts_on' => today(), 'ends_on' => today()->addMonth(), 'max_uses' => 200, 'is_active' => true, 'applies_to' => $promo::FOR_ORDERS, 'restaurant_id' => $restaurant->id, 'min_subtotal' => 600]);
+        }
+    }
+
+    private function loyaltyProgram(): void
+    {
+        \App\Modules\Loyalty\Models\LoyaltyProgram::query()->firstOrCreate([], ['enabled' => true, 'pesos_per_point' => 100, 'referral_points' => 200]);
+
+        if (\App\Modules\Loyalty\Models\Reward::query()->exists()) {
+            return;
+        }
+
+        foreach ([['Welcome drink', 40, 150], ['₱500 stay credit', 150, 500], ['₱1,500 stay credit', 400, 1500]] as [$name, $cost, $credit]) {
+            \App\Modules\Loyalty\Models\Reward::query()->create(['name' => $name, 'points_cost' => $cost, 'kind' => 'credit', 'credit_amount' => $credit, 'is_active' => true]);
+        }
+    }
+
+    private function campaigns(User $owner): void
+    {
+        if (\App\Modules\Marketing\Models\Campaign::query()->exists()) {
+            return;
+        }
+
+        \App\Modules\Marketing\Models\Campaign::query()->create(['name' => 'Rainy season getaway', 'channel' => 'email', 'audience' => 'all', 'subject' => '15% off two nights or more', 'body' => "Hi {name},\n\nRainy season is the quiet season. Book two nights or more with code RAINYDAYS for 15% off.\n\n{business}", 'status' => 'draft', 'created_by' => $owner->id]);
+        \App\Modules\Marketing\Models\Campaign::query()->create(['name' => 'Weekend brunch launch', 'channel' => 'email', 'audience' => 'all', 'subject' => 'Brunch is back on weekends', 'body' => "Hi {name},\n\nWeekend brunch starts this Saturday. See you there.\n\n{business}", 'status' => 'draft', 'created_by' => $owner->id]);
+    }
+
+    /** Next week's rota for every employee: day or evening shifts, one day off. */
+    private function rota(User $owner): void
+    {
+        if (\App\Modules\Workforce\Models\Shift::query()->exists()) {
+            return;
+        }
+
+        $service = app(WorkforceService::class);
+        $propertyId = Property::query()->value('id');
+
+        foreach (\App\Modules\Workforce\Models\Employee::query()->get() as $e => $employee) {
+            foreach (range(1, 6) as $day) {
+                if (($day + $e) % 7 === 0) {
+                    continue;
+                }
+                $date = today()->addDays($day)->toDateString();
+                [$from, $to] = $e % 2 === 0 ? ['07:00', '15:00'] : ['14:00', '22:00'];
+                rescue(fn () => $service->scheduleShift($employee, "{$date} {$from}", "{$date} {$to}", $owner, $propertyId), report: false);
+            }
+        }
+    }
+
+    private function purchasing(User $owner): void
+    {
+        if (\App\Modules\Inventory\Models\PurchaseOrder::query()->exists()) {
+            return;
+        }
+
+        $supplier = Supplier::query()->first();
+        $store = StockLocation::query()->first();
+        $items = InventoryItem::query()->whereIn('sku', ['SNAPPER', 'SHAMPOO', 'COFFEE'])->get();
+
+        if ($supplier && $store && $items->isNotEmpty()) {
+            app(InventoryService::class)->createPurchaseOrder($supplier, $store, $items->map(fn ($item) => [
+                'inventory_item_id' => $item->id,
+                'quantity' => $item->sku === 'SHAMPOO' ? 200 : 10,
+                'unit_cost' => $item->sku === 'SHAMPOO' ? 14 : ($item->sku === 'COFFEE' ? 720 : 390),
+            ])->all(), $owner, today()->addDays(3)->toDateString(), 'Weekly restock');
+        }
+    }
+
+    /** Guest questions to the business with the owner's replies. */
+    private function conversations(User $owner, $guests): void
+    {
+        if (\App\Modules\Messaging\Models\Thread::query()->where('tenant_id', app(TenantContext::class)->id())->exists() || $guests->isEmpty()) {
+            return;
+        }
+
+        $messaging = app(\App\Modules\Messaging\Services\MessagingService::class);
+        $property = Property::query()->first();
+        $threads = [
+            ['Early check-in?', 'Hi! Our flight lands at 8am. Is there any chance of an early check-in?', 'Good morning! We will do our best. The room is usually ready by noon, and you are welcome to leave your bags and use the pool before then.'],
+            ['Airport transfer', 'Do you offer transfers from the airport? We are a family of four with two surfboards.', 'Yes, we can arrange a van that fits boards. It is ₱1,800 each way; just send us your flight number.'],
+        ];
+
+        foreach ($threads as $n => [$subject, $question, $reply]) {
+            $guest = $guests[$n % $guests->count()];
+            $thread = rescue(fn () => $messaging->startWithBusiness($guest, $property, $subject, $question), report: false);
+            if ($thread) {
+                rescue(fn () => $messaging->post($thread, $owner, $reply), report: false);
+            }
         }
     }
 
