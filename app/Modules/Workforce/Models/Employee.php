@@ -45,7 +45,12 @@ class Employee extends Model
 
     public static function nextNumber(): string
     {
-        $last = (int) static::query()->max('id');
+        // From this business's own numbers (tenant-scoped), not the global
+        // auto-increment id: ids are shared across tenants and never roll back,
+        // so an id-based sequence skipped numbers whenever another business hired.
+        $last = (int) static::query()->pluck('employee_no')
+            ->map(fn (?string $no) => (int) preg_replace('/\D/', '', (string) $no))
+            ->max();
 
         do {
             $number = 'EMP-'.str_pad((string) ++$last, 4, '0', STR_PAD_LEFT);

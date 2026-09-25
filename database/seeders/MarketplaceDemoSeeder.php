@@ -75,6 +75,7 @@ class MarketplaceDemoSeeder extends Seeder
 
         $this->seedReviews($guests);
         $this->seedFavorites($guests);
+        $this->call(DemoOperationsSeeder::class);
 
         $this->command?->info(sprintf(
             'Demo marketplace seeded: %d properties, %d restaurants, %d users.',
@@ -710,7 +711,8 @@ class MarketplaceDemoSeeder extends Seeder
             );
 
             for ($n = 1; $n <= $count; $n++) {
-                \App\Modules\PropertyManagement\Models\Room::query()->updateOrCreate(
+                // firstOrCreate: re-seeding must not reset live housekeeping status.
+                \App\Modules\PropertyManagement\Models\Room::query()->firstOrCreate(
                     ['property_id' => $property->id, 'room_number' => (string) (($sort + 1) * 100 + $n)],
                     [
                         'tenant_id' => $property->tenant_id,

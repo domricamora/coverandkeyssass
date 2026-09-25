@@ -1513,3 +1513,11 @@ h2,
         grid-template-columns: minmax(0, 1fr);
     }
 }
+
+/* Amounts and dates never wrap mid-value. */
+.table td.text-right,
+.table th.text-right,
+.table .num {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
