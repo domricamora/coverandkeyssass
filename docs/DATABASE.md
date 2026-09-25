@@ -284,3 +284,7 @@ php artisan superadmin:create "Name" "email@example.com" --password=…
 ```
 
 Never hard-code admin credentials anywhere.
+
+## Phase 31 — API
+
+- `personal_access_tokens` (Laravel Sanctum): `tokenable_type` / `tokenable_id` (the user), `name` (device name), `token` (SHA-256 hash, unique; the plain token is shown once at issue), `abilities` (JSON: `["read"]` or `["read","write"]`), `last_used_at`, `expires_at` (issue + `SANCTUM_EXPIRATION` minutes, default 30 days), timestamps.

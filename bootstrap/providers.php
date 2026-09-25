@@ -28,6 +28,7 @@ use App\Providers\AppServiceProvider;
 
 return [
     AppServiceProvider::class,
+    \App\Modules\Api\Providers\ApiServiceProvider::class,
     MarketplaceServiceProvider::class,
     PropertyManagementServiceProvider::class,
     BookingServiceProvider::class,

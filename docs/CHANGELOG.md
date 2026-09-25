@@ -1,5 +1,29 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Phase 31: REST API v1 (v0.31.0)
+
+(verified: 280 tests / 1829 assertions)
+
+- New `App\Modules\Api` at `/api/v1`, authenticated with Laravel Sanctum personal access tokens (`laravel/sanctum` ^4.3):
+  - Tokens are issued, inspected with `/auth/me` and revoked.
+  - Unknown emails get the same error as wrong passwords, so accounts can't be probed. Suspended users are refused.
+  - `read` / `write` abilities, with every mutating route requiring `write`.
+  - Tokens expire after 30 days. Rate limits: 120 requests a minute overall, 6 a minute for token issue, 20 a minute for placing bookings and orders.
+- Public catalogue: property and restaurant search (same filters and service as the website), detail pages, room types, reviews and the full menu with modifier ids.
+- Customer `/me`:
+  - Read their own bookings, orders, payments, notifications and message threads.
+  - Book a stay (same rules as "Request to book"; creates a pending marketplace booking).
+  - Place a cash pickup or delivery order (prices computed on the server).
+- Business `/business` with the `X-Tenant` header (membership required, 404 otherwise):
+  - users, properties, rooms, bookings (+ status changes through the state machine), restaurants, orders (+ status changes), delivery zones, payments, CRM customers, reviews and subscription.
+  - Each endpoint checks the same permission as its dashboard screen.
+- Responses use explicit whitelists (`Api\Support\Present`): money as a decimal string plus currency, ISO-8601 dates, and no internal columns such as `tenant_id`.
+- Demo operations:
+  - `DemoOperationsSeeder` seeds bookings in every state (past stays created by moving the clock), settled folios, staff, stock, maintenance tickets, menus and orders, then syncs CRM and accounting.
+  - Covered by `DemoSeedTest`.
+- Fix: `Employee::nextNumber()` used the global auto-increment id, so one business's employee numbers jumped whenever another business hired. Numbers now continue each business's own `employee_no` sequence.
+- Fix: `_ai\run.bat composer …` passed the word "composer" to Composer (`%1` was expanded before `shift` inside the block).
+- 5 new Pest tests (API: 4, demo seed: 1).
 ## 2026-09-26 — Design pass: marketing site, dashboards, demo media (v0.30.1)
 
 (verified: 275 tests / 1779 assertions; screens checked at 390 and 1440 px in headless Chrome)

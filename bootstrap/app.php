@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'tenant.context' => \App\Http\Middleware\SetTenantContext::class,
             'super.admin' => \App\Http\Middleware\EnsureSuperAdmin::class,
+            'api.tenant' => \App\Modules\Api\Middleware\ResolveApiTenant::class,
+            'ability' => \Laravel\Sanctum\Http\Middleware\CheckForAnyAbility::class,
+            'abilities' => \Laravel\Sanctum\Http\Middleware\CheckAbilities::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
