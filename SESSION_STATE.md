@@ -28,12 +28,10 @@
 
 ## Next actions
 
-1. Design pass (owner request 2026-09-26) is committed. Follow-ups still open:
-   - QA the remaining dashboard screens at 390/768/1024/1440 with `ecc:browser-qa`/Chrome DevTools (the Playwright MCP failed to connect this session).
-   - Seed demo operational data (bookings, orders, housekeeping tasks, guests) so every dashboard screen shows real rows.
-   - Hero section polish (owner: "hero looks ugly, video good").
-2. Then Phase 31 — API (master plan).
-3. Owner preferences live in memory: design-direction (square, ink + champagne, Instrument Sans + Geist), demo-data-live, git-autonomy.
+1. Design pass + follow-ups DONE (2026-09-26): cinematic video hero; browser QA of 33 pages at 390/768/1440 (no console errors, no 4xx/5xx, no overflow); responsive module grids; live demo operations (`DemoOperationsSeeder`, covered by `DemoSeedTest`).
+2. **Now: Phase 31 — API** (master plan). Keep the demo seeder extended for any new screen (memory: demo-data-live).
+3. Browser QA script: `node qa.mjs <email|-> <outdir> <width> <shoot 0|1> <paths… | @sidebar>` (session scratchpad; recreate from CHANGELOG notes if the scratchpad is gone).
+4. Owner preferences live in memory: design-direction (square, ink + champagne, Instrument Sans + Geist), demo-data-live, git-autonomy.
 
 ## Design / media facts
 
