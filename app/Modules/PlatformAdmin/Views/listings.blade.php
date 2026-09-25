@@ -40,6 +40,24 @@
                                     <button name="status" value="draft" class="btn btn-sm btn-ghost" type="submit">Send back</button>
                                 @endif
                             </form>
+                            <details class="mt-2">
+                                <summary class="text-xs" style="cursor:pointer">
+                                    Placement
+                                    @if ($listing->isSponsored()) · <strong>sponsored</strong> @endif
+                                    @if ($listing->isFeaturedNow()) · <strong>featured</strong> @endif
+                                    @if ($listing->ranking_boost) · boost {{ $listing->ranking_boost }} @endif
+                                    @if ($listing->isVerified()) · <strong>verified</strong> @endif
+                                </summary>
+                                <form method="POST" action="{{ route('admin.listings.placement', [$kind, $listing->id]) }}" class="mt-2" style="display:grid;gap:6px;max-width:320px">
+                                    @csrf
+                                    <label><input type="checkbox" name="is_featured" value="1" @checked($listing->is_featured) /> Featured</label>
+                                    <label class="text-xs">Featured until (empty = no end) <input type="date" name="featured_until" value="{{ $listing->featured_until?->toDateString() }}" class="form-input" /></label>
+                                    <label class="text-xs">Sponsored until (paid placement, labelled) <input type="date" name="sponsored_until" value="{{ $listing->sponsored_until?->toDateString() }}" class="form-input" /></label>
+                                    <label class="text-xs">Ranking boost (−50 to 50) <input type="number" name="ranking_boost" min="-50" max="50" value="{{ $listing->ranking_boost }}" class="form-input" /></label>
+                                    <label><input type="checkbox" name="verified" value="1" @checked($listing->isVerified()) /> Verified (documents checked)</label>
+                                    <button class="btn btn-sm btn-dark" type="submit" style="justify-self:start">Save placement</button>
+                                </form>
+                            </details>
                         </td>
                     </tr>
                 @empty

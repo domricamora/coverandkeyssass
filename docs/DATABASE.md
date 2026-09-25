@@ -265,6 +265,12 @@ The unique `(user_id, reviewable_type, reviewable_id)` becomes a plain index, so
 | cms_pages | public content pages | slug unique, title, meta_description, body (Markdown), is_published, in_footer, updated_by |
 | platform_settings | platform key / value settings | key primary; support_email, support_phone, announcement, commission_default_rate |
 
+## Phase 29 changes (Marketplace Administration)
+
+- `properties`, `restaurants`: `featured_until`, `sponsored_until` (indexed), `ranking_boost` smallint, `verified_at`.
+- `tenants`: `verified_at`, `verification_note`.
+- New `content_reports`: user, morph `reportable` (property / restaurant), reason, details, status `open/resolved/dismissed`, resolved_by, resolution_note, resolved_at.
+
 ## Seeding
 
 `php artisan db:seed` → PermissionSeeder (catalogue) + RoleSeeder (platform `super_admin` **and** a refresh of every existing tenant's system roles, so newly added catalogue permissions reach already-provisioned businesses).

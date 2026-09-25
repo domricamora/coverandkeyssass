@@ -93,10 +93,7 @@ class MarketplaceSearchService
             'price_desc' => $query->orderByDesc('base_price')->orderBy('id'),
             'rating' => $query->orderByDesc('avg_rating')->orderByDesc('reviews_count')->orderBy('id'),
             'newest' => $query->orderByDesc('published_at')->orderByDesc('id'),
-            default => $query->orderByDesc('is_featured')
-                ->orderByDesc('avg_rating')
-                ->orderByDesc('reviews_count')
-                ->orderBy('id'),
+            default => $query->ranked(),
         };
     }
 
@@ -134,7 +131,7 @@ class MarketplaceSearchService
             'rating' => $query->orderByDesc('avg_rating')->orderByDesc('reviews_count')->orderBy('id'),
             'newest' => $query->orderByDesc('published_at')->orderByDesc('id'),
             'price_asc' => $query->orderBy('price_level')->orderBy('id'),
-            default => $query->orderByDesc('is_featured')->orderByDesc('avg_rating')->orderBy('id'),
+            default => $query->ranked(),
         };
 
         return $query->paginate(self::PER_PAGE)->withQueryString();
@@ -147,8 +144,7 @@ class MarketplaceSearchService
     public function featuredProperties(int $limit = 6): Collection
     {
         return Property::publicQuery()
-            ->orderByDesc('is_featured')
-            ->orderByDesc('avg_rating')
+            ->ranked()
             ->limit($limit)
             ->get();
     }
@@ -156,8 +152,7 @@ class MarketplaceSearchService
     public function featuredRestaurants(int $limit = 3): Collection
     {
         return Restaurant::publicQuery()
-            ->orderByDesc('is_featured')
-            ->orderByDesc('avg_rating')
+            ->ranked()
             ->limit($limit)
             ->get();
     }

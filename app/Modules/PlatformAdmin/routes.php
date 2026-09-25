@@ -3,6 +3,7 @@
 use App\Modules\PlatformAdmin\Controllers\ActivityController;
 use App\Modules\PlatformAdmin\Controllers\ContentController;
 use App\Modules\PlatformAdmin\Controllers\ListingController;
+use App\Modules\PlatformAdmin\Controllers\MarketplaceAdminController;
 use App\Modules\PlatformAdmin\Controllers\ReportController;
 use Illuminate\Support\Facades\Route;
 
@@ -32,6 +33,19 @@ Route::middleware(['auth', 'super.admin'])->prefix('admin')->name('admin.')->gro
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/{report}.csv', [ReportController::class, 'export'])->name('reports.export');
     Route::get('/logs', [ReportController::class, 'logs'])->name('logs.index');
+
+    // Marketplace administration (Phase 29)
+    Route::post('/listings/{kind}/{id}/placement', [MarketplaceAdminController::class, 'promote'])->whereIn('kind', ['properties', 'restaurants'])->whereNumber('id')->name('listings.placement');
+    Route::post('/tenants/{tenant}/verify', [MarketplaceAdminController::class, 'verifyHost'])->name('tenants.verify');
+    Route::get('/taxonomy/{type?}', [MarketplaceAdminController::class, 'taxonomy'])->name('taxonomy.index');
+    Route::post('/taxonomy/{type}', [MarketplaceAdminController::class, 'saveTaxonomy'])->name('taxonomy.store');
+    Route::put('/taxonomy/{type}/{id}', [MarketplaceAdminController::class, 'saveTaxonomy'])->whereNumber('id')->name('taxonomy.update');
+    Route::delete('/taxonomy/{type}/{id}', [MarketplaceAdminController::class, 'deleteTaxonomy'])->whereNumber('id')->name('taxonomy.destroy');
+    Route::get('/moderation', [MarketplaceAdminController::class, 'moderation'])->name('moderation.index');
+    Route::post('/moderation/{report}', [MarketplaceAdminController::class, 'resolve'])->name('moderation.resolve');
 });
+
+Route::post('/report/{kind}/{slug}', [MarketplaceAdminController::class, 'report'])
+    ->middleware(['auth', 'throttle:10,1'])->whereIn('kind', ['properties', 'restaurants'])->name('listings.report');
 
 Route::get('/pages/{slug}', [ContentController::class, 'show'])->where('slug', '[A-Za-z0-9_-]+')->name('pages.show');

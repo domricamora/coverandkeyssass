@@ -8,7 +8,9 @@
     <a class="listing-card__media" href="{{ $url }}" aria-label="{{ $property->name }}">
         @include('marketplace::partials.cover', ['listing' => $property, 'variant' => 'card'])
 
-        @if ($property->is_featured)
+        @if ($property->isSponsored())
+            <span class="listing-card__flag">Sponsored</span>
+        @elseif ($property->isFeaturedNow())
             <span class="listing-card__flag">Guest favourite</span>
         @endif
 

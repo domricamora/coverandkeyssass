@@ -21,6 +21,7 @@ class Tenant extends Model
     {
         return [
             'settings' => 'array',
+            'verified_at' => 'datetime',
         ];
     }
 

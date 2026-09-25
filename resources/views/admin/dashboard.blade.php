@@ -11,7 +11,7 @@
             'admin.users.index' => 'Users', 'admin.tenants.index' => 'Businesses', 'admin.modules.index' => 'Modules', 'admin.pricing.index' => 'Pricing',
             'admin.billing.index' => 'Subscriptions', 'admin.bookings.index' => 'Bookings', 'admin.orders.index' => 'Orders', 'admin.payments.index' => 'Payments & refunds',
             'admin.commissions.index' => 'Commissions', 'admin.payouts.index' => 'Payouts', 'admin.reviews.index' => 'Reviews', 'admin.support.index' => 'Support',
-            'admin.pages.index' => 'CMS pages', 'admin.settings.index' => 'Settings', 'admin.reports.index' => 'Reports', 'admin.logs.index' => 'Logs',
+            'admin.moderation.index' => 'Reported content', 'admin.taxonomy.index' => 'Categories & locations', 'admin.pages.index' => 'CMS pages', 'admin.settings.index' => 'Settings', 'admin.reports.index' => 'Reports', 'admin.logs.index' => 'Logs',
         ] as $name => $label)
             <a href="{{ route($name) }}" class="btn btn-dark btn-sm">{{ $label }}</a>
         @endforeach

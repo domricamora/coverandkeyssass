@@ -1,5 +1,15 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Phase 29: Marketplace Administration (v0.29.0)
+
+(verified: 269 tests / 1738 assertions)
+
+- Placement: featured (with an optional end date), sponsored (paid, dated, always labelled) and a ranking boost. The recommended order in search and the home page now puts live sponsored listings first, then live featured ones, then a score (rating, review volume, verification, boost).
+- Verification of properties, restaurants and hosts, shown to guests as badges.
+- Super Admin CRUD for locations, property categories, cuisines and amenities. Entries in use can't be deleted.
+- Guests can report a listing. A moderation queue lets admins suspend the listing (with a note), resolve or dismiss.
+- 4 new Pest tests.
+
 ## 2026-09-26 — Phase 28: Super Admin (v0.28.0)
 
 (verified: 265 tests / 1680 assertions)

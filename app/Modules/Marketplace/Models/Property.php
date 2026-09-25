@@ -39,6 +39,7 @@ class Property extends Model
     use HasFactory;
     use HasMedia;
     use HasPublicIdentity;
+    use \App\Modules\Marketplace\Models\Concerns\Promotable;
     use SoftDeletes;
 
     public const STATUS_DRAFT = 'draft';

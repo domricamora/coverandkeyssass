@@ -16,6 +16,7 @@
 
         <div class="listing-head">
             <h1>{{ $p->name }}</h1>
+            @include('platform-admin::partials.listing-trust', ['listing' => $p, 'kind' => 'properties'])
             <div class="listing-head__sub">
                 <span class="listing-head__rating">
                     @include('marketplace::partials.stars', ['rating' => $p->avg_rating, 'count' => $p->reviews_count])

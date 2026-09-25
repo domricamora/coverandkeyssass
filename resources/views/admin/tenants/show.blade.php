@@ -6,6 +6,12 @@
             <p class="mt-1 text-sm" style="color:var(--text-3)">{{ ucfirst($tenant->business_type) }} &middot; {{ $tenant->slug }} &middot; {{ $tenant->users_count }} member(s)</p>
         </div>
         <div class="flex flex-wrap gap-2">
+            <form method="POST" action="{{ route('admin.tenants.verify', $tenant) }}" class="flex gap-1">
+                @csrf
+                <input type="hidden" name="verified" value="{{ $tenant->verified_at ? 0 : 1 }}" />
+                @unless ($tenant->verified_at)<input name="note" class="form-input" placeholder="Checked: permit, ID…" aria-label="Verification note" style="max-width:180px" />@endunless
+                <button type="submit" class="btn btn-sm {{ $tenant->verified_at ? 'btn-ghost' : 'btn-primary' }}">{{ $tenant->verified_at ? 'Verified '.$tenant->verified_at->format('M j, Y').' · undo' : 'Verify host' }}</button>
+            </form>
             @if ($tenant->status === 'active')
                 <form method="POST" action="{{ route('admin.tenants.suspend', $tenant) }}">
                     @csrf
