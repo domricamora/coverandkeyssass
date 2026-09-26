@@ -52,8 +52,13 @@ listing pages.
    with `promo_code`), submit → existing reserve endpoint → confirmation.
 3. Signed out: review route is `auth`; Laravel's intended URL carries the
    query back after login/register.
-4. Confirmation = the customer booking page (`account.bookings.show`)
-   rebuilt as Inertia `Account/Booking` with pay (PayMongo) when enabled.
+4. Confirmation = the existing customer booking page
+   (`account.bookings.show`, pay button when PayMongo is on). Converting
+   the My trips area to React is a follow-up, not part of this spec.
+
+Sign-in return for all three flows: `GET /continue?to=/relative/path`
+(auth). Signed out → login/register stores it as the intended URL; after
+sign-in it redirects to `to` (relative paths only).
 
 ## Restaurant flow
 
