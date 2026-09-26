@@ -27,7 +27,22 @@
 
 ## Next actions
 
-## HAND-OFF (2026-09-26, checkout without registration + PayPal) — start here
+## HAND-OFF (2026-09-27, latest) — start here
+
+**Done since the dashboard conversion:**
+- **Guest account on React (`Pages/Account/*`):** Home, Trips, Trip, Orders, Order, Tables, Reviews, Notifications. They use `PublicShell`, which now has site nav, an account menu with sign-out (business links only for members), a mobile menu and page transitions.
+- **Menus:** Team and Business settings show only to roles that can use them. Dashboard/Businesses links show only to business members; guests see neither.
+- **Photos:** room-type galleries (Booking.com style), dish photos and menu-section banners via `PhotoController` and `PhotoStrip`. Guests see room photos in the stay panel (full-screen `Gallery`) and dishes and banners in the menu. `DemoPhotoSeeder` fills the demo data.
+- **Booking-site features:** price-drop alerts (`favorites:price-drops`, daily 09:00), recently viewed stays (localStorage strip on `/`, `/stays`, search), and the map view (Leaflet + OSM, `StayMap` widget, host map-pin fields).
+- **Motion:** `.page-in`, `dialog[open]` and `.menu-in` in `react.css` / `app.css`, all respecting reduced motion.
+- **Deploy target** saved (memory `deploy-target`; secrets only in the git-ignored `.deploy.env` and `.env.production`). The owner said to upload "later".
+
+**Next (owner asked, in order):**
+1. Remaining guest account tabs to React: Wish list (`FavoriteController::index`), Payments (`PaymentController::index`), Rewards (`Loyalty MemberController::index`), Messages (`GuestMessageController` index/show/create), Notification settings, Profile, the invoice and folio pages. Pattern: `AccountController::nav('<route>')` + `PublicShell` + `AccountTabs`.
+2. Classy motion and responsive checks on each converted page (390/768/1440 with `flow.mjs`).
+3. Platform admin area to React, then the FINAL_AUDIT items (sandbox keys from the owner, deploy when told).
+
+## HAND-OFF (2026-09-26, checkout without registration + PayPal) — superseded
 
 **Done:** checkout without registration (plan `docs/superpowers/plans/2026-09-26-frictionless-checkout.md`), PayPal Orders v2 beside PayMongo, the pay-now / pay-at-property choice, React staff & rota (`Staff/*`, `MyWork/Index`). Full suite: 341 passing.
 
