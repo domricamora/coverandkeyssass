@@ -192,8 +192,10 @@ it('runs the accounting screens with permissions, gating and isolation', functio
     $this->post(route('accounting.invoices.issue', $invoice->id))->assertSessionHasNoErrors();
     $this->post(route('accounting.expenses.store'), ['ledger_account_id' => LedgerAccount::query()->where('system_key', 'maintenance_expense')->value('id'), 'vendor' => 'Plumber', 'expense_date' => '2030-09-05', 'amount' => 1500, 'paid_from' => 'cash'])->assertSessionHasNoErrors();
 
-    $this->get(route('accounting.index', ['from' => '2030-09-01', 'to' => '2030-09-30']))->assertOk()->assertSee('₱10,000.00')->assertSee('₱1,500.00');
-    $this->get(route('accounting.trial-balance'))->assertOk()->assertSee('balanced');
+    $this->get(route('accounting.index', ['from' => '2030-09-01', 'to' => '2030-09-30']))->assertOk()->assertInertia(fn ($p) => $p->component('Accounting/Index')
+        ->where('pnl.total_revenue', fn ($v) => (float) $v === 10000.0)
+        ->where('pnl.total_expenses', fn ($v) => (float) $v === 1500.0));
+    $this->get(route('accounting.trial-balance'))->assertOk()->assertInertia(fn ($p) => $p->where('tb', fn ($tb) => abs($tb['debits'] - $tb['credits']) < 0.01 && $tb['debits'] > 0));
     $this->get(route('accounting.journal'))->assertOk()->assertSee('Invoice '.$invoice->number);
     $this->get(route('accounting.payables'))->assertOk()->assertSee($invoice->number);
     $this->get(route('accounting.invoices.show', $invoice->id))->assertOk()->assertSee('Retreat package');

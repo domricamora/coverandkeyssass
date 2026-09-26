@@ -10,8 +10,9 @@ use App\Modules\Accounting\Services\BooksService;
 use App\Modules\Accounting\Services\LedgerService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Inertia\Inertia;
 
-/** Expenses and customer invoices (Phase 20). */
+/** Expenses and customer invoices (Phase 20; React screens). */
 class BooksController extends Controller
 {
     public function __construct(
@@ -24,10 +25,22 @@ class BooksController extends Controller
         $this->authorizeTo($request, 'accounting.view');
         $this->ledger->account('cash');
 
-        return view('accounting::expenses', [
-            'expenses' => Expense::query()->with('account')->latest('expense_date')->latest('id')->paginate(30),
-            'accounts' => LedgerAccount::query()->where('type', 'expense')->orderBy('code')->get(),
-            'title' => 'Expenses',
+        return Inertia::render('Accounting/Expenses', [
+            'expenses' => Expense::query()->with('account')->latest('expense_date')->latest('id')->paginate(30)->through(fn (Expense $e) => [
+                'id' => $e->id,
+                'date' => $e->expense_date->format('M j, Y'),
+                'vendor' => $e->vendor,
+                'reference' => $e->reference,
+                'account' => $e->account?->name,
+                'paidFrom' => $e->paid_from,
+                'tax' => (float) $e->tax_amount,
+                'amount' => (float) $e->amount,
+            ]),
+            'accounts' => LedgerAccount::query()->where('type', 'expense')->orderBy('code')->get()->map(fn ($a) => [$a->id, $a->code.' · '.$a->name]),
+            'today' => today()->toDateString(),
+            'can' => ['manage' => $request->user()->hasPermissionTo('accounting.manage')],
+            'tabs' => AccountingController::tabs('accounting.expenses'),
+            'urls' => ['store' => route('accounting.expenses.store')],
         ]);
     }
 
@@ -56,7 +69,23 @@ class BooksController extends Controller
     {
         $this->authorizeTo($request, 'accounting.view');
 
-        return view('accounting::invoices', ['invoices' => Invoice::query()->latest('issue_date')->latest('id')->paginate(30), 'title' => 'Invoices']);
+        return Inertia::render('Accounting/Invoices', [
+            'invoices' => Invoice::query()->latest('issue_date')->latest('id')->paginate(30)->through(fn (Invoice $i) => [
+                'id' => $i->id,
+                'number' => $i->number,
+                'customer' => $i->customer_name,
+                'due' => $i->due_date->format('M j, Y'),
+                'status' => $i->isOverdue() ? 'overdue' : $i->status,
+                'total' => (float) $i->total,
+                'balance' => $i->balance(),
+                'href' => route('accounting.invoices.show', $i->id),
+            ]),
+            'today' => today()->toDateString(),
+            'due' => today()->addDays(30)->toDateString(),
+            'can' => ['manage' => $request->user()->hasPermissionTo('accounting.manage')],
+            'tabs' => AccountingController::tabs('accounting.invoices'),
+            'urls' => ['store' => route('accounting.invoices.store')],
+        ]);
     }
 
     public function storeInvoice(Request $request)
@@ -84,8 +113,41 @@ class BooksController extends Controller
     public function showInvoice(Request $request, string $invoice)
     {
         $this->authorizeTo($request, 'accounting.view');
+        $invoice = Invoice::query()->with(['lines', 'payments'])->findOrFail($invoice);
+        $canManage = $request->user()->hasPermissionTo('accounting.manage');
 
-        return view('accounting::invoice', ['invoice' => Invoice::query()->with(['lines', 'payments'])->findOrFail($invoice), 'title' => 'Invoice']);
+        return Inertia::render('Accounting/Invoice', [
+            'invoice' => [
+                'number' => $invoice->number,
+                'customer' => $invoice->customer_name,
+                'email' => $invoice->customer_email,
+                'issued' => $invoice->issue_date->format('M j, Y'),
+                'due' => $invoice->due_date->format('M j, Y'),
+                'status' => $invoice->isOverdue() ? 'overdue' : $invoice->status,
+                'taxRate' => (float) $invoice->tax_rate,
+                'subtotal' => (float) $invoice->subtotal,
+                'tax' => (float) $invoice->tax_total,
+                'total' => (float) $invoice->total,
+                'paid' => (float) $invoice->amount_paid,
+                'balance' => $invoice->balance(),
+                'notes' => $invoice->notes,
+                'lines' => $invoice->lines->map(fn ($l) => ['id' => $l->id, 'description' => $l->description, 'quantity' => (float) $l->quantity, 'unit' => (float) $l->unit_price, 'total' => (float) $l->line_total]),
+                'payments' => $invoice->payments->map(fn ($p) => ['id' => $p->id, 'date' => $p->paid_on->format('M j, Y'), 'method' => $p->method, 'amount' => (float) $p->amount, 'reference' => $p->reference]),
+            ],
+            'today' => today()->toDateString(),
+            'can' => [
+                'issue' => $canManage && $invoice->status === Invoice::DRAFT,
+                'void' => $canManage && in_array($invoice->status, [Invoice::DRAFT, Invoice::ISSUED], true) && (float) $invoice->amount_paid == 0.0,
+                'pay' => $canManage && $invoice->status === Invoice::ISSUED,
+            ],
+            'tabs' => AccountingController::tabs('accounting.invoices'),
+            'urls' => [
+                'index' => route('accounting.invoices'),
+                'issue' => route('accounting.invoices.issue', $invoice->id),
+                'void' => route('accounting.invoices.void', $invoice->id),
+                'pay' => route('accounting.invoices.pay', $invoice->id),
+            ],
+        ]);
     }
 
     public function issueInvoice(Request $request, string $invoice)
