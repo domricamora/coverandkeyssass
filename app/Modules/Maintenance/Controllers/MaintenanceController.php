@@ -11,6 +11,8 @@ use App\Modules\PropertyManagement\Models\Room;
 use App\Support\TenantContext;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Inertia\Inertia;
 use Illuminate\Validation\Rule;
 
 /** Maintenance tickets screens (Phase 16): list + filters, new ticket, detail with notes / files / cost / workflow. */
@@ -38,12 +40,25 @@ class MaintenanceController extends Controller
             ->orderByRaw("FIELD(priority, 'urgent', 'high', 'normal', 'low')")->latest()
             ->paginate(25)->withQueryString();
 
-        return view('maintenance::index', [
-            'tickets' => $tickets,
-            'filters' => $filters,
+        return Inertia::render('Maintenance/Index', [
+            'tickets' => $tickets->through(fn (MaintenanceTicket $t) => [
+                'reference' => $t->reference,
+                'title' => $t->title,
+                'where' => $t->property?->name.($t->room ? ' · '.$t->room->room_number : ''),
+                'out_of_order' => $t->room_out_of_order,
+                'priority' => $t->priority,
+                'status' => $t->status,
+                'assignee' => $t->assignee?->name,
+                'href' => route('maintenance.show', $t->reference),
+            ]),
+            'filters' => ['status' => $filters['status'] ?? 'active', 'priority' => $filters['priority'] ?? null, 'mine' => $request->boolean('mine') ? 1 : null],
             'properties' => Property::query()->orderBy('name')->get(['id', 'name']),
             'rooms' => Room::query()->orderBy('room_number')->get(['id', 'property_id', 'room_number']),
-            'title' => 'Maintenance',
+            'statuses' => [MaintenanceTicket::OPEN, MaintenanceTicket::IN_PROGRESS, MaintenanceTicket::ON_HOLD, MaintenanceTicket::RESOLVED, MaintenanceTicket::CLOSED],
+            'priorities' => MaintenanceTicket::PRIORITIES,
+            'categories' => MaintenanceTicket::CATEGORIES,
+            'canWork' => $request->user()->hasPermissionTo('maintenance.work'),
+            'urls' => ['self' => route('maintenance.index'), 'store' => route('maintenance.store')],
         ]);
     }
 
@@ -75,10 +90,43 @@ class MaintenanceController extends Controller
         $this->authorizeTo($request, 'maintenance.view');
         $ticket = $this->find($ticket)->load(['property', 'room', 'reporter', 'assignee', 'notes.author', 'attachments']);
 
-        return view('maintenance::show', [
-            'ticket' => $ticket,
+        $user = $request->user();
+        $canManage = $user->hasPermissionTo('maintenance.manage');
+        $ref = $ticket->reference;
+
+        return Inertia::render('Maintenance/Show', [
+            'ticket' => [
+                'reference' => $ref,
+                'title' => $ticket->title,
+                'description' => $ticket->description,
+                'where' => $ticket->property?->name.($ticket->room ? ' · room '.$ticket->room->room_number.' ('.Str::headline((string) $ticket->room->housekeeping_status).')' : ''),
+                'category' => $ticket->category,
+                'priority' => $ticket->priority,
+                'status' => $ticket->status,
+                'out_of_order' => $ticket->room_out_of_order,
+                'reporter' => $ticket->reporter?->name,
+                'reported' => $ticket->created_at->diffForHumans(),
+                'assigned_to' => $ticket->assigned_to,
+                'assignee' => $ticket->assignee?->name,
+                'cost' => $ticket->cost !== null ? (float) $ticket->cost : null,
+                'started_at' => $ticket->started_at,
+                'resolved_at' => $ticket->resolved_at,
+                'notes' => $ticket->notes->map(fn ($n) => ['id' => $n->id, 'author' => $n->author?->name ?? 'System', 'at' => $n->created_at, 'body' => $n->body, 'system' => (bool) $n->is_system]),
+                'files' => $ticket->attachments->map(fn ($f) => ['id' => $f->id, 'name' => $f->alt ?? 'File', 'kind' => $f->kind, 'href' => route('maintenance.attachments.show', [$ref, $f->id])]),
+                // Closing is a supervisor's call; a resolved ticket going back to work reads "Reopen".
+                'next' => collect(MaintenanceTicket::TRANSITIONS[$ticket->status] ?? [])->reject(fn ($to) => $to === MaintenanceTicket::CLOSED && ! $canManage)
+                    ->map(fn ($to) => ['status' => $to, 'label' => $ticket->status === MaintenanceTicket::RESOLVED && $to === MaintenanceTicket::IN_PROGRESS ? 'Reopen' : Str::headline($to)])->values(),
+            ],
             'members' => app(TenantContext::class)->tenant()->users()->wherePivot('status', 'active')->orderBy('name')->get(['users.id', 'users.name']),
-            'title' => 'Ticket '.$ticket->reference,
+            'can' => ['work' => $user->hasPermissionTo('maintenance.work'), 'manage' => $canManage],
+            'urls' => [
+                'index' => route('maintenance.index'),
+                'transition' => route('maintenance.transition', $ref),
+                'assign' => route('maintenance.assign', $ref),
+                'cost' => route('maintenance.cost', $ref),
+                'note' => route('maintenance.notes.store', $ref),
+                'attach' => route('maintenance.attachments.store', $ref),
+            ],
         ]);
     }
 

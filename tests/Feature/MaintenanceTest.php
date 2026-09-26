@@ -9,6 +9,7 @@ use App\Support\ModuleService;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Support\BookingFixtures;
 use Tests\Support\MarketplaceFixtures;
 use Tests\Support\PropertyManagementFixtures;
@@ -73,7 +74,9 @@ it('opens, assigns and walks a ticket through its workflow with a note trail', f
 
     $this->post(route('maintenance.notes.store', $ticket->reference), ['body' => 'late'])->assertSessionHasErrors('body');
     $this->post(route('maintenance.transition', $ticket->reference), ['status' => 'in_progress'])->assertSessionHasErrors('status');
-    $this->get(route('maintenance.show', $ticket->reference))->assertOk()->assertSee('Replaced the trap.')->assertSee('₱450.00');
+    $this->get(route('maintenance.show', $ticket->reference))->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Maintenance/Show')->where('ticket.cost', 450)->where('ticket.next', [])
+        ->where('ticket.notes', fn ($notes) => collect($notes)->contains('body', 'Replaced the trap.')));
 });
 
 it('hands a repaired room back to housekeeping only when its last ticket is resolved', function () {
