@@ -134,6 +134,7 @@ class DemoOperationsSeeder extends Seeder
         }
 
         DemoHistorySeeder::groupOwner();
+        (new DemoPhotoSeeder)->run(); // room-type galleries, dish photos, menu section banners
         Artisan::call('accounting:sync');
         $this->command?->info('Demo operations seeded: bookings, staff, inventory, maintenance, menus, orders.');
     }
