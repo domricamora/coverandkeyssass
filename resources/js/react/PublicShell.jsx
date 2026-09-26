@@ -11,7 +11,7 @@ export default function PublicShell({ children }) {
     const [notice, setNotice] = useState(null);
 
     useEffect(() => {
-        const text = flash?.error ?? flash?.success ?? (errors && Object.values(errors)[0]);
+        const text = flash?.error ?? flash?.warning ?? flash?.success ?? (errors && Object.values(errors)[0]);
         setNotice(text ? { text, bad: !flash?.success || !!flash?.error } : null);
     }, [flash, errors]);
 
@@ -30,5 +30,23 @@ export default function PublicShell({ children }) {
             )}
             <main className="mx-auto max-w-6xl px-5 py-8 sm:px-10 sm:py-12">{children}</main>
         </div>
+    );
+}
+
+/** Guest account sub-navigation (Trips, Tables, Orders, …); some tabs are still server pages, so plain links. */
+export function AccountTabs({ tabs }) {
+    return (
+        <nav aria-label="Account" className="-mx-5 mb-8 flex gap-1 overflow-x-auto border-b border-line px-5 sm:mx-0 sm:px-0">
+            {tabs.map((t) => (
+                <a
+                    key={t.href}
+                    href={t.href}
+                    aria-current={t.active ? 'page' : undefined}
+                    className={`-mb-px whitespace-nowrap border-b-2 px-3 py-2.5 text-[14px] ${t.active ? 'border-brand font-medium text-fg' : 'border-transparent text-fg-3 hover:text-fg'}`}
+                >
+                    {t.label}
+                </a>
+            ))}
+        </nav>
     );
 }

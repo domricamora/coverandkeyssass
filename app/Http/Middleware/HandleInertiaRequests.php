@@ -33,6 +33,7 @@ class HandleInertiaRequests extends Middleware
             'flash' => fn () => array_filter([
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),
+                'warning' => $request->session()->get('warning'),
             ]),
             'links' => fn () => $user ? array_filter([
                 'logout' => route('logout'),

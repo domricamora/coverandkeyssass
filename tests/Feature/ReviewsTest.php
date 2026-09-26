@@ -166,7 +166,7 @@ it('keeps review screens to the right people', function () {
     // The customer portal still offers the stay review form with categories.
     MarketplaceFixtures::asTenant(null);
     $stay = finishedStay($fresh = User::factory()->create(), '2030-11-01', '2030-11-03');
-    $this->actingAs($fresh)->get(route('account.bookings.show', $stay->reference))->assertOk()->assertSee('Cleanliness');
+    $this->actingAs($fresh)->get(route('account.bookings.show', $stay->reference))->assertOk()->assertInertia(fn ($p) => $p->component('Account/Trip')->where('can.review', true));
     $this->post(route('account.bookings.review', $stay->reference), ['rating' => 5, 'comment' => 'Perfect', 'rating_value' => 5])->assertSessionHasNoErrors();
     expect(Review::query()->where('booking_id', $stay->id)->value('rating_value'))->toBe(5);
 });

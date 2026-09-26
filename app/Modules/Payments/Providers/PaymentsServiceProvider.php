@@ -5,11 +5,9 @@ namespace App\Modules\Payments\Providers;
 use App\Modules\Booking\Events\BookingTransitioning;
 use App\Modules\Booking\Models\Booking;
 use App\Modules\Payments\Controllers\WebhookController;
-use App\Modules\Payments\Models\Payment;
 use App\Modules\Payments\Services\PaymentService;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 /**
@@ -40,18 +38,6 @@ class PaymentsServiceProvider extends ServiceProvider
         Event::listen(function (\App\Modules\Ordering\Events\OrderTransitioning $event): void {
             if ($event->to === \App\Modules\Ordering\Models\Order::REFUNDED) {
                 app(PaymentService::class)->refundOrder($event->order);
-            }
-        });
-
-        View::composer(['customer::bookings.show'], function ($view): void {
-            $booking = $view->getData()['booking'] ?? null;
-
-            if ($booking) {
-                $view->with('payments', Payment::query()->withoutGlobalScope('tenant')
-                    ->where('tenant_id', $booking->tenant_id)
-                    ->where('booking_id', $booking->id)
-                    ->latest('id')
-                    ->get());
             }
         });
     }

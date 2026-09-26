@@ -145,6 +145,7 @@ function Toasts() {
         const next = [];
         if (flash?.success) next.push({ tone: 'ok', text: flash.success });
         if (flash?.error) next.push({ tone: 'bad', text: flash.error });
+        if (flash?.warning) next.push({ tone: 'bad', text: flash.warning });
         const firstError = errors && Object.values(errors)[0];
         if (firstError) next.push({ tone: 'bad', text: firstError });
         if (!next.length) return;
