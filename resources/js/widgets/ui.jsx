@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 /**
  * Shared bits for the public widgets. Utility classes only: the public
@@ -162,4 +162,41 @@ export function useGuest({ user, urls, returnTo, phone: initialPhone = '', stack
     );
 
     return { view, ensure, phone, signedIn: !!me, waiting: mode === 'sent' };
+}
+
+/** Full-screen photo gallery (room types, dishes): native <dialog>, arrows + keyboard, counter. */
+export function Gallery({ photos, title, start = 0, onClose }) {
+    const ref = useRef(null);
+    const [i, setI] = useState(start);
+    const go = (d) => setI((n) => (n + d + photos.length) % photos.length);
+
+    useEffect(() => {
+        ref.current?.showModal();
+        const key = (e) => { if (e.key === 'ArrowRight') go(1); if (e.key === 'ArrowLeft') go(-1); };
+        window.addEventListener('keydown', key);
+        return () => window.removeEventListener('keydown', key);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    return (
+        <dialog ref={ref} onClose={onClose} aria-label={`${title} photos`} className="m-0 h-dvh max-h-none w-screen max-w-none bg-black/95 p-0 text-white backdrop:bg-black/80">
+            <div className="flex h-full flex-col">
+                <div className="flex items-center justify-between px-4 py-3 text-[14px]">
+                    <span className="truncate font-medium">{title}</span>
+                    <span className="flex items-center gap-4">
+                        <span className="tabular-nums text-white/70">{i + 1} / {photos.length}</span>
+                        <button type="button" onClick={() => ref.current?.close()} className="text-2xl leading-none text-white/80 hover:text-white" aria-label="Close">×</button>
+                    </span>
+                </div>
+                <div className="relative flex min-h-0 flex-1 items-center justify-center px-2 pb-4">
+                    <img src={photos[i]} alt={`${title} photo ${i + 1}`} className="max-h-full max-w-full object-contain" />
+                    {photos.length > 1 && (
+                        <>
+                            <button type="button" onClick={() => go(-1)} aria-label="Previous photo" className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 px-3 py-4 text-2xl hover:bg-black/70">‹</button>
+                            <button type="button" onClick={() => go(1)} aria-label="Next photo" className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 px-3 py-4 text-2xl hover:bg-black/70">›</button>
+                        </>
+                    )}
+                </div>
+            </div>
+        </dialog>
+    );
 }

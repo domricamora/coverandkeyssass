@@ -48,8 +48,8 @@ class StayQuoteController extends Controller
         return app(TenantContext::class)->runAs($listing, function () use ($listing, $in, $out, $nights, $guests, $validated) {
             $options = [];
 
-            foreach ($listing->roomTypes()->active()->sorted()->get() as $type) {
-                $option = ['room_type_id' => $type->id, 'name' => $type->name, 'sleeps' => (int) $type->max_guests, 'fits' => $type->max_guests >= $guests];
+            foreach ($listing->roomTypes()->active()->sorted()->with('media')->get() as $type) {
+                $option = ['room_type_id' => $type->id, 'name' => $type->name, 'sleeps' => (int) $type->max_guests, 'fits' => $type->max_guests >= $guests, 'photos' => $type->galleryUrls()];
                 $option['free'] = count($this->availability->freeRoomIds($type, $in, $out->subDay()));
 
                 try {

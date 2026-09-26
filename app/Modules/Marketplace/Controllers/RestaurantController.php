@@ -44,6 +44,8 @@ class RestaurantController extends Controller
             ->with([
                 'menuCategories' => fn ($q) => $q->withoutGlobalScope('tenant')->where('is_active', true),
                 'menuCategories.items' => fn ($q) => $q->withoutGlobalScope('tenant'),
+                'menuCategories.media', // section banners
+                'menuCategories.items.media', // dish photos
                 'menuCategories.items.modifierGroups' => fn ($q) => $q->withoutGlobalScope('tenant'),
                 'menuCategories.items.modifierGroups.options' => fn ($q) => $q->withoutGlobalScope('tenant')->where('is_available', true),
             ])

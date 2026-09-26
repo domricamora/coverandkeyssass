@@ -58,7 +58,12 @@ export default function MenuOrder({ ordering, slug, currency = 'PHP', addUrl, su
 
             {categories.map((c) => (
                 <section key={c.id} id={`menu-${c.id}`} className="scroll-mt-16 pt-6">
-                    <h3 className="mb-2 text-[16px] font-semibold">{c.name}</h3>
+                    {c.banner ? (
+                        <div className="relative mb-2 h-32 overflow-hidden sm:h-40">
+                            <img src={c.banner} alt="" loading="lazy" className="h-full w-full object-cover" />
+                            <h3 className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-4 pb-3 pt-8 text-[18px] font-semibold text-white">{c.name}</h3>
+                        </div>
+                    ) : <h3 className="mb-2 text-[16px] font-semibold">{c.name}</h3>}
                     <ul className="divide-y divide-line border-y border-line">
                         {c.items.map((i) => (
                             <li key={i.id} className={cx('flex gap-4 py-4', !i.available && 'opacity-55')}>

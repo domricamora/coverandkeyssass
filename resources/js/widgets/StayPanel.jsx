@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { BTN, FIELD, LABEL, Stepper, cx, json, money } from './ui';
+import { BTN, FIELD, Gallery, LABEL, Stepper, cx, json, money } from './ui';
 
 /**
  * Property page booking panel: dates, guests, rooms → live quote for every
@@ -26,6 +26,7 @@ export default function StayPanel({ quoteUrl, reviewUrl, root, signedIn, currenc
     const [quote, setQuote] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [gallery, setGallery] = useState(null); // room type whose photos are open
     const abort = useRef(null);
 
     const ready = checkIn && checkOut && checkOut > checkIn;
@@ -125,6 +126,17 @@ export default function StayPanel({ quoteUrl, reviewUrl, root, signedIn, currenc
                                 )}
                             >
                                 <input type="radio" name="room" className="h-4 w-4 accent-[var(--primary)] text-brand" checked={on} disabled={!ok} onChange={() => setPick(o.room_type_id)} />
+                                {o.photos?.length > 0 && (
+                                    <button
+                                        type="button"
+                                        onClick={(e) => { e.preventDefault(); setGallery(o); }}
+                                        className="relative h-12 w-16 shrink-0 overflow-hidden"
+                                        aria-label={`See ${o.photos.length} photos of ${o.name}`}
+                                    >
+                                        <img src={o.photos[0]} alt="" loading="lazy" className="h-full w-full object-cover" />
+                                        {o.photos.length > 1 && <span className="absolute bottom-0 right-0 bg-black/60 px-1 text-[10px] text-white">{o.photos.length}</span>}
+                                    </button>
+                                )}
                                 <span className="min-w-0 flex-1">
                                     <span className="block text-[14px] font-medium">{o.name}</span>
                                     <span className="block text-[12px] text-fg-3">
@@ -158,6 +170,7 @@ export default function StayPanel({ quoteUrl, reviewUrl, root, signedIn, currenc
                 Reserve
             </button>
             <p className="text-center text-[12px] text-fg-3">You won't be charged yet. You review everything on the next step.</p>
+            {gallery && <Gallery photos={gallery.photos} title={gallery.name} onClose={() => setGallery(null)} />}
         </div>
     );
 }

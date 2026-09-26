@@ -73,9 +73,9 @@
                             'summaryUrl' => route('cart.summary'),
                             'cartBase' => url('/cart'),
                             'checkoutUrl' => route('cart.show'),
-                            'categories' => $menu->map(fn ($c) => ['id' => $c->id, 'name' => $c->name, 'items' => $c->items->map(fn ($i) => [
+                            'categories' => $menu->map(fn ($c) => ['id' => $c->id, 'name' => $c->name, 'banner' => $c->coverUrl(), 'items' => $c->items->map(fn ($i) => [
                                 'id' => $i->id, 'name' => $i->name, 'description' => $i->description, 'price' => (float) $i->price,
-                                'photo' => $i->photo_url, 'available' => (bool) $i->is_available,
+                                'photo' => $i->coverUrl() ?? $i->photo_url, 'photos' => $i->galleryUrls(), 'available' => (bool) $i->is_available,
                                 'groups' => $i->modifierGroups->map(fn ($g) => [
                                     'id' => $g->id, 'name' => $g->name, 'min' => (int) $g->min_select, 'max' => $g->max_select, 'rule' => $g->ruleLabel(),
                                     'options' => $g->options->map(fn ($o) => ['id' => $o->id, 'name' => $o->name, 'price' => (float) $o->price])->values(),
