@@ -61,9 +61,30 @@
                     </div>
                 @endif
 
-                @php($menu = $r->relationLoaded('menuCategories') ? $r->menuCategories->filter(fn ($c) => $c->items->isNotEmpty()) : collect())
+                @php $menu = $r->relationLoaded('menuCategories') ? $r->menuCategories->filter(fn ($c) => $c->items->isNotEmpty()) : collect(); @endphp
                 @if ($menu->isNotEmpty())
-                    <div class="listing-block">
+                    @php
+                        // React menu + cart (MenuOrder widget); the Blade below is the no-JS fallback it replaces.
+                        $menuOrder = [
+                            'ordering' => $ordering,
+                            'slug' => $r->slug,
+                            'currency' => $r->currency ?: 'PHP',
+                            'addUrl' => route('cart.add', $r->slug),
+                            'summaryUrl' => route('cart.summary'),
+                            'cartBase' => url('/cart'),
+                            'checkoutUrl' => route('cart.show'),
+                            'categories' => $menu->map(fn ($c) => ['id' => $c->id, 'name' => $c->name, 'items' => $c->items->map(fn ($i) => [
+                                'id' => $i->id, 'name' => $i->name, 'description' => $i->description, 'price' => (float) $i->price,
+                                'photo' => $i->photo_url, 'available' => (bool) $i->is_available,
+                                'groups' => $i->modifierGroups->map(fn ($g) => [
+                                    'id' => $g->id, 'name' => $g->name, 'min' => (int) $g->min_select, 'max' => $g->max_select, 'rule' => $g->ruleLabel(),
+                                    'options' => $g->options->map(fn ($o) => ['id' => $o->id, 'name' => $o->name, 'price' => (float) $o->price])->values(),
+                                ])->values(),
+                            ])->values()])->values(),
+                        ];
+                    @endphp
+                    @push('widgets') @vite('resources/js/widgets.jsx') @endpush
+                    <div class="listing-block" data-widget="MenuOrder" data-props="{{ json_encode($menuOrder) }}">
                         <h2>Menu @if ($ordering)<a class="btn btn-sm btn-ghost" style="float:right;" href="{{ route('cart.show') }}">View cart</a>@endif</h2>
                         @if (session('success'))<p class="muted" role="status">{{ session('success') }}</p>@endif
                         @foreach (['modifiers', 'cart'] as $field)

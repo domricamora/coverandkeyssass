@@ -116,3 +116,14 @@ it('runs the cart as JSON for the menu widget', function () {
 
     $this->postJson(route('cart.add', $a->slug), ['item_id' => $burger->id, 'options' => [999999], 'quantity' => 1])->assertStatus(422);
 });
+
+it('mounts the React menu with modifier rules', function () {
+    Tests\Support\PropertyManagementFixtures::bootstrap();
+    [$restaurant] = menuKitchen('Kitchen A');
+    auth()->logout();
+
+    $this->get(route('marketplace.restaurants.show', $restaurant->slug))->assertOk()
+        ->assertSee('data-widget="MenuOrder"', false)
+        ->assertSee('&quot;name&quot;:&quot;Cheese&quot;', false)
+        ->assertSee('Add to order'); // no-JS fallback
+});
