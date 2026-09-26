@@ -53,7 +53,7 @@ it('lets a guest message the host, and the host answer, with read status and CRM
     expect(Thread::query()->count())->toBe(1)->and($thread->messages()->count())->toBe(2);
 
     PropertyManagementFixtures::login($this->owner, $this->tenant);
-    $this->get(route('messages.index'))->assertOk()->assertSee('Early check-in?')->assertSee('2 new');
+    $this->get(route('messages.index'))->assertOk()->assertSee('Early check-in?')->assertInertia(fn ($p) => $p->component('Messages/Index')->where('threads.data.0.unread', 2));
     $this->get(route('messages.show', $thread->id))->assertOk()->assertSee('Can we arrive at 10am?')->assertSee('passport.jpg');
     $this->post(route('messages.reply', $thread->id), ['body' => 'Yes, from 11am.'])->assertRedirect();
     expect(newMessages($this->guest))->toBe(1)->and($thread->refresh()->unreadFor($this->owner))->toBe(0);

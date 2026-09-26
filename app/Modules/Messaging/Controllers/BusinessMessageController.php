@@ -19,22 +19,7 @@ class BusinessMessageController extends Controller
 
     public function index(Request $request)
     {
-        $user = $request->user();
-        $tenant = app(TenantContext::class)->tenant();
-        $canGuests = $user->hasPermissionTo('messages.view');
-
-        $threads = Thread::query()->where('tenant_id', $tenant->id)
-            ->where(fn ($q) => $q
-                ->when($canGuests, fn ($w) => $w->whereIn('kind', [Thread::GUEST_HOST, Thread::GUEST_RESTAURANT]))
-                ->orWhere(fn ($w) => $w->where('kind', Thread::STAFF)->whereHas('participants', fn ($p) => $p->where('user_id', $user->id))))
-            ->when($request->query('status', 'open') !== 'all', fn ($q) => $q->where('status', $request->query('status', 'open')))
-            ->with(['guest', 'participants'])->latest('last_message_at')->paginate(25)->withQueryString();
-
-        return view('messaging::business.index', [
-            'threads' => $threads,
-            'members' => $tenant->users()->wherePivot('status', 'active')->where('users.id', '!=', $user->id)->orderBy('name')->get(['users.id', 'users.name']),
-            'title' => 'Messages',
-        ]);
+        return $this->inbox($request, null);
     }
 
     public function show(Request $request, string $thread)
@@ -42,10 +27,57 @@ class BusinessMessageController extends Controller
         $thread = $this->find($request, $thread);
         $this->messaging->markRead($thread, $request->user());
 
-        return view('messaging::business.show', [
-            'thread' => $thread->load(['messages.author', 'messages.attachments', 'guest', 'participants.user']),
-            'canReply' => $this->messaging->canReply($request->user(), $thread),
-            'title' => $thread->subject,
+        return $this->inbox($request, $thread->load(['messages.author', 'messages.attachments', 'guest', 'participants.user']));
+    }
+
+    /** React inbox: thread list + the open conversation (two panes). */
+    private function inbox(Request $request, ?Thread $open)
+    {
+        $user = $request->user();
+        $tenant = app(TenantContext::class)->tenant();
+        $canGuests = $user->hasPermissionTo('messages.view');
+        $status = in_array($request->query('status'), ['open', 'closed', 'all'], true) ? $request->query('status') : 'open';
+
+        $threads = Thread::query()->where('tenant_id', $tenant->id)
+            ->where(fn ($q) => $q
+                ->when($canGuests, fn ($w) => $w->whereIn('kind', [Thread::GUEST_HOST, Thread::GUEST_RESTAURANT]))
+                ->orWhere(fn ($w) => $w->where('kind', Thread::STAFF)->whereHas('participants', fn ($p) => $p->where('user_id', $user->id))))
+            ->when($status !== 'all', fn ($q) => $q->where('status', $status))
+            ->with(['guest', 'participants'])->latest('last_message_at')->paginate(25)->withQueryString();
+
+        return \Inertia\Inertia::render('Messages/Index', [
+            'threads' => $threads->through(fn (Thread $t) => [
+                'id' => $t->id,
+                'subject' => $t->subject,
+                'who' => $t->kind === Thread::STAFF ? 'Staff · '.$t->participants->count().' people' : ($t->guest?->name ?? 'Guest'),
+                'when' => $t->last_message_at?->diffForHumans(),
+                'unread' => $t->unreadFor($user),
+                'href' => route('messages.show', ['thread' => $t->id, 'status' => $status]),
+                'active' => $open?->id === $t->id,
+            ]),
+            'status' => $status,
+            'members' => $tenant->users()->wherePivot('status', 'active')->where('users.id', '!=', $user->id)->orderBy('name')->get(['users.id', 'users.name'])->map(fn ($m) => [$m->id, $m->name]),
+            'thread' => $open ? [
+                'id' => $open->id,
+                'subject' => $open->subject,
+                'meta' => ($open->kind === Thread::STAFF
+                    ? 'Staff: '.$open->participants->pluck('user.name')->implode(', ')
+                    : 'Guest: '.($open->guest?->name ?? '—').($open->guest?->email ? ' · '.$open->guest->email : ''))
+                    .($open->about_type ? ' · about '.class_basename($open->about_type).' #'.$open->about_id : ''),
+                'status' => $open->status,
+                'messages' => $open->messages->map(fn ($m) => [
+                    'id' => $m->id,
+                    'author' => $m->author?->name ?? 'Deleted user',
+                    'side' => $m->side,
+                    'when' => $m->created_at->format('M j, g:i A'),
+                    'body' => $m->body,
+                    'mine' => (int) $m->user_id === (int) $user->id,
+                    'files' => $m->attachments->map(fn ($f) => ['id' => $f->id, 'name' => $f->alt ?? 'Attachment', 'url' => route('messages.attachment', [$open->id, $f->id])]),
+                ]),
+                'canReply' => $this->messaging->canReply($user, $open),
+                'urls' => ['reply' => route('messages.reply', $open->id), 'status' => route('messages.status', $open->id)],
+            ] : null,
+            'urls' => ['self' => route('messages.index'), 'staff' => route('messages.staff.store')],
         ]);
     }
 
