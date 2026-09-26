@@ -22,11 +22,27 @@ class MemberController extends Controller
     {
         $contactIds = Contact::query()->withoutGlobalScope('tenant')->where('user_id', $request->user()->id)->pluck('id');
 
-        return view('loyalty::account', [
+        return \Inertia\Inertia::render('Account/Rewards', [
             'accounts' => LoyaltyAccount::query()->withoutGlobalScope('tenant')->whereIn('crm_contact_id', $contactIds)
                 ->with(['transactions' => fn ($q) => $q->withoutGlobalScope('tenant')->limit(5)])->get()
-                ->each(fn ($a) => $a->setRelation('business', Tenant::query()->find($a->tenant_id))),
-            'cards' => GiftCard::query()->withoutGlobalScope('tenant')->whereIn('crm_contact_id', $contactIds)->where('status', 'active')->where('balance', '>', 0)->get(),
+                ->map(function ($a) {
+                    $next = $a->nextTier();
+
+                    return [
+                        'id' => $a->id,
+                        'business' => Tenant::query()->find($a->tenant_id)?->name,
+                        'tier' => $a->tierLabel(),
+                        'points' => (int) $a->points_balance,
+                        'next' => $next ? number_format($next[1]).' more to '.$next[0] : null,
+                        'code' => $a->referral_code,
+                        'canRefer' => ! $a->referred_by_id,
+                        'referral' => route('account.loyalty.referral', $a->id),
+                        'activity' => $a->transactions->map(fn ($t) => ['id' => $t->id, 'text' => $t->description, 'points' => (int) $t->points]),
+                    ];
+                }),
+            'cards' => GiftCard::query()->withoutGlobalScope('tenant')->whereIn('crm_contact_id', $contactIds)->where('status', 'active')->where('balance', '>', 0)->get()
+                ->map(fn ($c) => ['id' => $c->id, 'business' => Tenant::query()->find($c->tenant_id)?->name, 'code' => $c->code, 'balance' => '₱'.number_format((float) $c->balance, 2)]),
+            'tabs' => \App\Modules\Customer\Controllers\AccountController::nav('account.loyalty'),
         ]);
     }
 

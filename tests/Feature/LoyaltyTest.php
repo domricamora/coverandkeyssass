@@ -192,7 +192,7 @@ it('shows members their rewards and runs the host screens with permissions', fun
     $member = memberOf($this->guest);
 
     MarketplaceFixtures::asTenant(null);
-    $this->actingAs($this->guest)->get(route('account.loyalty'))->assertOk()->assertSee('Hotel A')->assertSee('125 points')->assertSee($member->referral_code);
+    $this->actingAs($this->guest)->get(route('account.loyalty'))->assertOk()->assertSee('Hotel A')->assertSee($member->referral_code)->assertInertia(fn ($p) => $p->where('accounts.0.points', 125));
 
     PropertyManagementFixtures::login($this->owner, $this->tenant);
     $this->get(route('loyalty.index'))->assertOk()->assertSee('Maria Santos')->assertSee('Bronze');
