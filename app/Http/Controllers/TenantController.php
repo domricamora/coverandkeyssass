@@ -27,9 +27,19 @@ class TenantController extends Controller
             ->orderBy('tenants.name')
             ->get();
 
-        return view('tenants.index', [
-            'tenants' => $tenants,
-            'currentTenantId' => app(TenantContext::class)->id(),
+        // /tenants runs without the tenant.context middleware: the chosen business is in the session.
+        $current = app(TenantContext::class)->id() ?? (int) $request->session()->get('tenant_id');
+
+        return \Inertia\Inertia::render('Businesses/Index', [
+            'businesses' => $tenants->map(fn ($t) => [
+                'id' => $t->id,
+                'name' => $t->name,
+                'slug' => $t->slug,
+                'type' => \Illuminate\Support\Str::headline((string) $t->business_type),
+                'current' => $current === $t->id,
+                'switch' => route('tenants.switch', $t),
+            ]),
+            'urls' => ['create' => route('tenants.create')],
         ]);
     }
 

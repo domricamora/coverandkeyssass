@@ -14,7 +14,7 @@
 - Windows WAMP PHP 8.3.14 (`C:\wamp64\bin\php\php8.3.14`), Composer 2.10.3, MySQL 9.1.0 (root / no password).
 - Dev DB `hospitality_os` (migrated through Phase 33; local Super Admin admin@coverandkeys.test), test DB `hospitality_os_testing`.
 - The default `php` on PATH is 7.4 — run everything via: `cmd.exe //c "_ai\run.bat php artisan <cmd>"` from the repo root.
-- Frontend build: `node node_modules/vite/bin/vite.js build` (the `&` in the path breaks npm shims).
+- Frontend build (local, app under /ck/public): `MSYS_NO_PATHCONV=1 ASSET_URL=/ck/public node node_modules/vite/bin/vite.js build`. Without ASSET_URL, lazy chunks preload from /build/ and 404 (harmless but noisy). Production at the domain root builds without it. (The `&` in the path breaks npm shims.)
 - Dev URL: `http://localhost/ck/public`. No Python on this machine; use PHP / bash (prefer the Write tool for files containing quotes — bash heredocs have broken on apostrophes).
 
 ## Open items
@@ -33,7 +33,9 @@
 
 **Needs the owner:** real sandbox keys. No `PAYMONGO_*` or `PAYPAL_*` values are set in `.env`, so locally only "Pay at the property" shows. Steps are in `docs/modules/payments.md` → "Sandbox run". The dev DB holds one QA guest booking (BKPSGMGO96, user `qa.guest.…@example.test`) created by the browser test.
 
-**Next Blade → React screens:** Accounting, Wallet, Billing, Notifications, Messages, Team, Business settings, Switch business. Then OTA ideas (map view, recently viewed, price-drop alerts) and the FINAL_AUDIT items.
+**Dashboard React conversion: every sidebar screen is now React** (2026-09-27): Accounting (7 screens), Wallet, Billing (+ invoice), Notifications, Messages (two-pane inbox), Team (the Livewire TeamManager was replaced by `TeamController`), Business settings, Switch business (`Businesses/Index`), plus Staff & rota. `DashboardNav::SPA` lists them all. Still Blade: platform admin (`/admin/*`), guest account pages (`/account/*`), auth, tenant create, notification settings. Full suite: 341 passing.
+
+**Next:** OTA ideas (map view, recently viewed, price-drop alerts); guest account pages → React (trips, orders, reservations) to match the new checkout; the platform admin area; the FINAL_AUDIT items (sandbox keys first).
 
 ## HAND-OFF (2026-09-26, guest booking flows) — superseded
 

@@ -1,5 +1,13 @@
 # CHANGELOG.md
 
+## 2026-09-27 — Every dashboard screen on React
+
+- **Accounting:** overview (P&L, VAT, balances), invoices plus invoice detail (issue, void, record payment), expenses, payables & receivables (pay suppliers), journal, trial balance. Fix: an empty period now falls back to month-to-date instead of today.
+- **Wallet**, **Billing** (subscription, module picker, add / remove, usage, invoices; invoice pay stays a plain POST to PayMongo), **Notifications**, **Messages** (two-pane inbox with attachments and a colleague composer).
+- **Team** moved from the Livewire `TeamManager` to `TeamController` + React, with the same rules (one owner, staff limit) and new HTTP tests. **Business settings**, **Switch business**.
+- The old Blade views were removed. Shared-prop names (`links`, `business`) are not reused by page props.
+- Local build: `ASSET_URL=/ck/public` so lazy chunks preload from the right path.
+
 ## 2026-09-26 — Checkout without registration, PayPal, React staff & rota
 
 - **Guest checkout (Booking.com / Agoda style):** the stay review page, food checkout and table booking ask only for name, email and phone. A new email gets an account quietly and stays signed in. An existing email must use its password, or a 30-minute sign-in link sent by email that returns to the same step. We never sign in on an email alone. Code: `GuestCheckoutController`, `useGuest` in `widgets/ui.jsx`.
