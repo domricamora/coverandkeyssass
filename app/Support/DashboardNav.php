@@ -17,7 +17,7 @@ use App\Modules\Marketplace\Models\Property;
 class DashboardNav
 {
     /** Route names rendered by Inertia (React). */
-    public const SPA = ['frontdesk.index', 'floor.index', 'housekeeping.index'];
+    public const SPA = ['dashboard', 'frontdesk.index', 'floor.index', 'housekeeping.index'];
 
     /** @return list<array{label: ?string, items: list<array{label: string, href: string, active: bool, icon: string, badge: ?int, spa: bool}>}> */
     public static function for(?User $user, string $route): array
