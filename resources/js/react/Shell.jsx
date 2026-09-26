@@ -118,7 +118,7 @@ function UserMenu() {
                     <div className="absolute right-0 top-11 z-40 w-56 border border-line bg-surface py-1 shadow-[0_12px_32px_-12px_rgba(11,12,14,.3)]">
                         <p className="border-b border-line px-3 pb-2 pt-1.5 text-xs text-fg-3">{auth.email}</p>
                         {links.trips && <MenuLink href={links.trips}>My trips</MenuLink>}
-                        <MenuLink href={links.businesses}>Businesses</MenuLink>
+                        {links.businesses && <MenuLink href={links.businesses}>Businesses</MenuLink>}
                         <MenuLink href={links.profile}>Profile</MenuLink>
                         {links.admin && <MenuLink href={links.admin}>Platform admin</MenuLink>}
                         <form method="POST" action={links.logout} className="border-t border-line pt-1">

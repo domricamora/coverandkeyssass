@@ -71,8 +71,9 @@ class DashboardNav
         }
 
         $groups[] = ['Settings', [
-            ['Team', 'team', $route === 'team', 'M16 14a4 4 0 10-8 0 4 4 0 008 0zM2 20c1.5-3 5-4 8-4s6.5 1 8 4', true],
-            ['Business settings', 'tenants.settings', $route === 'tenants.settings', 'M12 15a3 3 0 100-6 3 3 0 000 6zM4 12a8 8 0 0116 0', true],
+            // Only people who run the business see its team and settings (guests and plain staff do not).
+            ['Team', 'team', $route === 'team', 'M16 14a4 4 0 10-8 0 4 4 0 008 0zM2 20c1.5-3 5-4 8-4s6.5 1 8 4', $tenant->has() && (bool) $user?->can('manageTeam', $tenant->tenant())],
+            ['Business settings', 'tenants.settings', $route === 'tenants.settings', 'M12 15a3 3 0 100-6 3 3 0 000 6zM4 12a8 8 0 0116 0', $tenant->has() && (bool) $user?->can('update', $tenant->tenant())],
             ['Switch business', 'tenants.index', $route === 'tenants.index', 'M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4', $tenant->has()],
         ]];
 

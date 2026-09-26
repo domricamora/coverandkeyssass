@@ -83,7 +83,11 @@
                             </summary>
                             <div class="absolute right-0 top-12 z-50 w-60 border border-line bg-white py-1 shadow-[0_18px_40px_-18px_rgba(16,37,42,.35)]">
                                 <p class="border-b border-line px-4 pb-2.5 pt-2 text-[13px] font-medium text-fg">{{ auth()->user()->name }}<br><span class="font-normal text-fg-3">{{ auth()->user()->email }}</span></p>
-                                @foreach ([['My trips', route('account.dashboard')], ['Wish list', route('marketplace.favorites.index')], ['Dashboard', route('dashboard')], ['Businesses', route('tenants.index')], ['Profile', route('profile.edit')]] as [$label, $href])
+                                @php
+                                    // Business links only for people who belong to a business; guests see their trips.
+                                    $hostLinks = auth()->user()->tenants()->exists() ? [['Dashboard', route('dashboard')], ['Businesses', route('tenants.index')]] : [];
+                                @endphp
+                                @foreach ([['My trips', route('account.dashboard')], ['Wish list', route('marketplace.favorites.index')], ...$hostLinks, ['Profile', route('profile.edit')]] as [$label, $href])
                                     <a class="block px-4 py-2 text-[13px] text-fg-2 hover:bg-soft hover:text-fg" href="{{ $href }}">{{ $label }}</a>
                                 @endforeach
                                 @if (auth()->user()->isPlatformAdmin())

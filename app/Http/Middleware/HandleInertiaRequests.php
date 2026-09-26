@@ -39,7 +39,7 @@ class HandleInertiaRequests extends Middleware
                 'logout' => route('logout'),
                 'profile' => route('profile.edit'),
                 'trips' => route('account.dashboard'),
-                'businesses' => route('tenants.index'),
+                'businesses' => $user->tenants()->exists() ? route('tenants.index') : null, // guests: no business links
                 'admin' => $user->isPlatformAdmin() ? route('admin.dashboard') : null,
             ]) : [],
         ];

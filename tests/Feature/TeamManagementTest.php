@@ -99,3 +99,18 @@ it('prevents staff from managing the team', function () {
     $this->post(route('team.store'), ['name' => 'X', 'email' => 'x@example.com', 'role' => 'staff'])->assertForbidden();
     $this->delete(route('team.remove', $other->id))->assertForbidden();
 });
+
+it('shows team and business settings only to people who run the business', function () {
+    [$owner, $tenant] = teamFixture();
+    $desk = teamMember($tenant, 'front_desk');
+
+    $this->actingAs($desk)->withSession(['tenant_id' => $tenant->id])->get(route('notifications.index'))
+        ->assertInertia(fn ($p) => $p->where('nav', fn ($nav) => ! collect($nav)->flatMap(fn ($g) => collect($g['items'])->pluck('label'))->intersect(['Team', 'Business settings'])->count()));
+
+    $this->actingAs($owner)->withSession(['tenant_id' => $tenant->id])->get(route('notifications.index'))
+        ->assertInertia(fn ($p) => $p->where('nav', fn ($nav) => collect($nav)->flatMap(fn ($g) => collect($g['items'])->pluck('label'))->intersect(['Team', 'Business settings'])->count() === 2));
+
+    // A plain guest (no business) has no business links anywhere.
+    $guest = User::factory()->create();
+    $this->actingAs($guest)->get(route('account.dashboard'))->assertInertia(fn ($p) => $p->where('links', fn ($l) => ! isset($l['businesses'])));
+});
