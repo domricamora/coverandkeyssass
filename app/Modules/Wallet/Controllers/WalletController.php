@@ -20,12 +20,44 @@ class WalletController extends Controller
 
         $wallet = $this->wallets->wallet();
 
-        return view('wallet::host.index', [
-            'wallet' => $wallet,
-            'transactions' => $wallet->transactions()->paginate(20),
-            'commissions' => Commission::query()->with(['booking:id,reference', 'order:id,reference'])->latest('id')->limit(10)->get(),
-            'payouts' => Payout::query()->latest('id')->limit(10)->get(),
+        $payouts = Payout::query()->latest('id')->limit(10)->get();
+
+        return \Inertia\Inertia::render('Wallet/Index', [
+            'currency' => $wallet->currency,
+            'balances' => [
+                'available' => (float) $wallet->available_balance,
+                'pending' => (float) $wallet->pending_balance,
+                'inProgress' => (float) $payouts->where('status', Payout::REQUESTED)->sum('amount'),
+            ],
+            'transactions' => $wallet->transactions()->paginate(20)->through(fn ($tx) => [
+                'id' => $tx->id,
+                'date' => $tx->created_at->format('M j, Y H:i'),
+                'description' => $tx->description,
+                'bucket' => $tx->bucket,
+                'amount' => (float) $tx->amount,
+                'after' => (float) $tx->balance_after,
+            ]),
+            'commissions' => Commission::query()->with(['booking:id,reference', 'order:id,reference'])->latest('id')->limit(10)->get()->map(fn ($c) => [
+                'id' => $c->id,
+                'source' => $c->sourceLabel(),
+                'gross' => (float) $c->gross,
+                'fee' => (float) $c->platform_fee,
+                'rate' => (float) $c->rate,
+                'net' => (float) $c->host_amount,
+                'status' => $c->status,
+            ]),
+            'payouts' => $payouts->map(fn ($p) => [
+                'id' => $p->id,
+                'date' => $p->created_at->format('M j, Y'),
+                'amount' => (float) $p->amount,
+                'to' => ucfirst($p->method).' ····'.substr((string) $p->account_number, -4),
+                'status' => $p->status,
+                'reference' => $p->reference,
+            ]),
+            'methods' => Payout::METHODS,
             'minPayout' => WalletService::MIN_PAYOUT,
+            'can' => ['request' => $request->user()->hasPermissionTo('payouts.request')],
+            'urls' => ['payout' => route('wallet.payouts.store')],
         ]);
     }
 

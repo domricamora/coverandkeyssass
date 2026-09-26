@@ -212,7 +212,7 @@ it('enforces plan limits with per-business overrides', function () {
 
     PropertyManagementFixtures::login($owner, $tenant);
     $this->post(route('restaurants.store'), ['name' => 'Second'])->assertSessionHasErrors('limit');
-    $this->get(route('billing.index'))->assertOk()->assertSee('At limit');
+    $this->get(route('billing.index'))->assertOk()->assertInertia(fn ($p) => $p->where('usage', fn ($u) => collect($u)->contains('atLimit', true)));
 });
 
 it('keeps billing to owners of the business', function () {
@@ -222,7 +222,7 @@ it('keeps billing to owners of the business', function () {
     [$stranger, $strangerTenant] = MarketplaceFixtures::business('Hotel XYZ');
 
     PropertyManagementFixtures::login($owner, $tenant);
-    $this->get(route('billing.index'))->assertOk()->assertSee('Your subscription')->assertSee($invoice->number);
+    $this->get(route('billing.index'))->assertOk()->assertInertia(fn ($p) => $p->component('Billing/Index')->where('subscription.status', 'active')->where('invoices.0.number', $invoice->number));
     $this->get(route('billing.invoices.show', $invoice->number))->assertOk()->assertSee('Property');
 
     PropertyManagementFixtures::login($manager, $tenant);

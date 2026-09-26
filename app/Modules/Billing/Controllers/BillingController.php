@@ -12,6 +12,7 @@ use App\Modules\Billing\Support\Usage;
 use App\Support\TenantContext;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Inertia\Inertia;
 
 /** The business's Billing page (Phase 27): modules, subscription, usage and invoices. Owners only. */
 class BillingController extends Controller
@@ -31,15 +32,54 @@ class BillingController extends Controller
                 $module->yearly_cents = $this->billing->priceCents($tenant, $module, 'yearly');
             });
 
-        return view('billing::business.index', [
-            'tenant' => $tenant,
-            'subscription' => $subscription,
-            'subscribedIds' => $subscription?->items->pluck('module_id')->all() ?? [],
-            'modules' => $modules,
-            'entitlements' => TenantModule::query()->withoutGlobalScope('tenant')->where('tenant_id', $tenant->id)->get()->keyBy('module_id'),
-            'recurringCents' => $subscription ? $subscription->items->sum(fn ($item) => $this->billing->priceCents($tenant, $item->module, $interval) * $item->quantity) : 0,
-            'usage' => Usage::report($tenant),
-            'invoices' => Invoice::query()->where('tenant_id', $tenant->id)->latest('id')->limit(24)->get(),
+        $live = $subscription && $subscription->status !== Subscription::CANCELLED ? $subscription : null;
+        $subscribedIds = $live?->items->pluck('module_id')->all() ?? [];
+        $entitlements = TenantModule::query()->withoutGlobalScope('tenant')->where('tenant_id', $tenant->id)->get()->keyBy('module_id');
+        $per = $interval === 'yearly' ? 'year' : 'month';
+
+        return Inertia::render('Billing/Index', [
+            'business' => $tenant->name,
+            'subscription' => $live ? [
+                'status' => $live->status,
+                'interval' => $live->billing_interval,
+                'summary' => Subscription::INTERVALS[$live->billing_interval].' · '.Invoice::money($live->items->sum(fn ($item) => $this->billing->priceCents($tenant, $item->module, $interval) * $item->quantity)).' per '.$per,
+                'period' => $live->current_period_start->format('M j, Y').' – '.$live->current_period_end->format('M j, Y'),
+                'cancelAtEnd' => (bool) $live->cancel_at_period_end,
+                'coupon' => $live->coupon ? $live->coupon->code.' ('.$live->coupon->label().')' : null,
+            ] : null,
+            'modules' => $modules->map(function (Module $module) use ($entitlements, $subscribedIds, $live, $interval, $per) {
+                $entitled = $entitlements[$module->id] ?? null;
+                $on = in_array($module->id, $subscribedIds, true);
+
+                return [
+                    'id' => $module->id,
+                    'name' => $module->name,
+                    'price' => $live
+                        ? Invoice::money($interval === 'yearly' ? $module->yearly_cents : $module->monthly_cents).' / '.$per
+                        : Invoice::money($module->monthly_cents).'/month · '.Invoice::money($module->yearly_cents).'/year',
+                    'on' => $on,
+                    'checked' => $entitled && $entitled->status === 'active',
+                    'badge' => match (true) {
+                        $on && $entitled?->expires_at !== null => ['warn', 'Suspended — invoice unpaid'],
+                        (bool) $entitled?->isTrialing() => ['warn', 'Trial until '.$entitled->trial_ends_at->format('M j')],
+                        $on => ['ok', 'Subscribed'],
+                        ! $entitled && $module->trial_days > 0 => ['ok', $module->trial_days.'-day free trial'],
+                        default => null,
+                    },
+                    'remove' => route('billing.modules.remove', $module),
+                ];
+            })->values(),
+            'usage' => collect(Usage::report($tenant))->map(fn ($row) => $row + ['atLimit' => $row['limit'] !== null && $row['used'] >= $row['limit']])->values(),
+            'invoices' => Invoice::query()->where('tenant_id', $tenant->id)->latest('id')->limit(24)->get()->map(fn (Invoice $i) => [
+                'number' => $i->number,
+                'period' => $i->period_start->format('M j').' – '.$i->period_end->format('M j, Y'),
+                'total' => Invoice::money($i->total_cents),
+                'status' => $i->isOverdue() ? 'overdue' : $i->status,
+                'href' => route('billing.invoices.show', $i->number),
+            ]),
+            'intervals' => collect(Subscription::INTERVALS)->map(fn ($label, $key) => [$key, $key === 'yearly' ? 'Yearly (2 months free)' : $label])->values(),
+            'can' => ['manage' => $request->user()->hasPermissionTo('billing.manage')],
+            'urls' => ['subscribe' => route('billing.subscribe'), 'add' => route('billing.modules.add'), 'interval' => route('billing.interval'), 'coupon' => route('billing.coupon'), 'cancel' => route('billing.cancel')],
         ]);
     }
 
@@ -107,7 +147,27 @@ class BillingController extends Controller
     {
         $this->can($request, 'billing.view');
 
-        return view('billing::business.invoice', ['invoice' => $this->findInvoice($number)->load('items', 'tenant')]);
+        $invoice = $this->findInvoice($number)->load('items', 'tenant');
+
+        return Inertia::render('Billing/Invoice', [
+            'invoice' => [
+                'number' => $invoice->number,
+                'business' => $invoice->tenant->name,
+                'period' => $invoice->period_start->format('M j, Y').' – '.$invoice->period_end->format('M j, Y'),
+                'items' => $invoice->items->map(fn ($item) => ['id' => $item->id, 'description' => $item->description, 'quantity' => $item->quantity, 'unit' => Invoice::money($item->unit_cents), 'amount' => Invoice::money($item->amount_cents)]),
+                'subtotal' => Invoice::money($invoice->subtotal_cents),
+                'discount' => $invoice->discount_cents ? ['code' => $invoice->coupon_code, 'amount' => Invoice::money($invoice->discount_cents)] : null,
+                'total' => Invoice::money($invoice->total_cents),
+                'status' => $invoice->isOverdue() ? 'overdue' : $invoice->status,
+                'paid' => $invoice->status === 'paid' ? trim($invoice->paid_at?->format('M j, Y').($invoice->payment_method && $invoice->payment_method !== 'none' ? ' · '.$invoice->payment_method : '')) : null,
+                'due' => $invoice->due_at?->format('M j, Y'),
+            ],
+            'can' => [
+                'pay' => $invoice->status === 'open' && $request->user()->hasPermissionTo('billing.manage'),
+                'online' => filled(config('services.paymongo.secret_key')), // billing invoices pay through PayMongo
+            ],
+            'urls' => ['index' => route('billing.index'), 'pay' => route('billing.invoices.pay', $invoice->number)],
+        ]);
     }
 
     public function pay(Request $request, string $number)

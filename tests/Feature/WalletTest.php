@@ -209,7 +209,7 @@ it('limits the wallet to owners and managers and payouts to owners', function ()
 
     $manager = MarketplaceFixtures::member($tenant, 'manager');
     PropertyManagementFixtures::login($manager, $tenant);
-    $this->get(route('wallet.index'))->assertOk()->assertDontSee('Request a payout');
+    $this->get(route('wallet.index'))->assertOk()->assertInertia(fn ($p) => $p->component('Wallet/Index')->where('can.request', false));
     $this->post(route('wallet.payouts.store'), ['amount' => 100, 'method' => 'bank', 'account_name' => 'x', 'account_number' => '1'])->assertForbidden();
 
     $desk = MarketplaceFixtures::member($tenant, 'front_desk');

@@ -8,7 +8,7 @@ export default function Payables({ suppliers, otherPayables, receivables, today,
     return (
         <Page title="Payables & receivables">
             <Tabs tabs={tabs} />
-            <div className="grid gap-8 xl:grid-cols-2">
+            <div className="grid gap-8 2xl:grid-cols-2">
                 <Panel title="We owe (suppliers)">
                     <Table head={['Supplier', { label: 'Owed', right: true }, '']} empty="No suppliers.">
                         {suppliers.map((s) => <SupplierRow key={s.id} s={s} today={today} canPay={can.manage} />)}
