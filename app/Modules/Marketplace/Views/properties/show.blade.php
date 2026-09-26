@@ -14,6 +14,9 @@
 
 <x-public-layout :title="$title" :description="Str::limit(strip_tags($p->tagline ?: $p->description ?: $p->name), 155)"
     :image="$gallery[0] ?? null" :canonical="$url" :breadcrumbs="$crumbs" :schema="[\App\Support\Seo::property($p)]">
+    @push('widgets') @vite('resources/js/widgets.jsx') @endpush
+    {{-- Remembers this stay for the "Recently viewed" strip (browser only). --}}
+    <div data-widget="RecentlyViewed" data-props="{{ json_encode(['record' => ['slug' => $p->slug, 'name' => $p->name, 'url' => $url, 'image' => $gallery[0] ?? null, 'price' => $p->priceLabel(), 'where' => $p->locationLabel() ?: null]]) }}"></div>
     <div class="listing-page container">
 
         <div class="listing-head">

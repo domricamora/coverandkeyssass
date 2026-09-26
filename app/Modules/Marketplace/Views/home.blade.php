@@ -56,6 +56,9 @@
         </div>
     </section>
 
+    @push('widgets') @vite('resources/js/widgets.jsx') @endpush
+    <div class="container" data-widget="RecentlyViewed" data-props="{{ json_encode(['title' => 'Pick up where you left off']) }}"></div>
+
     <section class="container section">
         <div class="section-head">
             <span class="eyebrow">Guest favourites</span>

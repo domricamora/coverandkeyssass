@@ -91,6 +91,9 @@
             </div>
         @endif
 
+        @push('widgets') @vite('resources/js/widgets.jsx') @endpush
+        <div class="container" data-widget="RecentlyViewed" data-props="{}"></div>
+
         <div class="results container">
             <div class="dash__side">
                 @include('marketplace::partials.filters', [

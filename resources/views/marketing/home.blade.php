@@ -68,6 +68,10 @@
         </div>
     </section>
 
+    {{-- Recently viewed stays (browser only; hidden until the guest has viewed one). --}}
+    @push('widgets') @vite('resources/js/widgets.jsx') @endpush
+    <div class="{{ $pad }}" data-widget="RecentlyViewed" data-props="{{ json_encode(['title' => 'Pick up where you left off']) }}"></div>
+
     {{-- Destinations --}}
     @if ($destinations->isNotEmpty())
         <section class="{{ $pad }} pt-20">
