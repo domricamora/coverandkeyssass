@@ -89,7 +89,8 @@ export default function Checkout({ restaurant, lines, quote, error, promoCode, o
 
                     <section className="space-y-3">
                         <h2 className="text-[16px] font-semibold">How do you want it?</h2>
-                        <div role="radiogroup" aria-label="Fulfillment" className="flex border border-line-strong">
+                        {modes.length === 1 && <p className="text-[14px] text-fg-2">Pickup at {restaurant.name}.</p>}
+                        <div role="radiogroup" aria-label="Fulfillment" className={cx('flex border border-line-strong', modes.length === 1 && 'hidden')}>
                             {modes.map(([v, label]) => (
                                 <button key={v} type="button" role="radio" aria-checked={mode === v} onClick={() => setMode(v)}
                                     className={cx('h-11 flex-1 border-r border-line-strong text-[14px] font-medium last:border-r-0', mode === v ? 'bg-brand text-white' : 'bg-surface text-fg-2 hover:bg-soft')}>
@@ -136,7 +137,7 @@ export default function Checkout({ restaurant, lines, quote, error, promoCode, o
                         <div className="flex flex-wrap gap-2">
                             {[['asap', `As soon as possible (about ${restaurant.prep_minutes} min)`], ['later', 'Schedule for later']].map(([v, label]) => (
                                 <label key={v} className={cx('flex h-11 cursor-pointer items-center gap-2 border px-3 text-[14px]', when === v ? 'border-brand bg-brand-soft' : 'border-line')}>
-                                    <input type="radio" name="when" className="accent-[var(--primary)]" checked={when === v} onChange={() => setWhen(v)} /> {label}
+                                    <input type="radio" name="when" className="accent-[var(--primary)] text-brand" checked={when === v} onChange={() => setWhen(v)} /> {label}
                                 </label>
                             ))}
                         </div>
@@ -161,7 +162,7 @@ export default function Checkout({ restaurant, lines, quote, error, promoCode, o
                         <div className="grid gap-2 sm:grid-cols-3">
                             {paymentOptions.map(([v, label, hint]) => (
                                 <label key={v} className={cx('flex cursor-pointer items-start gap-2 border px-3 py-3', payment === v ? 'border-brand bg-brand-soft' : 'border-line hover:border-line-strong')}>
-                                    <input type="radio" name="pay" className="mt-1 accent-[var(--primary)]" checked={payment === v} onChange={() => setPay(v)} />
+                                    <input type="radio" name="pay" className="mt-1 accent-[var(--primary)] text-brand" checked={payment === v} onChange={() => setPay(v)} />
                                     <span><span className="block text-[14px] font-medium">{label}</span><span className="block text-[12px] text-fg-3">{hint}</span></span>
                                 </label>
                             ))}

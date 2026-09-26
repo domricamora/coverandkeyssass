@@ -6,7 +6,7 @@
 
 - Date: 2026-09-26
 - Phase: **38 COMPLETE + post-audit owner queue (see Next actions)** Remaining: the INCOMPLETE items in `docs/FINAL_AUDIT.md`
-- Tests: PASS — 321 tests / 2110 assertions (full suite, 2026-09-26), MySQL `hospitality_os_testing`
+- Tests: PASS — 333 tests / 2422 assertions (full suite, 2026-09-26, after guest booking flows), MySQL `hospitality_os_testing`
 - Git: `master` → origin <https://github.com/domricamora/coverandkeyssass.git> — **not pushed yet**: the auto-mode classifier blocks `git push` from the agent; the owner runs `git push -u origin master:main` (or adds a Bash permission rule)
 
 ## Environment (ready)
@@ -27,7 +27,13 @@
 
 ## Next actions
 
-## HAND-OFF (2026-09-26, last commit 435ba2b) — start here
+## HAND-OFF (2026-09-26, guest booking flows) — start here
+
+**Guest booking flows in React: DONE** (plan `docs/superpowers/plans/2026-09-26-guest-booking-flows.md`, tasks 1–9). Stay panel → `/stay/{slug}/review`; menu widget + cart JSON → React `/cart` checkout; table booking widget; `/continue?to=` sign-in return. Widgets mount over the Blade forms (the no-JS fallback) via `resources/js/widgets.jsx`. QA at 390/1440 done (scratchpad `flow.mjs` = `qa.mjs` plus `js:<expr>` steps; run with `MSYS_NO_PATHCONV=1` or Git Bash mangles `/paths`). Gotcha: `@tailwindcss/forms` colours radios and checkboxes with `text-*`, so add `text-brand`. Harmless local noise: modulepreload hints 404 under `/ck/public` (the imports themselves resolve).
+
+**Next, in order:** (a) the remaining items 2–6 of the list below (OverviewTest, OTA ideas, more Blade→React screens, FINAL_AUDIT items, module docs); (b) optional: a sticky "Book" jump button on phones (the booking panels sit at the bottom of the listing pages).
+
+## HAND-OFF (2026-09-26, last commit 435ba2b) — superseded
 
 **React dashboard rebuild: all 4 phases DONE.** (1) Front desk `/dashboard/front-desk` (12f407e); (2) Restaurant floor `/dashboard/restaurant-floor` (8d27b8d; `App\Modules\Pos\Controllers\FloorController`); (3) Housekeeping & ops `/dashboard/housekeeping` (035967f; the Blade board was replaced by `Housekeeping/Index`); (4) Owner overview `/dashboard` (435ba2b; `App\Support\OwnerInsights`, portfolio across all businesses). The React routes are listed in `DashboardNav::SPA`.
 

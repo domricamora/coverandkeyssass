@@ -124,7 +124,7 @@ export default function StayPanel({ quoteUrl, reviewUrl, root, signedIn, currenc
                                     !ok && 'cursor-not-allowed opacity-55',
                                 )}
                             >
-                                <input type="radio" name="room" className="h-4 w-4 accent-[var(--primary)]" checked={on} disabled={!ok} onChange={() => setPick(o.room_type_id)} />
+                                <input type="radio" name="room" className="h-4 w-4 accent-[var(--primary)] text-brand" checked={on} disabled={!ok} onChange={() => setPick(o.room_type_id)} />
                                 <span className="min-w-0 flex-1">
                                     <span className="block text-[14px] font-medium">{o.name}</span>
                                     <span className="block text-[12px] text-fg-3">

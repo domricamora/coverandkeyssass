@@ -1,5 +1,14 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Guest booking flows in React (stay, food order, table)
+
+- **Stay booking:** the property page panel (`widgets/StayPanel.jsx`) quotes every room type live for the chosen dates, guests and number of rooms. It shows free rooms, the full-stay price and the free-cancellation deadline. "Reserve" opens the Inertia review step `/stay/{property}/review` (`Stay/Review`), where the guest adds details and a promo code (re-quoted), then requests the booking.
+- **Food ordering:** the restaurant menu (`widgets/MenuOrder.jsx`) has section chips and an item sheet that enforces the modifier rules. A cart bar and drawer run over the new cart JSON API (`GET /cart/summary`; add and update return JSON when asked). `/cart` is now the React checkout (`Order/Checkout`). Guests edit quantities, choose pickup, delivery (zone, address, location) or room service, order ASAP or scheduled, apply a promo, pick a payment method and place the order. The old Blade cart view has been removed.
+- **Table booking:** `widgets/TableBooking.jsx` offers a 14-day date strip, party size, live time slots, phone and requests.
+- **Sign-in return:** signed-out guests go through `/continue?to=` (same-site paths only) and come back to the same step with their selection kept.
+- Listing pages stay server-rendered (SEO). Each widget mounts over its Blade form, which stays as the no-JS fallback. Business rules and the existing endpoints are unchanged.
+
+
 ## 2026-09-26 — React dashboard phases 2–4: restaurant floor, housekeeping & ops, owner overview
 
 - **Restaurant floor** (`/dashboard/restaurant-floor`):

@@ -169,7 +169,7 @@ function ItemSheet({ item, currency, addUrl, onClose, onAdded }) {
                                 const full = !on && g.max > 1 && picked(g).length >= g.max;
                                 return (
                                     <label key={o.id} className={cx('flex min-h-[48px] cursor-pointer items-center gap-3 px-3', full && 'cursor-not-allowed opacity-50')}>
-                                        <input type={g.max === 1 ? 'radio' : 'checkbox'} name={`g${g.id}`} className="h-4 w-4 accent-[var(--primary)]" checked={on} disabled={full} onChange={() => toggle(g, o.id)} />
+                                        <input type={g.max === 1 ? 'radio' : 'checkbox'} name={`g${g.id}`} className="h-4 w-4 accent-[var(--primary)] text-brand" checked={on} disabled={full} onChange={() => toggle(g, o.id)} />
                                         <span className="flex-1 text-[14px]">{o.name}</span>
                                         {o.price > 0 && <span className="text-[13px] tabular-nums text-fg-3">+{money(o.price, currency, 2)}</span>}
                                     </label>
