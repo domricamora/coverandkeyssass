@@ -998,7 +998,7 @@ h1, h2, .stat__value, .plan__price, .stat-band dd {
     --radius-lg: 0;
 }
 
-*:not(.avatar):not(.checklist__mark),
+*:not(.avatar):not(.checklist__mark):not(.brand-logo),
 *::before,
 *::after {
     border-radius: 0 !important;
@@ -1775,3 +1775,14 @@ dialog[open]::backdrop { animation: ck-fade-in 200ms ease-out both; }
 /* Sticky filter bar sits under the header (70) so the account menu opens over it. */
 
 .public-body .filter-bar { z-index: 30; }
+
+/* Features page product tour (FeatureCarousel widget). */
+.fc-img { opacity: 0; transform: scale(1.015); transition: opacity 700ms cubic-bezier(0.23, 1, 0.32, 1), transform 1200ms cubic-bezier(0.23, 1, 0.32, 1); }
+.fc-img.is-on { opacity: 1; transform: none; }
+.fc-bar { transform: scaleX(0); transform-origin: left; animation-name: fc-progress; animation-timing-function: linear; animation-fill-mode: forwards; }
+.fc-text { animation: fc-in 500ms cubic-bezier(0.23, 1, 0.32, 1) both; }
+@keyframes fc-progress { to { transform: scaleX(1); } }
+@keyframes fc-in { from { opacity: 0; transform: translateY(6px); } }
+@media (prefers-reduced-motion: reduce) {
+    .fc-img, .fc-text { transition: opacity 200ms ease; animation: none; transform: none; }
+}

@@ -1,0 +1,18 @@
+---
+deployment:
+  tasks:
+    # DEPLOYPATH = document root of ck.deskpulse.click. Verify in cPanel > Domains.
+    - export DEPLOYPATH="$HOME/ck.deskpulse.click"
+    - export PHP="$(command -v /opt/cpanel/ea-php83/root/usr/bin/php || command -v php)"
+    - export COMPOSER="$(command -v /opt/cpanel/composer/bin/composer || command -v composer)"
+    - /bin/mkdir -p "$DEPLOYPATH"
+    - /usr/bin/rsync -a --exclude='.git' --exclude='.env' --exclude='node_modules' --exclude='tests' --exclude='storage/app/public' ./ "$DEPLOYPATH/"
+    - cd "$DEPLOYPATH" && $COMPOSER install --no-dev --optimize-autoloader --no-interaction
+    - cd "$DEPLOYPATH" && $PHP artisan migrate --force
+    - cd "$DEPLOYPATH" && $PHP artisan optimize:clear
+    - cd "$DEPLOYPATH" && $PHP artisan config:cache
+    - cd "$DEPLOYPATH" && $PHP artisan route:cache
+    - cd "$DEPLOYPATH" && $PHP artisan view:cache
+    - cd "$DEPLOYPATH" && $PHP artisan event:cache
+    - cd "$DEPLOYPATH" && $PHP artisan storage:link || true
+    - cd "$DEPLOYPATH" && $PHP artisan queue:restart || true

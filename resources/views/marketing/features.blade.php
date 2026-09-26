@@ -19,10 +19,26 @@
                 </div>
             </div>
         </div>
-        <figure class="mt-12 border border-line bg-white p-2 shadow-[0_40px_80px_-40px_rgba(16,37,42,.35)] sm:p-3">
-            <img src="{{ asset('img/product/front-desk.webp') }}" alt="The Cover & Keys front desk: today's arrivals, occupancy and a room chart" width="1440" height="900" class="block w-full" loading="eager">
-        </figure>
+        @php
+            $tour = [
+                ['Owner dashboard', 'Revenue, occupancy, ADR and RevPAR against last period, with arrivals and open work right now.', 'overview', 'The owner dashboard: live counts, revenue and occupancy charts'],
+                ['Front desk', 'Arrivals, departures and in-house guests, with one-click check-in and the room chart.', 'front-desk', 'The front desk: today\'s arrivals, occupancy and a room chart'],
+                ['Housekeeping', 'Every check-out drops a cleaning task on the board for attendants to start and finish.', 'housekeeping', 'The housekeeping board with rooms to clean and inspect'],
+                ['Restaurant floor', 'Table plan, open tickets and the kitchen queue on one screen, charged to the table or the room.', 'restaurant', 'The restaurant floor: table plan and kitchen tickets'],
+                ['Accounting', 'Every night sold and order rung up posts to a double-entry ledger automatically.', 'accounting', 'Accounting overview with profit and loss'],
+                ['Staff rota', 'Shifts by department, clock-ins and leave, so the week is planned before it starts.', 'staff', 'The weekly staff rota by department'],
+                ['Guest profiles', 'Stays, spend and loyalty for every guest, ready for the next campaign.', 'guests', 'Guest profiles with stays and spend'],
+            ];
+        @endphp
+        <div class="mx-auto mt-14 max-w-[1180px]" data-widget="FeatureCarousel"
+             data-props="{{ json_encode(['slides' => array_map(fn ($s) => ['title' => $s[0], 'body' => $s[1], 'src' => asset('img/product/'.$s[2].'.webp'), 'alt' => $s[3]], $tour)]) }}">
+            {{-- No-JS fallback: the first screen. --}}
+            <figure class="m-0 border border-line bg-white shadow-[0_40px_80px_-40px_rgba(16,37,42,.35)]">
+                <img src="{{ asset('img/product/overview.webp') }}" alt="{{ $tour[0][3] }}" width="1440" height="900" class="block aspect-[16/10] w-full object-cover object-left-top" loading="eager">
+            </figure>
+        </div>
     </section>
+    @push('widgets') @vite('resources/js/widgets.jsx') @endpush
 
     {{-- Jobs to be done --}}
     @php

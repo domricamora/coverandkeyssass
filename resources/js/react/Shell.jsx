@@ -1,6 +1,7 @@
 import { Link, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { Icon, cx } from './ui';
+import logo from '../../images/logo.svg';
 
 /**
  * Full-screen dashboard shell: fixed sidebar rail (drawer under lg), slim
@@ -172,13 +173,8 @@ function Toasts() {
     );
 }
 
+const LOGO_RING = { borderRadius: 9999, border: '2px solid #c9a13b', padding: 3, boxSizing: 'border-box' };
+
 function Mark() {
-    return (
-        <svg viewBox="0 0 32 32" width="20" height="20" fill="none" aria-hidden="true">
-            <path d="M16 3.2a12.8 12.8 0 1 1-9.05 21.85" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" />
-            <circle cx="16" cy="16" r="8.4" stroke="currentColor" strokeWidth="1.1" opacity="0.45" />
-            <circle cx="16" cy="13.6" r="3" fill="currentColor" />
-            <path d="M16 16.4 14.7 23h2.6L16 16.4Z" fill="currentColor" />
-        </svg>
-    );
+    return <img className="brand-logo" src={logo} width="32" height="32" alt="" aria-hidden="true" style={LOGO_RING} />;
 }

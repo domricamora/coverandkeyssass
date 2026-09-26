@@ -77,6 +77,41 @@ class DemoOperationsSeeder extends Seeder
                 ['Coconut rice', 'Steamed in pandan.', 110],
             ],
         ],
+        'hillside-table-tagaytay' => [
+            'Mains' => [
+                ['Bulalo for two', 'Beef shank and marrow, simmered all day, sweet corn.', 980],
+                ['Garden kare-kare', 'Farm vegetables, peanut sauce, bagoong.', 520],
+                ['Adobo flakes', 'Crisp pork adobo, garlic rice, pickled papaya.', 395],
+            ],
+            'Desserts' => [
+                ['Barako tiramisu', 'Batangas coffee, mascarpone.', 260],
+                ['Buko pie slice', 'Young coconut, flaky crust.', 180],
+            ],
+        ],
+        'alona-reef-kitchen' => [
+            'From the sea' => [
+                ['Morning-boat kinilaw', 'Tuna, coconut vinegar, ginger, chilli.', 380],
+                ['Grilled squid', 'Stuffed with tomato and onion.', 450],
+            ],
+            'Grill' => [
+                ['Calamay-glazed ribs', 'Bohol calamay, charred pineapple.', 620],
+            ],
+            'Bar' => [
+                ['Calamansi sour', 'Tanduay, calamansi, egg white.', 290],
+                ['Fresh buko juice', 'Served in the shell.', 140],
+            ],
+        ],
+        'laiya-driftwood-grill' => [
+            'Grill' => [
+                ['Liempo by the kilo', 'Lemongrass-rubbed pork belly.', 890],
+                ['Inihaw na pusit', 'Whole squid, soy-calamansi glaze.', 480],
+                ['Chicken inasal', 'Annatto oil, garlic rice.', 320],
+            ],
+            'Cool down' => [
+                ['Halo-halo bucket', 'For four: ube, leche flan, beans, shaved ice.', 560],
+                ['Mango shake', 'Carabao mango.', 150],
+            ],
+        ],
     ];
 
 
@@ -101,7 +136,7 @@ class DemoOperationsSeeder extends Seeder
 
         // Months of trading history: full scale on a dev database, a few days under tests.
         $history = app()->runningUnitTests() ? new DemoHistorySeeder(stayDays: 12, ticketDays: 3) : new DemoHistorySeeder;
-        $tenants = Tenant::query()->whereIn('slug', ['aplaya-beach-resort', 'kalye-suite-company', 'nido-cove-escapes'])->orderBy('id')->get();
+        $tenants = Tenant::query()->whereIn('slug', ['aplaya-beach-resort', 'kalye-suite-company', 'nido-cove-escapes', 'ridge-and-reef-hospitality'])->orderBy('id')->get();
 
         foreach ($tenants as $t => $tenant) {
             $owner = User::query()->where('email', 'like', 'owner@%')->whereHas('tenants', fn ($q) => $q->whereKey($tenant->id))->first();

@@ -76,3 +76,7 @@ Unsplash licence (free for commercial use). Source: `https://unsplash.com/photos
 - terrace: https://unsplash.com/photos/FxExosRmEWg
 - terrace: https://unsplash.com/photos/kzX1Vv6-Wgk
 - terrace: https://unsplash.com/photos/U9PMIls8imM
+
+## Ridge & Reef listings (added 2026-09-27)
+
+The Ridge & Reef stays and restaurants (taal-ridge-villa, panglao-reef-dive-resort, laiya-shoreline-house, hillside-table-tagaytay, alona-reef-kitchen, laiya-driftwood-grill) reuse Unsplash photos from `tour/`. The source is the id in each tour file's name.

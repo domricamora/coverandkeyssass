@@ -40,12 +40,7 @@
         <header style="z-index:70" class="sticky top-0 border-b border-line bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/85">
             <div class="flex h-[68px] items-center gap-6 px-5 lg:px-10 2xl:px-16">
                 <a class="flex shrink-0 items-center gap-2.5 text-fg" href="{{ route('home') }}" aria-label="{{ config('app.name') }} home">
-                    <svg viewBox="0 0 32 32" width="26" height="26" fill="none" aria-hidden="true" class="text-brand">
-                        <path d="M16 3.2a12.8 12.8 0 1 1-9.05 21.85" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
-                        <circle cx="16" cy="16" r="8.4" stroke="currentColor" stroke-width="1.1" opacity="0.45"/>
-                        <circle cx="16" cy="13.6" r="3" fill="var(--coral)"/>
-                        <path d="M16 16.4 14.7 23h2.6L16 16.4Z" fill="var(--coral)"/>
-                    </svg>
+                    <img class="brand-logo" src="{{ asset('img/brand/logo.svg') }}" width="38" height="38" style="border-radius:9999px;border:2px solid #c9a13b;padding:3px;box-sizing:border-box" alt="" aria-hidden="true">
                     <span class="font-display text-[17px] font-semibold tracking-tight">{{ config('app.name') }}</span>
                 </a>
 
@@ -154,11 +149,7 @@
             <div class="grid gap-10 px-5 py-14 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:px-10 2xl:px-16">
                 <div class="max-w-sm">
                     <p class="flex items-center gap-2.5">
-                        <svg viewBox="0 0 32 32" width="24" height="24" fill="none" aria-hidden="true" class="text-brand">
-                            <path d="M16 3.2a12.8 12.8 0 1 1-9.05 21.85" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
-                            <circle cx="16" cy="13.6" r="3" fill="var(--coral)"/>
-                            <path d="M16 16.4 14.7 23h2.6L16 16.4Z" fill="var(--coral)"/>
-                        </svg>
+                        <img class="brand-logo" src="{{ asset('img/brand/logo.svg') }}" width="36" height="36" style="border-radius:9999px;border:2px solid #c9a13b;padding:3px;box-sizing:border-box" alt="" aria-hidden="true">
                         <span class="font-display text-[17px] font-semibold text-fg">{{ config('app.name') }}</span>
                     </p>
                     <p class="mt-4 text-[14px] leading-relaxed text-fg-2">Book stays and tables with the people who run them. Hotels, resorts, B&amp;Bs and restaurants run their whole operation on Cover &amp; Keys.</p>
