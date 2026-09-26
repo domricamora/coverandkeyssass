@@ -1771,3 +1771,7 @@ dialog[open]::backdrop { animation: ck-fade-in 200ms ease-out both; }
 @media (prefers-reduced-motion: reduce) {
     .page-in, dialog[open] { animation: ck-fade-in 120ms ease-out both; }
 }
+
+/* Sticky filter bar sits under the header (70) so the account menu opens over it. */
+
+.public-body .filter-bar { z-index: 30; }
