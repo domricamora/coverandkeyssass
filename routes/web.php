@@ -25,11 +25,16 @@ Route::get('/llms.txt', [SeoController::class, 'llms'])->name('seo.llms');
 // Sign-in return for guest flows: signed-out guests are sent to log in or
 // register and come back to the booking / cart / table step they left.
 // Only same-site relative paths are followed.
-Route::get('/continue', function (\Illuminate\Http\Request $request) {
-    $to = (string) $request->query('to');
+Route::get('/continue', fn (\Illuminate\Http\Request $request) => redirect(\App\Http\Controllers\GuestCheckoutController::safePath((string) $request->query('to'))))
+    ->middleware('auth')->name('continue');
 
-    return redirect(preg_match('#^/(?![/\\\\])#', $to) ? $to : '/');
-})->middleware('auth')->name('continue');
+// Checkout without registration (see GuestCheckoutController).
+Route::middleware('throttle:10,1')->group(function (): void {
+    Route::post('/guest/identify', [\App\Http\Controllers\GuestCheckoutController::class, 'identify'])->name('guest.identify');
+    Route::post('/guest/password', [\App\Http\Controllers\GuestCheckoutController::class, 'password'])->name('guest.password');
+});
+Route::post('/login-link', [\App\Http\Controllers\GuestCheckoutController::class, 'sendLink'])->middleware('throttle:5,10')->name('login.link.send');
+Route::get('/login-link/{user}', [\App\Http\Controllers\GuestCheckoutController::class, 'useLink'])->middleware('signed')->name('login.link');
 
 // ---------------------------------------------------------------------
 // Tenant (host) area
