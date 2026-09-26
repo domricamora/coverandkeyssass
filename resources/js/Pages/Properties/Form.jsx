@@ -3,7 +3,7 @@ import { Input, Page, Panel, Row, Select, Tabs, TextArea, submit } from '../../r
 import MediaManager from '../../react/media';
 
 const BLANK = {
-    name: '', tagline: '', description: '', property_type_id: '', location_id: '', address_line: '', city: '', region: '',
+    name: '', tagline: '', description: '', property_type_id: '', location_id: '', address_line: '', city: '', region: '', latitude: '', longitude: '',
     max_guests: 2, bedrooms: 1, beds: 1, bathrooms: 1, base_price: '', weekend_price: '', cleaning_fee: 0, currency: 'PHP',
     check_in_time: '14:00', check_out_time: '11:00',
 };
@@ -37,6 +37,10 @@ export default function PropertyForm({ property, title, options, media, tabs, ur
                         <Input form={form} name="address_line" label="Address" />
                         <Input form={form} name="city" label="City" />
                         <Input form={form} name="region" label="Region" />
+                    </Row>
+                    <Row>
+                        <Input form={form} name="latitude" type="number" step="0.0000001" min="-90" max="90" label="Map pin latitude" hint="Optional. Right-click the spot in Google Maps and copy the first number." />
+                        <Input form={form} name="longitude" type="number" step="0.0000001" min="-180" max="180" label="Map pin longitude" hint="Without a pin, the map shows the destination area." />
                     </Row>
                     <Row cols={4}>
                         <Input form={form} name="max_guests" type="number" min="1" label="Max guests" required />

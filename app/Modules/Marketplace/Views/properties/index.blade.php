@@ -105,6 +105,21 @@
             </div>
 
             <div class="results__main">
+                @php
+                    // Map pins: the host's exact point, else the destination's (nudged per stay so pins don't stack).
+                    $mapPoints = $properties->getCollection()->map(function ($p) {
+                        $exact = $p->latitude !== null && $p->longitude !== null;
+                        $lat = $exact ? (float) $p->latitude : (float) $p->location?->latitude;
+                        $lng = $exact ? (float) $p->longitude : (float) $p->location?->longitude;
+
+                        return ($lat || $lng) ? [
+                            'id' => $p->id, 'name' => $p->name, 'price' => $p->priceLabel(), 'exact' => $exact,
+                            'url' => route('marketplace.properties.show', $p->slug), 'image' => $p->galleryUrls()[0] ?? null, 'where' => $p->locationLabel(),
+                            'lat' => $exact ? $lat : $lat + (($p->id % 7) - 3) * 0.004, 'lng' => $exact ? $lng : $lng + (intdiv($p->id, 7) % 7 - 3) * 0.004,
+                        ] : null;
+                    })->filter()->values();
+                @endphp
+                <div data-widget="StayMap" data-props="{{ json_encode(['points' => $mapPoints]) }}"></div>
                 <div class="results__head">
                     <h1>{{ $destination ? 'Stays in '.$destination->name : 'Stays' }}</h1>
                     <p class="results__count">
