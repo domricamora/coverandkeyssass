@@ -6,7 +6,7 @@
 
 - Date: 2026-09-26
 - Phase: **38 COMPLETE + post-audit owner queue (see Next actions)** Remaining: the INCOMPLETE items in `docs/FINAL_AUDIT.md`
-- Tests: PASS — 316 tests (full suite 314 + 2 new, verified 2026-09-26), MySQL `hospitality_os_testing`
+- Tests: PASS — 321 tests / 2110 assertions (full suite, 2026-09-26), MySQL `hospitality_os_testing`
 - Git: `master` → origin <https://github.com/domricamora/coverandkeyssass.git> — **not pushed yet**: the auto-mode classifier blocks `git push` from the agent; the owner runs `git push -u origin master:main` (or adds a Bash permission rule)
 
 ## Environment (ready)
@@ -21,27 +21,26 @@
 
 - **PayMongo sandbox run**: verified only against `Http::fake()`. Put real `sk_test_…` + webhook `whsk_…` in `.env`, register the webhook (curl in `docs/modules/payments.md`), and pay one booking and one billing invoice in test mode before going live.
 - Laravel Boost (requested by CLAUDE.md) is not installed — deliberately skipped so far.
-- **SMS carrier**: `SmsSender` only logs; add a Semaphore / Twilio driver before real SMS.
+- SMS: Semaphore / Twilio drivers exist (set SMS_DRIVER + keys).
 - **Push sender**: `push_messages` is an outbox only; add an FCM / APNs worker.
 - **Before running `billing:run` on dev / prod data**: it expires every module whose trial ended and that has no subscription. Existing demo tenants have old trials — grant them (Super Admin, no trial) or subscribe them first.
 
 ## Next actions
 
-**OWNER QUEUE (2026-09-26, in this order — resume here):**
+**RESUME HERE (saved 2026-09-26, last commit 4433b87, 321 tests passing):** owner said "when tasks queue is cleared proceed with the rest of the phases till session limit".
 
-- a. **Photo tour, public side (half done).**
-  - Done: upload (multi-file, converted to WebP, tagged with a tour area in `media.caption`), `App\Support\MediaUploads`, and the tour photos in `public/img/demo/tour/{area}-{n}-{id}.jpg`. Areas: room, bath, lobby, pool, breakfast, spa, dining, dish, bar, kitchen, terrace.
-  - To do:
-    - Seed the tour photos in `MarketplaceDemoSeeder`: an idempotent `attachTour()` giving each property about 10 photos (Rooms / Bathrooms / Lobby / Pool / Breakfast / Spa) and each restaurant about 8 (Dining room / Dishes / Bar / Kitchen / Terrace), with caption = area, rotated by listing index.
-    - Build the "Take the tour" section on `marketplace::properties/show` and `restaurants/show`: area chips, a grid, and a fullscreen lightbox (arrow keys, Esc, counter, captions).
-    - Run `php artisan storage:link` locally; `public/storage` is missing, so uploaded files 404 until then.
-- b. **Seed a fully running platform.** All employees, not just one: every role per business, rota, tasks and performance data across all businesses and properties, so performance and management of every business can be reviewed.
-- c. **Marketing site redesign in Tailwind:** full width (not boxed), light and fresh "Lagoon & Coral" palette across the whole platform (canvas #F7FAF9, lagoon #0E6461, coral #D9603F/#B84A2C, ink #10252A), less generic; use the marketing skills. Then retheme the Blade dashboard to the same light palette (tokens in `resources/css/app.css` `.dash-body`).
-- d. **Research Booking.com, Agoda and Airbnb and implement their best features** (owner: "do a research first then implement what is best to make our platform stand out").
-- e. **Continue the React rebuild:** Restaurant floor, then Housekeeping & ops, then Owner overview.
+Owner queue (a–d) is DONE:
+- a. Guest photo tour: WebP multi-upload with tour areas; `marketplace::partials.mosaic` + `partials.tour` (fullscreen viewer); 8 captioned Unsplash tour photos per demo listing (e33c774). `public/storage` is linked locally.
+- b. Full demo platform: `DemoHistorySeeder` (called by DemoOperationsSeeder) gives 20 staff per business with logins and roles, rota, clock-ins and leave; ~90 days of stays and ~60 days of POS tickets; a live "today" (in house, arrivals, departures, 30 days ahead); group owner `group@coverandkeys.example.test` / password owns all 3 businesses. Idempotency flags live in `tenants.settings.demo_seeded`. A full dev seed takes ~3 min.
+- c. Marketing redesign: Tailwind public layout + home / features ("For hosts") / pricing / contact, full width; palette v3 Lagoon & Coral applied platform-wide (token override at the end of `resources/css/app.css`). The owner then **cancelled** a sky-blue gradient idea: keep lagoon. Owner rules: thin borders only on the search `.filter-bar` (nothing inside it); one gutter scale 20/40/64px; SEO + AI pass done (FAQPage, ItemList, SoftwareApplication, `/llms.txt`).
+- d. OTA features (Booking.com / Airbnb / Agoda research): date search with only-available stays and total stay price (`StayQuoteService`), "only N left", free-cancellation policy (`policies.free_cancellation_days`) with badge and filter, review-score filter, listing-page quote + cancellation deadline, review category scores with a Booking-style summary.
 
-Done this session: the React Front desk (12f407e), grouped nav, the notifications sidebar fix, the WebP multi-upload and tour photos.
-QA tip: `qa.mjs` paths are relative to `/ck/public` (pass `/dashboard/front-desk`, not `/ck/public/...`).
+**Next, in order:**
+1. React rebuild continues: (2) Restaurant floor: live table plan, fast POS with modifiers, kitchen display, reservations book. (3) Housekeeping & ops: mobile-first room board, maintenance queue, rota. (4) Owner overview: occupancy / ADR / RevPAR / covers / revenue charts across businesses (the group owner has 90 days of data). Pattern: add the route name to `DashboardNav::SPA`, render with `Inertia::render('X/Index')` from a controller, pages in `resources/js/Pages`, shell `resources/js/react/Shell.jsx`, tokens in `resources/css/react.css`.
+2. More OTA ideas not built yet: pay at property / reserve now pay later, map view of results, recently viewed stays, price-drop alerts.
+3. INCOMPLETE items in `docs/FINAL_AUDIT.md` (need owner credentials or a server): PayMongo sandbox, deploy, SMTP, off-site backups, push worker, owner `git push`.
+
+QA tips: `qa.mjs` paths are relative to `/ck/public`. `scratchpad/chips.mjs` shows how to probe live layout over CDP (port 9335). GateGuard asks for facts before the first edit of each file, so state them and retry.
 
 0. **(Front desk DONE)** Rebuild the dashboard in React + Tailwind via Inertia.js. — owner found the Blade dashboard half-baked (missing real hotel/restaurant workflows, confusing nav, layout issues). Decided: React (not Vue), Laravel stays back end (reuse services, permissions, tenant isolation, tests). Order: (1) Front desk — today view (arrivals/departures/in-house), drag-and-drop room tape chart, one-screen check-in/out with folio + payment; (2) Restaurant floor — live floor plan, fast POS with modifiers, kitchen display, reservations book; (3) Housekeeping & ops — mobile-first room board, maintenance queue, rota; (4) Owner overview — occupancy/ADR/RevPAR/covers/revenue charts. Full-screen shell already live (commit 3db6892). Start: `composer require inertiajs/inertia-laravel`, npm `@inertiajs/react react react-dom @vitejs/plugin-react` (run npm via `node "C:/Program Files/nodejs/node_modules/npm/bin/npm-cli.js"`), add `HandleInertiaRequests` middleware + `resources/views/app-react.blade.php` root, migrate screens one by one behind the existing routes.
    Since the audit: fixed Guests page crash (CRM watermark cached as object, d59e594), richer demo data (983db2a), Semaphore/Twilio SMS drivers (054656b) — SMS no longer INCOMPLETE.
