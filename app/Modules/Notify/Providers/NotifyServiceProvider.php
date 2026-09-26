@@ -29,7 +29,6 @@ class NotifyServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadMigrationsFrom(__DIR__.'/../Migrations');
-        $this->loadViewsFrom(__DIR__.'/../Views', 'notify');
 
         Route::middleware('web')->group(__DIR__.'/../routes.php');
 

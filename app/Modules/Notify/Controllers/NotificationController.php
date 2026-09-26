@@ -49,10 +49,19 @@ class NotificationController extends Controller
     {
         $user = $request->user();
 
-        return view('notify::settings', [
-            'events' => $this->eventsFor($user),
-            'prefs' => NotificationPreference::query()->where('user_id', $user->id)->get()
-                ->mapWithKeys(fn ($p) => [$p->event.'.'.$p->channel => $p->enabled]),
+        $prefs = NotificationPreference::query()->where('user_id', $user->id)->get()
+            ->mapWithKeys(fn ($p) => [$p->event.'.'.$p->channel => (bool) $p->enabled]);
+
+        return \Inertia\Inertia::render('Account/NotificationSettings', [
+            'rows' => collect($this->eventsFor($user))->map(fn ($meta, $event) => [
+                'event' => $event,
+                'label' => $meta[0],
+                'business' => $meta[1] === 'staff',
+                'on' => collect(array_keys(Events::CHANNELS))->mapWithKeys(fn ($c) => [$c => $prefs[$event.'.'.$c] ?? Events::defaultOn($event, $c)]),
+            ])->values(),
+            'channels' => collect(Events::CHANNELS)->map(fn ($label, $key) => [$key, $label])->values(),
+            'tabs' => \App\Modules\Customer\Controllers\AccountController::nav('account.notifications'),
+            'urls' => ['update' => route('account.notification-settings.update'), 'notifications' => route('account.notifications')],
         ]);
     }
 

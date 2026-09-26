@@ -24,7 +24,7 @@ it('seeds a fully explorable demo through the real services, and re-runs safely'
 
     expect($statuses)->toContain(Booking::CHECKED_OUT, Booking::CHECKED_IN, Booking::CONFIRMED, Booking::PENDING)
         ->and(Order::query()->withoutGlobalScopes()->where('status', Order::COMPLETED)->exists())->toBeTrue()
-        ->and(Media::query()->where('path', 'like', 'img/demo/%')->count())->toBe(110)          // 3 own + 8 tour photos x 10 listings
+        ->and(Media::query()->whereIn('mediable_type', ['property', 'restaurant'])->where('path', 'like', 'img/demo/%')->count())->toBe(110)          // 3 own + 8 tour photos x 10 listings (room and dish photos are extra)
         ->and(Media::query()->where('path', 'like', 'img/demo/tour/%')->whereNull('caption')->exists())->toBeFalse()
         ->and(DB::table('tenant_modules')->whereNotNull('expires_at')->exists())->toBeFalse()
         ->and(DB::table('housekeeping_tasks')->exists())->toBeTrue()          // queued by real check-outs
@@ -45,10 +45,11 @@ it('seeds a fully explorable demo through the real services, and re-runs safely'
         ->and(DB::table('tenant_users')->where('user_id', App\Models\User::query()->where('email', 'group@coverandkeys.example.test')->value('id'))->count())->toBe(3);
 
     $count = $bookings()->count();
+    $media = Media::query()->count();
     $this->seed(MarketplaceDemoSeeder::class);
 
     expect($bookings()->count())->toBe($count)
-        ->and(Media::query()->count())->toBe(110);
+        ->and(Media::query()->count())->toBe($media);
 
     $this->get(route('marketplace.properties.show', 'aplaya-beachfront-suites'))
         ->assertOk()->assertSee('Take a look around')->assertSee('Show all 11 photos')->assertSee('Bathrooms');
