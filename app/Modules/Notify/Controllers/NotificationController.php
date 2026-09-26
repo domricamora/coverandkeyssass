@@ -13,8 +13,16 @@ class NotificationController extends Controller
 {
     public function index(Request $request)
     {
-        return view('notify::index', [
-            'notifications' => $request->user()->notifications()->paginate(25),
+        return \Inertia\Inertia::render('Notifications/Index', [
+            'notifications' => $request->user()->notifications()->paginate(25)->through(fn ($n) => [
+                'id' => $n->id,
+                'message' => $n->data['message'] ?? 'Update',
+                'href' => ! empty($n->data['link']) ? route('notifications.open', $n->id) : null,
+                'when' => $n->created_at->diffForHumans(),
+                'unread' => $n->read_at === null,
+            ]),
+            'unread' => $request->user()->unreadNotifications()->count(),
+            'urls' => ['read' => route('notifications.read'), 'settings' => route('account.notification-settings')],
         ]);
     }
 

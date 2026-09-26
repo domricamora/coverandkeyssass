@@ -117,6 +117,6 @@ it('keeps the business sidebar on the notifications page', function () {
     app(\App\Support\TenantContext::class)->forget(); // fixtures set it in-process; a real request starts empty
     $this->get(route('notifications.index'))
         ->assertOk()
-        ->assertSee(route('frontdesk.index'), false)
-        ->assertSee('Hotel');
+        ->assertInertia(fn ($p) => $p->where('nav', fn ($nav) => collect($nav)->contains(fn ($g) => $g['label'] === 'Hotel'
+            && collect($g['items'])->contains('href', route('frontdesk.index')))));
 });
