@@ -39,3 +39,29 @@ it('falls back to 30 days for an unknown range', function () {
     $this->get(route('dashboard', ['range' => 5]))
         ->assertInertia(fn (Assert $page) => $page->where('range', 30)->has('daily', 30));
 });
+
+it('hides money from staff without accounting access', function () {
+    $clerk = Tests\Support\MarketplaceFixtures::member($this->tenant, 'front_desk');
+    Tests\Support\PropertyManagementFixtures::login($clerk, $this->tenant);
+
+    $this->get(route('dashboard'))->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('money', false)
+            ->where('kpis', null)
+            ->where('daily', [])
+            ->where('portfolio', [])
+            ->where('today.arrivals', 1));
+});
+
+it('lists every business in the portfolio for a group owner', function () {
+    [, $second] = Tests\Support\MarketplaceFixtures::business('Hotel B');
+    $second->users()->attach($this->owner->id, ['status' => 'active', 'joined_at' => now()]);
+    $this->owner->assignTenantRole($second, $second->roles()->where('slug', 'owner')->firstOrFail());
+
+    $this->get(route('dashboard'))->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('portfolio', 2)
+            ->where('portfolio.0.name', 'Hotel A')
+            ->where('portfolio.0.current', true)
+            ->where('portfolio.1.current', false));
+});
