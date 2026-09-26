@@ -72,7 +72,7 @@ export function Table({ head, rows, empty = 'Nothing here yet.', children }) {
     const has = Array.isArray(body) ? body.length > 0 : !!body;
     return (
         <div className="overflow-x-auto">
-            <table className="w-full text-[13px]">
+            <table className="w-full min-w-[680px] text-[13px]">
                 <thead className="text-left text-[11px] uppercase tracking-[0.08em] text-fg-3">
                     <tr className="border-b border-line">
                         {head.map((h, i) => (

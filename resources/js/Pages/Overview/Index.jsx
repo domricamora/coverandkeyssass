@@ -1,5 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { cx, fmtDay, label, money } from '../../react/ui';
 
 /**
@@ -10,6 +10,7 @@ import { cx, fmtDay, label, money } from '../../react/ui';
 // Chart hues: lagoon one step brighter than --primary (chroma floor) + coral; validated with dataviz.
 const ROOMS = '#119990';
 const FNB = '#d9603f';
+const whole = (v) => new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP', maximumFractionDigits: 0 }).format(v ?? 0);
 
 export default function Overview(props) {
     const { company: business, range, money: canMoney, steps, today, kpis, previous, daily, channels, dishes, team, portfolio, urls } = props;
@@ -52,7 +53,7 @@ export default function Overview(props) {
                     <section className="mt-8" aria-label="Performance">
                         <h2 className="text-[12px] font-semibold uppercase tracking-[0.1em] text-fg-3">Last {range} days <span className="font-normal normal-case tracking-normal">vs the {range} days before</span></h2>
                         <dl className="mt-2 grid grid-cols-2 border-l border-t border-line bg-surface md:grid-cols-3 xl:grid-cols-6">
-                            <Kpi term="Revenue" value={money(kpis.revenue)} now={kpis.revenue} before={previous.revenue} />
+                            <Kpi term="Revenue" value={whole(kpis.revenue)} now={kpis.revenue} before={previous.revenue} />
                             <Kpi term="Occupancy" value={`${kpis.occupancy}%`} now={kpis.occupancy} before={previous.occupancy} points />
                             <Kpi term="ADR" value={money(kpis.adr)} now={kpis.adr} before={previous.adr} />
                             <Kpi term="RevPAR" value={money(kpis.revpar)} now={kpis.revpar} before={previous.revpar} />
@@ -182,8 +183,7 @@ function Legend({ items }) {
     );
 }
 
-// Shared plot geometry (SVG user units; the SVG scales to the panel width).
-const W = 720;
+// Plot geometry in CSS pixels: charts measure their own width so axis text stays 11px.
 const H = 240;
 const PAD = { l: 56, r: 12, t: 12, b: 26 };
 
@@ -196,8 +196,20 @@ function niceMax(v) {
 
 const compact = (n) => new Intl.NumberFormat('en-PH', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
 
+/** [ref, width] of an element, following resizes. */
+function useWidth() {
+    const ref = useRef(null);
+    const [w, setW] = useState(720);
+    useEffect(() => {
+        const ro = new ResizeObserver(([e]) => setW(Math.max(280, Math.round(e.contentRect.width))));
+        ro.observe(ref.current);
+        return () => ro.disconnect();
+    }, []);
+    return [ref, w];
+}
+
 /** Hovered day index from the pointer's x over the plot area. */
-function useHover(n) {
+function useHover(n, W) {
     const [i, setI] = useState(null);
     const onMove = (e) => {
         const box = e.currentTarget.getBoundingClientRect();
@@ -208,9 +220,9 @@ function useHover(n) {
     return [i, { onPointerMove: onMove, onPointerLeave: () => setI(null) }];
 }
 
-function Axes({ max, fmt, daily }) {
+function Axes({ max, fmt, daily, W }) {
     const plotH = H - PAD.t - PAD.b;
-    const every = Math.ceil(daily.length / 6);
+    const every = Math.ceil(daily.length / Math.max(2, Math.floor((W - PAD.l) / 80)));
     const colW = (W - PAD.l - PAD.r) / daily.length;
     return (
         <g className="text-[11px]" fill="var(--text-3)">
@@ -228,7 +240,7 @@ function Axes({ max, fmt, daily }) {
     );
 }
 
-function Tip({ i, n, children }) {
+function Tip({ i, n, W, children }) {
     if (i === null) return null;
     const left = ((PAD.l + ((W - PAD.l - PAD.r) * (i + 0.5)) / n) / W) * 100;
     return (
@@ -240,7 +252,8 @@ function Tip({ i, n, children }) {
 
 function RevenueChart({ daily }) {
     const n = daily.length;
-    const [i, hover] = useHover(n);
+    const [ref, W] = useWidth();
+    const [i, hover] = useHover(n, W);
     const max = niceMax(Math.max(...daily.map((d) => d.rooms + d.fnb)));
     const plotH = H - PAD.t - PAD.b;
     const colW = (W - PAD.l - PAD.r) / n;
@@ -249,9 +262,9 @@ function RevenueChart({ daily }) {
     const base = H - PAD.b;
 
     return (
-        <div className="relative px-3 pb-2 pt-3">
+        <div ref={ref} className="relative px-3 pb-2 pt-3">
             <svg viewBox={`0 0 ${W} ${H}`} className="block w-full touch-none" role="img" aria-label="Daily revenue, rooms and food and beverage" {...hover}>
-                <Axes max={max} fmt={compact} daily={daily} />
+                <Axes max={max} fmt={compact} daily={daily} W={W} />
                 {daily.map((d, k) => {
                     const x = PAD.l + colW * k + (colW - barW) / 2;
                     const hr = y(d.rooms);
@@ -265,7 +278,7 @@ function RevenueChart({ daily }) {
                     );
                 })}
             </svg>
-            <Tip i={i} n={n}>
+            <Tip i={i} n={n} W={W}>
                 {i !== null && (
                     <>
                         <p className="font-semibold text-fg">{fmtDay(daily[i].date, { weekday: 'short', month: 'short', day: 'numeric' })}</p>
@@ -290,16 +303,17 @@ function TipRow({ color, name, value }) {
 
 function OccupancyChart({ daily }) {
     const n = daily.length;
-    const [i, hover] = useHover(n);
+    const [ref, W] = useWidth();
+    const [i, hover] = useHover(n, W);
     const plotH = H - PAD.t - PAD.b;
     const colW = (W - PAD.l - PAD.r) / n;
     const pt = (d, k) => [PAD.l + colW * (k + 0.5), PAD.t + plotH * (1 - d.occupancy / 100)];
     const path = daily.map((d, k) => `${k ? 'L' : 'M'}${pt(d, k).join(',')}`).join(' ');
 
     return (
-        <div className="relative px-3 pb-2 pt-3">
+        <div ref={ref} className="relative px-3 pb-2 pt-3">
             <svg viewBox={`0 0 ${W} ${H}`} className="block w-full touch-none" role="img" aria-label="Daily occupancy percentage" {...hover}>
-                <Axes max={100} fmt={(v) => `${v}%`} daily={daily} />
+                <Axes max={100} fmt={(v) => `${v}%`} daily={daily} W={W} />
                 <path d={path} fill="none" stroke={ROOMS} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
                 {i !== null && (
                     <>
@@ -308,7 +322,7 @@ function OccupancyChart({ daily }) {
                     </>
                 )}
             </svg>
-            <Tip i={i} n={n}>
+            <Tip i={i} n={n} W={W}>
                 {i !== null && (
                     <>
                         <p className="font-semibold text-fg">{fmtDay(daily[i].date, { weekday: 'short', month: 'short', day: 'numeric' })}</p>
