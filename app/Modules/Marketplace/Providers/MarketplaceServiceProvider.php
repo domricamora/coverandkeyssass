@@ -35,6 +35,10 @@ class MarketplaceServiceProvider extends ServiceProvider
         Relation::morphMap([
             'property' => Property::class,
             'restaurant' => Restaurant::class,
+            // Photo owners besides listings (media.mediable_type).
+            'room_type' => \App\Modules\PropertyManagement\Models\RoomType::class,
+            'menu_item' => \App\Modules\RestaurantManagement\Models\MenuItem::class,
+            'menu_category' => \App\Modules\RestaurantManagement\Models\MenuCategory::class,
         ]);
 
         $this->loadMigrationsFrom(__DIR__.'/../Migrations');

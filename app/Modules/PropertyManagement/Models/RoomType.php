@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class RoomType extends Model
 {
     use BelongsToTenant;
+    use \App\Modules\Marketplace\Models\Concerns\HasMedia; // room photos
     use HasFactory;
     use SoftDeletes;
 

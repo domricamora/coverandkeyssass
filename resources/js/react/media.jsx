@@ -1,4 +1,5 @@
 import { router, useForm } from '@inertiajs/react';
+import { useState } from 'react';
 import { Badge, Panel } from './kit';
 
 /**
@@ -76,5 +77,56 @@ export default function MediaManager({ media, video = true }) {
                 </Panel>
             )}
         </>
+    );
+}
+
+/**
+ * Compact photo strip for things inside a listing (room types, dishes, menu
+ * sections): thumbnails, main photo, remove, and "Add photos" that uploads
+ * straight away. photos: PhotoController::payload() → { photos, store }.
+ */
+export function PhotoStrip({ photos: data, label = 'Photos', editable = true }) {
+    const [busy, setBusy] = useState(false);
+    const [error, setError] = useState(null);
+    const act = (url, method = 'post') => router[method](url, {}, { preserveScroll: true });
+
+    const upload = (files) => {
+        if (!files.length) return;
+        setBusy(true);
+        setError(null);
+        router.post(data.store, { photos: [...files] }, {
+            forceFormData: true,
+            preserveScroll: true,
+            onError: (e) => setError(e.photos ?? Object.entries(e).find(([k]) => k.startsWith('photos'))?.[1] ?? 'Upload failed.'),
+            onFinish: () => setBusy(false),
+        });
+    };
+
+    return (
+        <div className="px-5 py-3">
+            <p className="mb-2 text-[12px] font-medium uppercase tracking-[0.08em] text-fg-3">{label} <span className="normal-case tracking-normal">· {data.photos.length}</span></p>
+            <div className="flex flex-wrap gap-2">
+                {data.photos.map((m) => (
+                    <figure key={m.id} className="group relative h-20 w-28 overflow-hidden border border-line">
+                        <img src={m.url} alt={m.alt ?? ''} loading="lazy" className="h-full w-full object-cover" />
+                        {m.cover && <span className="absolute left-1 top-1 bg-brand px-1.5 py-0.5 text-[10px] font-medium text-white">Main</span>}
+                        {editable && (
+                            <span className="absolute inset-x-0 bottom-0 flex justify-between bg-black/55 px-1 py-0.5 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
+                                {!m.cover ? <button type="button" className="text-[11px] text-white hover:underline" onClick={() => act(m.make_cover)}>Make main</button> : <span />}
+                                <button type="button" className="text-[11px] text-white hover:underline" onClick={() => window.confirm('Remove this photo?') && act(m.destroy, 'delete')} aria-label="Remove photo">Remove</button>
+                            </span>
+                        )}
+                    </figure>
+                ))}
+                {editable && (
+                    <label className={`flex h-20 w-28 cursor-pointer flex-col items-center justify-center border border-dashed border-line-strong text-center text-[12px] text-fg-3 hover:border-brand hover:text-brand ${busy ? 'pointer-events-none opacity-60' : ''}`}>
+                        <span className="text-[18px] leading-none">+</span>
+                        {busy ? 'Uploading…' : 'Add photos'}
+                        <input type="file" multiple accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(e) => { upload(e.target.files); e.target.value = ''; }} />
+                    </label>
+                )}
+            </div>
+            {error && <p className="mt-1.5 text-[12px] text-bad">{error}</p>}
+        </div>
     );
 }

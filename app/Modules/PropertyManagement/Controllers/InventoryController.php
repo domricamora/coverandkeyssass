@@ -47,6 +47,7 @@ class InventoryController extends PropertyManagementController
                 'name' => $type->name,
                 'summary' => $type->max_guests.' guests · '.$type->priceLabel().'/night · min '.$type->min_stay_nights.' night(s) · '.ucfirst($type->status),
                 'status' => $type->status,
+                'photos' => \App\Http\Controllers\PhotoController::payload($type, 'room-type'),
                 'destroy' => route('properties.room-types.destroy', [$p, $type]),
                 'addRoom' => route('properties.rooms.store', [$p, $type]),
                 'addRate' => route('properties.rates.store', [$p, $type]),

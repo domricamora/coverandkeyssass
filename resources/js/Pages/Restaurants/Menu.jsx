@@ -1,6 +1,7 @@
 import { router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import { Action, Badge, Empty, Form, Input, Page, Panel, Row, Select, Split, Stack, Tabs } from '../../react/kit';
+import { PhotoStrip } from '../../react/media';
 
 /** Menu builder: categories, items with prices, modifier groups and options. */
 export default function Menu({ restaurant, tabs, categories, can, urls }) {
@@ -25,6 +26,7 @@ export default function Menu({ restaurant, tabs, categories, can, urls }) {
                             )}
                         >
                             {c.description && <p className="border-b border-line px-5 py-2.5 text-[13px] text-fg-3">{c.description}</p>}
+                            <div className="border-b border-line"><PhotoStrip photos={c.photos} label="Section banner" editable={can.manage} /></div>
                             {c.items.length === 0 && <p className="px-5 py-6 text-[13px] text-fg-3">No items in this category yet.</p>}
                             <ul className="divide-y divide-line">
                                 {c.items.map((i) => <Item key={i.id} item={i} can={can} />)}
@@ -69,7 +71,7 @@ function Item({ item: i, can }) {
     return (
         <li className="px-5 py-4">
             <div className="flex flex-wrap items-start gap-4">
-                {i.fields.photo_url && <img src={i.fields.photo_url} alt="" className="h-14 w-14 object-cover" loading="lazy" />}
+                {!i.photos.photos.length && i.fields.photo_url && <img src={i.fields.photo_url} alt="" className="h-14 w-14 object-cover" loading="lazy" />}
                 <div className="min-w-0 flex-1">
                     <p className="text-[14px] text-fg"><span className="font-medium">{i.fields.name}</span> <span className="text-fg-2">· {i.price}</span> {!i.available && <Badge tone="warn">Unavailable</Badge>}</p>
                     {i.fields.description && <p className="mt-0.5 text-[13px] text-fg-3">{i.fields.description}</p>}
@@ -81,6 +83,7 @@ function Item({ item: i, can }) {
                     </span>
                 )}
             </div>
+            <div className="-mx-5 mt-2"><PhotoStrip photos={i.photos} label="Dish photos" editable={can.manage} /></div>
 
             {i.groups.map((g) => (
                 <div key={g.id} className="ml-2 mt-3 border-l-2 border-line pl-4 text-[13px]">

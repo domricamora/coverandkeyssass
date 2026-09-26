@@ -28,6 +28,7 @@ class MenuController extends RestaurantManagementController
                 'name' => $c->name,
                 'description' => $c->description,
                 'active' => (bool) $c->is_active,
+                'photos' => \App\Http\Controllers\PhotoController::payload($c, 'menu-category'),
                 'update' => route('restaurants.categories.update', [$r, $c->id]),
                 'destroy' => route('restaurants.categories.destroy', [$r, $c->id]),
                 'items' => $c->items->map(fn ($i) => [
@@ -35,6 +36,7 @@ class MenuController extends RestaurantManagementController
                     'fields' => $i->only(['menu_category_id', 'name', 'description', 'price', 'photo_url', 'sort_order']),
                     'price' => $i->priceLabel(),
                     'available' => (bool) $i->is_available,
+                    'photos' => \App\Http\Controllers\PhotoController::payload($i, 'menu-item'),
                     'update' => route('restaurants.items.update', [$r, $i->id]),
                     'destroy' => route('restaurants.items.destroy', [$r, $i->id]),
                     'addGroup' => route('restaurants.groups.store', [$r, $i->id]),

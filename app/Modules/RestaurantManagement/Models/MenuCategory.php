@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class MenuCategory extends Model
 {
     use BelongsToTenant;
+    use \App\Modules\Marketplace\Models\Concerns\HasMedia; // section banner photo
 
     protected function casts(): array
     {

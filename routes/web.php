@@ -58,6 +58,13 @@ Route::middleware(['auth', 'tenant.context'])->group(function () {
     Route::post('/dashboard/team', [\App\Http\Controllers\TeamController::class, 'store'])->name('team.store');
     Route::patch('/dashboard/team/{user}', [\App\Http\Controllers\TeamController::class, 'role'])->whereNumber('user')->name('team.role');
     Route::delete('/dashboard/team/{user}', [\App\Http\Controllers\TeamController::class, 'destroy'])->whereNumber('user')->name('team.remove');
+
+    // Room-type galleries, dish photos and menu section banners (PhotoController).
+    Route::prefix('/dashboard/photos/{type}/{id}')->whereIn('type', ['room-type', 'menu-item', 'menu-category'])->whereNumber('id')->name('photos.')->group(function (): void {
+        Route::post('/', [\App\Http\Controllers\PhotoController::class, 'store'])->middleware('throttle:30,1')->name('store');
+        Route::post('/{media}/cover', [\App\Http\Controllers\PhotoController::class, 'cover'])->whereNumber('media')->name('cover');
+        Route::delete('/{media}', [\App\Http\Controllers\PhotoController::class, 'destroy'])->whereNumber('media')->name('destroy');
+    });
     Route::get('/dashboard/settings', [DashboardController::class, 'settings'])->name('tenants.settings');
     Route::patch('/dashboard/settings', [DashboardController::class, 'update'])->name('tenants.update');
 });

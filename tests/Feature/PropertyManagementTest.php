@@ -538,3 +538,21 @@ it('uploads several tour photos at once and stores them as WebP', function () {
 
     $this->post(route('properties.media.store', $property), ['caption' => 'Pool'])->assertSessionHasErrors('photos');
 });
+
+it('uploads room-type photos inside the business only', function () {
+    \Illuminate\Support\Facades\Storage::fake('public');
+    [$owner, $tenant] = PropertyManagementFixtures::businessWithModule('Photo Hotel');
+    PropertyManagementFixtures::login($owner, $tenant);
+    $property = PropertyManagementFixtures::property($tenant, $owner);
+    $type = PropertyManagementFixtures::roomType($property);
+
+    $this->post(route('photos.store', ['room-type', $type->id]), ['photos' => [\Illuminate\Http\UploadedFile::fake()->image('suite.jpg', 800, 600)]])
+        ->assertSessionHasNoErrors();
+    expect($type->media()->count())->toBe(1)->and($type->coverUrl())->not->toBeNull();
+
+    $this->get(route('properties.inventory', $property))->assertInertia(fn ($p) => $p->has('roomTypes.0.photos.photos', 1));
+
+    [$other, $otherTenant] = PropertyManagementFixtures::businessWithModule('Other Hotel');
+    PropertyManagementFixtures::login($other, $otherTenant);
+    $this->post(route('photos.store', ['room-type', $type->id]), ['photos' => [\Illuminate\Http\UploadedFile::fake()->image('x.jpg', 800, 600)]])->assertNotFound();
+});

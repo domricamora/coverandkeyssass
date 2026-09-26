@@ -21,6 +21,7 @@ use Illuminate\Validation\ValidationException;
 class MenuItem extends Model
 {
     use BelongsToTenant;
+    use \App\Modules\Marketplace\Models\Concerns\HasMedia; // dish photos
 
     protected function casts(): array
     {

@@ -1,6 +1,7 @@
 import { router, useForm } from '@inertiajs/react';
 import { Action, Empty, Form, Input, Page, Panel, Row, Select, Split, Stack, Table, Td, Tabs } from '../../react/kit';
 import { label } from '../../react/ui';
+import { PhotoStrip } from '../../react/media';
 
 /** Inventory workbench: room types with rooms and rate periods, plus availability blocks. */
 export default function Inventory({ property, tabs, roomTypes, blocks, roomStatuses, reasons, can, urls }) {
@@ -79,6 +80,7 @@ function RoomType({ type: t, statuses, can }) {
             aside={can.edit && <Action href={t.destroy} method="delete" className="btn-danger btn-sm" confirm="Remove this room type?">Remove type</Action>}
         >
             <p className="border-b border-line px-5 py-2.5 text-[13px] text-fg-3">{t.summary}</p>
+            <div className="border-b border-line"><PhotoStrip photos={t.photos} label="Room photos (shown to guests)" editable={can.edit} /></div>
 
             <Table head={['Room', 'Floor', 'Status', '']} empty="No rooms yet for this type.">
                 {t.rooms.map((r) => (
