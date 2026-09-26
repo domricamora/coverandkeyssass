@@ -31,3 +31,10 @@ Route::middleware(['auth', 'tenant.context', 'module.active:pos'])
         Route::post('/tickets/{ticket}/cancel', [PosController::class, 'cancel'])->name('tickets.cancel');
         Route::post('/tickets/{ticket}/refund', [PosController::class, 'refund'])->name('tickets.refund');
     });
+
+// Restaurant floor (React/Inertia): table plan, book, kitchen rail and ticket drawer.
+Route::middleware(['auth', 'tenant.context', 'module.active:pos'])->group(function (): void {
+    Route::get('/dashboard/restaurant-floor', [\App\Modules\Pos\Controllers\FloorController::class, 'index'])->name('floor.index');
+    Route::post('/dashboard/restaurant-floor/{restaurant}/tickets', [\App\Modules\Pos\Controllers\FloorController::class, 'store'])->name('floor.tickets.store');
+    Route::post('/dashboard/restaurant-floor/{restaurant}/tickets/{ticket}/close', [\App\Modules\Pos\Controllers\FloorController::class, 'close'])->name('floor.tickets.close');
+});

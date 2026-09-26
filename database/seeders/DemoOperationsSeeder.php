@@ -100,7 +100,7 @@ class DemoOperationsSeeder extends Seeder
         $guests = User::query()->where('email', 'like', '%@example.test')->where('email', 'not like', 'owner@%')->orderBy('id')->get()->values();
 
         // Months of trading history: full scale on a dev database, a few days under tests.
-        $history = app()->runningUnitTests() ? new DemoHistorySeeder(stayDays: 4, ticketDays: 2) : new DemoHistorySeeder;
+        $history = app()->runningUnitTests() ? new DemoHistorySeeder(stayDays: 12, ticketDays: 3) : new DemoHistorySeeder;
         $tenants = Tenant::query()->whereIn('slug', ['aplaya-beach-resort', 'kalye-suite-company', 'nido-cove-escapes'])->orderBy('id')->get();
 
         foreach ($tenants as $t => $tenant) {

@@ -21,6 +21,7 @@ use App\Modules\Workforce\Models\Employee;
 use App\Modules\Workforce\Models\LeaveRequest;
 use App\Modules\Workforce\Models\Position;
 use App\Modules\Workforce\Services\WorkforceService;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
@@ -99,10 +100,11 @@ class DemoHistorySeeder
 
         foreach (Restaurant::query()->orderBy('id')->get() as $restaurant) {
             isset($done['tickets']) || $this->tickets($restaurant, $team);
+            isset($done['floor']) || $this->liveFloor($restaurant, $team);
         }
 
         $tenant->forceFill(['settings' => array_merge((array) $tenant->settings, [
-            'demo_seeded' => ['stays' => true, 'live' => true, 'tickets' => true],
+            'demo_seeded' => ['stays' => true, 'live' => true, 'tickets' => true, 'floor' => true],
         ])])->save();
 
         $this->housekeeping($team);
@@ -254,6 +256,9 @@ class DemoHistorySeeder
     /** ~90 days of stays through the booking engine, busier at weekends. */
     private function stays(Property $property): void
     {
+        Carbon::setTestNow();
+        $base = CarbonImmutable::today();
+
         if (Booking::query()->where('property_id', $property->id)->where('guest_email', 'like', '%@guestmail.example.test')->exists()) {
             return;
         }
@@ -268,7 +273,7 @@ class DemoHistorySeeder
         $sources = [Booking::SOURCE_MARKETPLACE, Booking::SOURCE_MARKETPLACE, Booking::SOURCE_MANUAL, Booking::SOURCE_WALK_IN];
 
         for ($d = -$this->stayDays; $d <= -2; $d++) {
-            $day = today()->addDays($d);
+            $day = $base->addDays($d); // fixed base: today() moves with the test clock
             // At least one arrival on day one (empty calendar), so the idempotency marker always exists.
             $arrivals = max($d === -$this->stayDays ? 1 : 0, mt_rand(0, 2) + ($day->isFriday() || $day->isSaturday() ? 1 : 0));
 
@@ -330,6 +335,9 @@ class DemoHistorySeeder
      */
     private function live(Property $property): void
     {
+        Carbon::setTestNow();
+        $base = CarbonImmutable::today();
+
         if (Booking::query()->where('property_id', $property->id)->where('guest_email', 'like', '%@guestmail.example.test')->where('check_out', '>=', today())->exists()) {
             return;
         }
@@ -344,7 +352,7 @@ class DemoHistorySeeder
         $lastDay = app()->runningUnitTests() ? 3 : 30;
 
         for ($d = -3; $d <= $lastDay; $d++) {
-            $day = today()->addDays($d);
+            $day = $base->addDays($d); // fixed base: today() moves with the test clock
             $arrivals = $d <= 0 ? mt_rand(1, 2) : mt_rand(0, 2) + ($day->isFriday() || $day->isSaturday() ? 1 : 0);
 
             for ($a = 0; $a < $arrivals; $a++) {
@@ -352,7 +360,7 @@ class DemoHistorySeeder
                 $guest = self::GUESTS[mt_rand(0, count(self::GUESTS) - 1)];
                 $source = $d > 0 && mt_rand(1, 4) === 1 ? Booking::SOURCE_MARKETPLACE : Booking::SOURCE_MANUAL;
 
-                Carbon::setTestNow(($d < 0 ? $day : today())->copy()->setTime(9 + $a, 5));
+                Carbon::setTestNow(($d < 0 ? $day : $base)->copy()->setTime(9 + $a, 5));
 
                 $booking = rescue(fn () => $service->reserve($property, [
                     'check_in' => $day->toDateString(),
@@ -383,6 +391,9 @@ class DemoHistorySeeder
     /** Daily register sessions with table tickets, paid by cash / card / e-wallet. */
     private function tickets(Restaurant $restaurant, array $team): void
     {
+        Carbon::setTestNow();
+        $base = CarbonImmutable::today();
+
         if (\App\Modules\Pos\Models\PosSession::query()->where('restaurant_id', $restaurant->id)->where('opened_at', '<', today())->exists()) {
             return;
         }
@@ -400,7 +411,7 @@ class DemoHistorySeeder
         $methods = ['cash', 'cash', 'card', 'card', 'ewallet'];
 
         for ($d = -$this->ticketDays; $d <= -1; $d++) {
-            $day = today()->addDays($d);
+            $day = $base->addDays($d); // fixed base: today() moves with the test clock
             $cashier = $staff[($d + 1000) % $staff->count()];
 
             if ($open = $pos->currentSession($restaurant)) {
@@ -426,7 +437,10 @@ class DemoHistorySeeder
                 }
 
                 rescue(function () use ($orders, $pos, $order, $methods, $cashier) {
-                    $order = $orders->transition($order->refresh(), Order::ACCEPTED);
+                    $order = $order->refresh();
+                    if ($order->status === Order::PENDING) {
+                        $order = $orders->transition($order, Order::ACCEPTED);
+                    }
                     Carbon::setTestNow(now()->addMinutes(mt_rand(35, 80)));
                     $method = $methods[mt_rand(0, count($methods) - 1)];
                     $due = $pos->balanceDue($order);
@@ -441,6 +455,58 @@ class DemoHistorySeeder
         }
 
         Carbon::setTestNow();
+    }
+
+    /** Service in progress today: register open, tables seated at different stages. */
+    private function liveFloor(Restaurant $restaurant, array $team): void
+    {
+        $items = MenuItem::query()->where('restaurant_id', $restaurant->id)->pluck('id');
+        $tables = RestaurantTable::query()->where('restaurant_id', $restaurant->id)->where('status', RestaurantTable::STATUS_ACTIVE)->orderBy('id')->get();
+        $staff = collect($team)->filter(fn ($m) => $m['user'] && in_array($m['position'], ['Restaurant Manager', 'Server'], true))->pluck('user')->values();
+
+        if ($items->count() < 2 || $tables->count() < 2 || $staff->isEmpty()) {
+            return;
+        }
+
+        Carbon::setTestNow();
+        $orders = app(OrderService::class);
+        $pos = app(PosService::class);
+        $pos->currentSession($restaurant) ?? $pos->openSession($restaurant, 3000, $staff[0]);
+
+        // Table 1: just ordered; 2: cooking; 3: food ready; 4: paid, waiting to be cleared.
+        foreach (['accepted', 'preparing', 'ready', 'paid'] as $n => $stage) {
+            $table = $tables[$n] ?? null;
+
+            if (! $table) {
+                break;
+            }
+
+            $lines = [['item_id' => $items[$n % $items->count()], 'quantity' => 2], ['item_id' => $items[($n + 2) % $items->count()], 'quantity' => 1]];
+            $order = rescue(fn () => $orders->placeAtRegister($restaurant, $lines, $table, $staff[$n % $staff->count()]), report: false);
+
+            if (! $order) {
+                continue;
+            }
+
+            $order->forceFill(['created_at' => now()->subMinutes([6, 18, 31, 52][$n])])->save();
+            $order = $order->refresh();
+
+            if ($order->status === Order::PENDING) {
+                $order = $orders->transition($order, Order::ACCEPTED);
+            }
+            if (in_array($stage, ['preparing', 'ready', 'paid'], true)) {
+                $order = $orders->transition($order, Order::PREPARING);
+            }
+            if (in_array($stage, ['ready', 'paid'], true)) {
+                $order = $orders->transition($order, Order::READY);
+            }
+            if ($stage === 'paid') {
+                $pos->pay($order->refresh(), 'card', $pos->balanceDue($order), $staff[0]);
+            }
+
+            // Kitchen timers count from acceptance; start them when the table ordered.
+            $order->forceFill(['accepted_at' => $order->created_at])->save();
+        }
     }
 
     // ------------------------------------------------------------------

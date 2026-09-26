@@ -17,7 +17,7 @@ use App\Modules\Marketplace\Models\Property;
 class DashboardNav
 {
     /** Route names rendered by Inertia (React). */
-    public const SPA = ['frontdesk.index'];
+    public const SPA = ['frontdesk.index', 'floor.index'];
 
     /** @return list<array{label: ?string, items: list<array{label: string, href: string, active: bool, icon: string, badge: ?int, spa: bool}>}> */
     public static function for(?User $user, string $route): array
@@ -50,6 +50,7 @@ class DashboardNav
             ]];
 
             $groups[] = ['Restaurant', [
+                ['Restaurant floor', 'floor.index', $on('floor'), 'M4 6h16M6 6v12M18 6v12M9 18h6M9 10h6', $can('pos.use')],
                 ['Restaurants', 'restaurants.index', $on('restaurants'), 'M7 3v8a2 2 0 002 2v8M5 3v5M9 3v5M17 21V3c-2 1-3 4-3 7h3', $can('restaurants.view')],
                 ['Inventory', 'inventory.index', $on('inventory'), 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4', $can('inventory.view')],
             ]];

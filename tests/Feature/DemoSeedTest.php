@@ -38,6 +38,10 @@ it('seeds a fully explorable demo through the real services, and re-runs safely'
         ->and(DB::table('attendances')->whereNotNull('clock_out_at')->exists())->toBeTrue()
         ->and(DB::table('shifts')->where('starts_at', '>', now())->exists())->toBeTrue()
         ->and(DB::table('pos_sessions')->whereNotNull('closed_at')->exists())->toBeTrue()
+        // Regression: time travel must not drift the calendar, and past register tickets are all settled.
+        ->and(DB::table('bookings')->where('check_in', '<', today()->subDays(30))->exists())->toBeFalse()
+        ->and(DB::table('orders')->where('created_at', '<', today()->subDays(30))->exists())->toBeFalse()
+        ->and(DB::table('orders')->where('channel', 'pos')->where('created_at', '<', today())->whereIn('status', ['accepted', 'preparing', 'ready'])->exists())->toBeFalse()
         ->and(DB::table('tenant_users')->where('user_id', App\Models\User::query()->where('email', 'group@coverandkeys.example.test')->value('id'))->count())->toBe(3);
 
     $count = $bookings()->count();
