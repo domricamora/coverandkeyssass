@@ -25,7 +25,42 @@ class FolioController extends Controller
         $booking = $this->hostBooking($request, 'folio.view', $booking);
         $this->folio->sync($booking);
 
-        return view('folio::host', $this->data($booking) + ['title' => 'Folio — '.$booking->reference]);
+        ['entries' => $entries, 'totals' => $totals] = $this->data($booking);
+        $user = $request->user();
+        $ref = $booking->reference;
+
+        return \Inertia\Inertia::render('Folio/Show', [
+            'booking' => [
+                'reference' => $ref,
+                'summary' => $booking->guest_name.' · '.$booking->property?->name.' · '.$booking->check_in->format('M j').'–'.$booking->check_out->format('M j, Y').' · '.$booking->statusLabel(),
+            ],
+            'entries' => $entries->map(fn (FolioEntry $e) => [
+                'id' => $e->id,
+                'type' => $e->type,
+                'date' => ($e->service_date ?? $e->created_at)->format('M j'),
+                'description' => $e->description,
+                'quantity' => (float) $e->quantity,
+                'unit' => (float) $e->unit_amount,
+                'reference' => $e->reference,
+                'category' => $e->categoryLabel(),
+                'amount' => (float) $e->amount,
+                'voided' => $e->voided_at !== null,
+                'void_reason' => $e->void_reason,
+                'voidable' => $e->isManual() && ! $e->voided_at,
+                'void' => route('folio.void', [$ref, $e->id]),
+            ]),
+            'totals' => $totals,
+            'categories' => FolioEntry::MANUAL_CHARGE_CATEGORIES,
+            'methods' => FolioEntry::PAYMENT_METHODS,
+            'can' => ['manage' => $user->hasPermissionTo('folio.manage'), 'void' => $user->hasPermissionTo('folio.void')],
+            'urls' => [
+                'booking' => route('bookings.show', $ref),
+                'print' => route('folio.print', $ref),
+                'charge' => route('folio.charges.store', $ref),
+                'payment' => route('folio.payments.store', $ref),
+                'refund' => route('folio.refunds.store', $ref),
+            ],
+        ]);
     }
 
     public function print(Request $request, string $booking)

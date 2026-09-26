@@ -11,7 +11,10 @@ use App\Modules\PropertyManagement\Services\AvailabilityService;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Modules\Payments\Models\Payment;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Inertia\Inertia;
 
 /**
  * Host-side booking desk (Phase 05): list + filters, manual / walk-in
@@ -51,10 +54,24 @@ class BookingController extends PropertyManagementController
             ->paginate(20)
             ->withQueryString();
 
-        return view('booking::bookings.index', [
-            'bookings' => $bookings,
+        $user = $request->user();
+
+        return Inertia::render('Bookings/Index', [
+            'bookings' => $bookings->through(fn (Booking $b) => [
+                'reference' => $b->reference,
+                'source' => $b->source,
+                'guest' => $b->guest_name,
+                'group' => $b->group_name,
+                'property' => $b->property?->name,
+                'stay' => $b->check_in->format('M j').' – '.$b->check_out->format('M j, Y'),
+                'status' => $b->status,
+                'total' => $b->money($b->total),
+                'href' => route('bookings.show', $b->reference),
+            ]),
             'filters' => $filters,
-            'properties' => Property::query()->orderBy('name')->get(['id', 'name', 'slug']),
+            'statuses' => Booking::statuses(),
+            'can' => ['create' => $user->hasPermissionTo('bookings.create'), 'promotions' => $user->hasPermissionTo('promotions.manage')],
+            'urls' => ['self' => route('bookings.index'), 'create' => route('bookings.create'), 'promotions' => route('bookings.promotions.index'), 'frontdesk' => route('frontdesk.index')],
         ]);
     }
 
@@ -80,7 +97,19 @@ class BookingController extends PropertyManagementController
             }
         }
 
-        return view('booking::bookings.create', compact('properties', 'property', 'roomTypes', 'available'));
+        return Inertia::render('Bookings/Create', [
+            'properties' => $properties->map(fn ($p) => [$p->slug, $p->name]),
+            'property' => $property?->slug,
+            'dates' => ['check_in' => $checkIn, 'check_out' => $checkOut],
+            'roomTypes' => $roomTypes->map(fn ($t) => [
+                'id' => $t->id,
+                'name' => $t->name,
+                'sleeps' => $t->max_guests,
+                'rate' => $t->priceLabel(),
+                'free' => $available[$t->id] ?? null,
+            ])->values(),
+            'urls' => ['self' => route('bookings.create'), 'store' => route('bookings.store'), 'index' => route('bookings.index')],
+        ]);
     }
 
     public function store(Request $request)
@@ -120,7 +149,47 @@ class BookingController extends PropertyManagementController
 
         $booking = $this->resolveBooking($booking)->load(['property', 'rooms.room', 'rooms.roomType', 'promotion', 'customer']);
 
-        return view('booking::bookings.show', compact('booking'));
+        $user = $request->user();
+        $b = $booking;
+
+        return Inertia::render('Bookings/Show', [
+            'booking' => [
+                'reference' => $b->reference,
+                'status' => $b->status,
+                'summary' => $b->property?->name.' · '.$b->check_in->format('D, M j').' – '.$b->check_out->format('D, M j, Y')
+                    .' · '.$b->nights().' '.Str::plural('night', $b->nights()).' · '.Str::headline($b->source),
+                'hold_expires' => $b->hold_expires_at?->diffForHumans(),
+                'guest' => [
+                    ['Name', $b->guest_name],
+                    ['Email', $b->guest_email],
+                    ['Phone', $b->guest_phone],
+                    ['Guests', $b->adults.' adults, '.$b->children.' children'],
+                    $b->group_name ? ['Group', $b->group_name] : null,
+                    $b->special_requests ? ['Special requests', $b->special_requests] : null,
+                    $b->cancellation_reason ? ['Cancellation', $b->cancellation_reason] : null,
+                ],
+                'lines' => $b->rooms->map(fn ($line) => [$line->roomType?->name.' · Room '.$line->room?->room_number, $b->money($line->total)])
+                    ->push(['Subtotal', $b->money($b->subtotal)])
+                    ->when((float) $b->discount_total > 0, fn ($c) => $c->push(['Discount'.($b->promotion ? ' ('.$b->promotion->code.')' : ''), '− '.$b->money($b->discount_total)])),
+                'total' => $b->money($b->total),
+                'next' => Booking::TRANSITIONS[$b->status] ?? [],
+            ],
+            'payments' => Payment::query()->where('booking_id', $b->id)->latest('id')->get()->map(fn (Payment $p) => [
+                'id' => $p->id,
+                'date' => ($p->paid_at ?? $p->created_at)->format('M j, Y H:i'),
+                'method' => $p->method ? Str::headline($p->method) : 'PayMongo',
+                'status' => $p->status,
+                'note' => $p->failure_reason,
+                'amount' => $p->currency.' '.number_format((float) $p->amount, 2),
+            ]),
+            'can' => ['update' => $user->hasPermissionTo('bookings.update'), 'folio' => $user->hasPermissionTo('folio.view')],
+            'urls' => [
+                'index' => route('bookings.index'),
+                'transition' => route('bookings.transition', $b->reference),
+                'folio' => route('folio.show', $b->reference),
+                'frontdesk' => route('frontdesk.index', ['booking' => $b->reference]),
+            ],
+        ]);
     }
 
     public function transition(Request $request, string $booking)
@@ -139,35 +208,10 @@ class BookingController extends PropertyManagementController
         return back()->with('success', 'Booking '.$booking->reference.' is now '.strtolower($booking->statusLabel()).'.');
     }
 
-    /** Rooms × days grid: who occupies which room each night, plus blocks. */
+    /** The old rooms × days grid lives on as the front desk tape chart. */
     public function calendar(Request $request)
     {
-        abort_unless($request->user()->hasPermissionTo('bookings.view'), 403);
-
-        $properties = Property::query()->orderBy('name')->get(['id', 'name', 'slug']);
-        $property = $request->filled('property')
-            ? $this->resolveProperty((string) $request->query('property'))
-            : $properties->first();
-
-        $start = CarbonImmutable::parse($request->query('start', today()->toDateString()))->startOfDay();
-        $days = collect(range(0, 13))->map(fn (int $offset) => $start->addDays($offset));
-        $end = $days->last()->toDateString();
-
-        $rooms = $property?->rooms()->with('roomType:id,name')->orderBy('room_type_id')->orderBy('room_number')->get() ?? collect();
-
-        $occupied = DB::table('room_nights')
-            ->join('booking_rooms', 'booking_rooms.id', '=', 'room_nights.booking_room_id')
-            ->join('bookings', 'bookings.id', '=', 'booking_rooms.booking_id')
-            ->whereIn('room_nights.room_id', $rooms->pluck('id'))
-            ->whereBetween('room_nights.night', [$start->toDateString(), $end])
-            ->get(['room_nights.room_id', 'room_nights.night', 'bookings.reference', 'bookings.guest_name', 'bookings.status'])
-            ->keyBy(fn ($row) => $row->room_id.'|'.substr((string) $row->night, 0, 10));
-
-        $blocks = $property
-            ? AvailabilityBlock::query()->where('property_id', $property->id)->intersecting($start->toDateString(), $end)->get()
-            : collect();
-
-        return view('booking::bookings.calendar', compact('properties', 'property', 'days', 'rooms', 'occupied', 'blocks', 'start'));
+        return redirect()->route('frontdesk.index', $request->only('property', 'start'));
     }
 
     private function resolveBooking(string $reference): Booking

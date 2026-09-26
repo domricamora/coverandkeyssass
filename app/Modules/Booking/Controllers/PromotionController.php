@@ -19,9 +19,19 @@ class PromotionController extends Controller
     {
         abort_unless($request->user()->hasPermissionTo('promotions.manage'), 403);
 
-        return view('booking::promotions.index', [
-            'promotions' => Promotion::query()->where('applies_to', Promotion::FOR_STAYS)->latest()->get(),
-            'properties' => Property::query()->orderBy('name')->get(['id', 'name']),
+        return \Inertia\Inertia::render('Bookings/Promotions', [
+            'promotions' => Promotion::query()->where('applies_to', Promotion::FOR_STAYS)->latest()->get()->map(fn (Promotion $p) => [
+                'id' => $p->id,
+                'code' => $p->code,
+                'name' => $p->name,
+                'discount' => $p->label(),
+                'valid' => ($p->starts_on?->format('M j, Y') ?? 'Any').' – '.($p->ends_on?->format('M j, Y') ?? 'Any'),
+                'used' => $p->used_count.($p->max_uses ? ' / '.$p->max_uses : ''),
+                'active' => (bool) $p->is_active,
+                'toggle' => route('bookings.promotions.toggle', $p->id),
+            ]),
+            'properties' => Property::query()->orderBy('name')->get(['id', 'name'])->map(fn ($p) => [$p->id, $p->name]),
+            'urls' => ['store' => route('bookings.promotions.store'), 'bookings' => route('bookings.index')],
         ]);
     }
 

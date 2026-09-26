@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Support\BookingFixtures;
 use Tests\Support\MarketplaceFixtures;
 use Tests\Support\PropertyManagementFixtures;
@@ -238,14 +239,18 @@ it('shows bookings on the list and the room calendar', function () {
     [, , $property, $type] = BookingFixtures::hotel(rooms: 2);
     $booking = BookingFixtures::reserve($property, $type, ['guest_name' => 'Maria Clara']);
 
-    $this->get(route('bookings.index'))->assertOk()->assertSee('Maria Clara');
-    $this->get(route('bookings.show', $booking->reference))->assertOk()->assertSee('Check in')->assertSee('PHP 12,500.00');
+    $this->get(route('bookings.index'))->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->component('Bookings/Index')->where('bookings.data.0.guest', 'Maria Clara'));
+    $this->get(route('bookings.show', $booking->reference))->assertOk()->assertInertia(fn (Assert $page) => $page
+        ->where('booking.total', 'PHP 12,500.00')->where('booking.next', fn ($next) => collect($next)->contains('checked_in')));
     $this->get(route('bookings.create', ['property' => $property->slug, 'check_in' => '2030-09-05', 'check_out' => '2030-09-08']))
         ->assertOk()
-        ->assertSeeInOrder(['Deluxe Room', 'PHP 3,500', '<td>1</td>'], false); // 1 of 2 rooms free
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('roomTypes.0.name', 'Deluxe Room')->where('roomTypes.0.rate', 'PHP 3,500')
+            ->where('roomTypes.0.free', 1)); // 1 of 2 rooms free
+    // The old room calendar is now the front desk tape chart.
     $this->get(route('bookings.calendar', ['property' => $property->slug, 'start' => '2030-09-04']))
-        ->assertOk()
-        ->assertSee('Maria Cl');
+        ->assertRedirect(route('frontdesk.index', ['property' => $property->slug, 'start' => '2030-09-04']));
 });
 
 it('lets a signed-in guest request a stay from the marketplace', function () {

@@ -15,6 +15,7 @@ use App\Support\ModuleService;
 use App\Support\TenantContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Validation\ValidationException;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Support\BookingFixtures;
 use Tests\Support\MarketplaceFixtures;
 use Tests\Support\PayMongoFake;
@@ -143,8 +144,10 @@ it('counts online payments and refunds from PayMongo', function () {
 it('runs the folio screens with permissions and isolation', function () {
     PropertyManagementFixtures::login($this->owner, $this->tenant);
 
-    $this->get(route('bookings.show', $this->stay->reference))->assertOk()->assertSee('Folio');
-    $this->get(route('folio.show', $this->stay->reference))->assertOk()->assertSee('₱12,500.00');
+    $this->get(route('bookings.show', $this->stay->reference))->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->component('Bookings/Show')->where('can.folio', true));
+    $this->get(route('folio.show', $this->stay->reference))->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->component('Folio/Show')->where('totals.balance', 12500)->where('can.manage', true));
     $this->post(route('folio.charges.store', $this->stay->reference), ['category' => 'laundry', 'description' => 'Laundry bag', 'unit_amount' => 350])->assertSessionHasNoErrors();
     $this->post(route('folio.payments.store', $this->stay->reference), ['method' => 'cash', 'amount' => 5000])->assertSessionHasNoErrors();
     $this->get(route('folio.print', $this->stay->reference))->assertOk()->assertSee('Laundry bag')->assertSee('₱7,850.00');

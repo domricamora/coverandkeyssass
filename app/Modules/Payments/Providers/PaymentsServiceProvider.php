@@ -43,7 +43,7 @@ class PaymentsServiceProvider extends ServiceProvider
             }
         });
 
-        View::composer(['booking::bookings.show', 'customer::bookings.show'], function ($view): void {
+        View::composer(['customer::bookings.show'], function ($view): void {
             $booking = $view->getData()['booking'] ?? null;
 
             if ($booking) {
