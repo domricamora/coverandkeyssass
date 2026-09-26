@@ -31,7 +31,7 @@ class FavoriteController extends Controller
 
     public function __construct(private readonly FavoriteService $favorites) {}
 
-    public function index(Request $request): View
+    public function index(Request $request)
     {
         $user = $request->user();
 
@@ -47,11 +47,27 @@ class FavoriteController extends Controller
             ->paginate(MarketplaceSearchService::PER_PAGE)
             ->withQueryString();
 
-        return view('marketplace::favorites.index', [
-            'favorites' => $favorites,
-            'properties' => $favorites->getCollection()->pluck('favoritable')->filter(fn ($m) => $m instanceof Property),
-            'restaurants' => $favorites->getCollection()->pluck('favoritable')->filter(fn ($m) => $m instanceof Restaurant),
-            'title' => 'Wish list',
+        return \Inertia\Inertia::render('Account/WishList', [
+            'items' => $favorites->through(function (Favorite $f) {
+                $l = $f->favoritable;
+                if (! $l) {
+                    return null;
+                }
+                $stay = $l instanceof Property;
+
+                return [
+                    'id' => $f->id,
+                    'kind' => $stay ? 'Stay' : 'Restaurant',
+                    'name' => $l->name,
+                    'where' => $l->locationLabel() ?: null,
+                    'price' => $stay ? $l->priceLabel().' / night' : $l->priceLevelLabel(),
+                    'image' => $l->galleryUrls()[0] ?? null,
+                    'url' => route($stay ? 'marketplace.properties.show' : 'marketplace.restaurants.show', $l->slug),
+                    'remove' => route('marketplace.favorites.destroy', [$l->getMorphClass(), $l->getKey()]),
+                ];
+            }),
+            'tabs' => \App\Modules\Customer\Controllers\AccountController::nav('marketplace.favorites.index'),
+            'urls' => ['stays' => route('marketplace.home')],
         ]);
     }
 
