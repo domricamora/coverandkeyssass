@@ -213,7 +213,7 @@
                                 @if ($isFavorited)
                                     @method('DELETE')
                                 @endif
-                                <button class="btn {{ $isFavorited ? 'btn-outline' : 'btn-primary' }} btn-block" type="submit">
+                                <button class="btn btn-outline btn-block" type="submit">
                                     <svg width="16" height="16" fill="{{ $isFavorited ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20.5S3.8 15.4 3.8 9.6A4.6 4.6 0 0112 6.9a4.6 4.6 0 018.2 2.7c0 5.8-8.2 10.9-8.2 10.9z"/></svg>
                                     {{ $isFavorited ? 'Saved to wish list' : 'Save to wish list' }}
                                 </button>

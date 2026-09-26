@@ -7,7 +7,7 @@ export const cx = (...c) => c.filter(Boolean).join(' ');
 
 export const BTN = 'inline-flex h-11 w-full items-center justify-center gap-2 bg-brand px-5 text-[15px] font-medium text-white transition-[transform,background-color] duration-150 hover:bg-brand-deep active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50';
 export const BTN_GHOST = 'inline-flex h-11 items-center justify-center gap-2 border border-line bg-surface px-4 text-[14px] font-medium text-fg transition-[transform,border-color] duration-150 hover:border-line-strong active:scale-[0.98] disabled:opacity-50';
-export const FIELD = 'block h-11 w-full border border-line-strong bg-surface px-3 text-base text-fg focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/20 sm:text-[14px]';
+export const FIELD = 'block h-11 w-full border border-line-strong bg-surface px-3 text-base text-fg focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand sm:text-[14px]';
 export const LABEL = 'mb-1.5 block text-[12px] font-medium text-fg-2';
 
 export function money(amount, currency = 'PHP', digits = 0) {

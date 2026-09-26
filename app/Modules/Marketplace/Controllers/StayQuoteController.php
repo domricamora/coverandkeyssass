@@ -36,6 +36,8 @@ class StayQuoteController extends Controller
             'check_out' => ['required', 'date', 'after:check_in'],
             'guests' => ['nullable', 'integer', 'min:1', 'max:50'],
             'promo_code' => ['nullable', 'string', 'max:40'],
+            'room_type_id' => ['nullable', 'integer'],
+            'quantity' => ['nullable', 'integer', 'min:1', 'max:10'],
         ]);
 
         $in = CarbonImmutable::parse($validated['check_in'])->startOfDay();
@@ -66,8 +68,12 @@ class StayQuoteController extends Controller
             if (filled($validated['promo_code'] ?? null)) {
                 try {
                     $promotion = $this->bookings->promotionFor($listing, $validated['promo_code'], $in, $nights);
-                    $cheapest = collect($options)->where('fits', true)->where('free', '>', 0)->whereNotNull('total')->min('total');
-                    $promo = ['code' => $promotion->code, 'label' => $promotion->label(), 'discount' => $cheapest ? round($promotion->discountOn((float) $cheapest), 2) : 0];
+                    // Discount on the chosen room × quantity (review step), else on the cheapest bookable room.
+                    $chosen = collect($options)->firstWhere('room_type_id', (int) ($validated['room_type_id'] ?? 0));
+                    $base = $chosen && $chosen['total'] !== null
+                        ? $chosen['total'] * (int) ($validated['quantity'] ?? 1)
+                        : collect($options)->where('fits', true)->where('free', '>', 0)->whereNotNull('total')->min('total');
+                    $promo = ['code' => $promotion->code, 'label' => $promotion->label(), 'discount' => $base ? round($promotion->discountOn((float) $base), 2) : 0];
                 } catch (ValidationException $e) {
                     $promoError = collect($e->errors())->flatten()->first();
                 }

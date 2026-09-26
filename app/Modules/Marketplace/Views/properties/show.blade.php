@@ -153,6 +153,24 @@
             <div>
                 <div class="card booking-widget">
                     @php
+                        // React booking panel (live quote → review step); the Blade below is the no-JS fallback it replaces.
+                        $stayPanel = ! empty($reservableRoomTypes) && $reservableRoomTypes->isNotEmpty() ? [
+                            'quoteUrl' => route('marketplace.properties.quote', $p->slug),
+                            'reviewUrl' => route('stay.review', $p->slug),
+                            'root' => url('/'),
+                            'signedIn' => auth()->check(),
+                            'currency' => $p->currency ?: 'PHP',
+                            'fromPrice' => $p->priceLabel(),
+                            'today' => today()->toDateString(),
+                            'dates' => $stayDates,
+                            'roomTypes' => $reservableRoomTypes->map(fn ($t) => ['id' => $t->id, 'name' => $t->name, 'sleeps' => $t->max_guests])->values(),
+                        ] : null;
+                    @endphp
+                    @if ($stayPanel)
+                        @push('widgets') @vite('resources/js/widgets.jsx') @endpush
+                        <div data-widget="StayPanel" data-props="{{ json_encode($stayPanel) }}">
+                    @endif
+                    @php
                         $freeCancelDays = $p->policies['free_cancellation_days'] ?? null;
                         $cancelBy = ($freeCancelDays !== null && $stayDates) ? \Carbon\Carbon::parse($stayDates['check_in'])->subDays((int) $freeCancelDays) : null;
                     @endphp
@@ -245,6 +263,9 @@
                             <p class="muted" style="margin:0;">This host is not taking online reservations yet.</p>
                         </div>
                     @endif
+                    @if ($stayPanel)
+                        </div>
+                    @endif
 
                     <div style="margin-top:14px;display:grid;gap:8px;">
                         @auth
@@ -255,7 +276,7 @@
                                 @if ($isFavorited)
                                     @method('DELETE')
                                 @endif
-                                <button class="btn {{ $isFavorited ? 'btn-outline' : 'btn-primary' }} btn-block" type="submit">
+                                <button class="btn btn-outline btn-block" type="submit">
                                     <svg width="16" height="16" fill="{{ $isFavorited ? 'currentColor' : 'none' }}" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 20.5S3.8 15.4 3.8 9.6A4.6 4.6 0 0112 6.9a4.6 4.6 0 018.2 2.7c0 5.8-8.2 10.9-8.2 10.9z"/></svg>
                                     {{ $isFavorited ? 'Saved to wish list' : 'Save to wish list' }}
                                 </button>

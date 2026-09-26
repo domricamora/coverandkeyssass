@@ -34,6 +34,11 @@ Route::middleware(['auth', 'tenant.context', 'module.active:booking'])
         Route::post('/{booking}/status', [BookingController::class, 'transition'])->name('transition');
     });
 
+// Stay booking step 2 (React review page); signed-out guests arrive via /continue.
+Route::get('/stay/{property}/review', \App\Modules\Booking\Controllers\StayReviewController::class)
+    ->middleware('auth')
+    ->name('stay.review');
+
 // Marketplace reservation request — any signed-in guest.
 Route::post('/property/{property}/reserve', [ReservationController::class, 'store'])
     ->middleware(['auth', 'throttle:20,1'])

@@ -43,6 +43,32 @@ it('quotes every room type live for the stay panel, with promo codes', function 
     $this->getJson($url(['check_out' => '2030-09-01']))->assertStatus(422);
 });
 
+it('mounts the React stay panel and runs the review step before reserving', function () {
+    BookingFixtures::bootstrap();
+    [, , $property, $type] = BookingFixtures::hotel(rooms: 2);
+    MarketplaceFixtures::publish($property);
+    auth()->logout();
+
+    $this->get(route('marketplace.properties.show', $property->slug))->assertOk()
+        ->assertSee('data-widget="StayPanel"', false)
+        ->assertSee('Sign in to book'); // server-rendered no-JS fallback stays inside the mount
+
+    $query = ['check_in' => '2030-09-02', 'check_out' => '2030-09-04', 'guests' => 2, 'room_type_id' => $type->id, 'quantity' => 1];
+    $this->get(route('stay.review', $property->slug).'?'.http_build_query($query))->assertRedirect(route('login'));
+
+    $guest = User::factory()->create();
+    $this->actingAs($guest)->get(route('stay.review', $property->slug).'?'.http_build_query($query))->assertOk()
+        ->assertInertia(fn (\Inertia\Testing\AssertableInertia $page) => $page
+            ->component('Stay/Review')
+            ->where('option.total', 7000)
+            ->where('stay.nights', 2)
+            ->where('guest.email', $guest->email));
+
+    // Asking for more rooms than are free sends the guest back to pick again.
+    $this->get(route('stay.review', $property->slug).'?'.http_build_query(['quantity' => 3] + $query))
+        ->assertRedirect()->assertSessionHas('error');
+});
+
 it('only follows same-site paths', function () {
     $this->actingAs(User::factory()->create());
 
