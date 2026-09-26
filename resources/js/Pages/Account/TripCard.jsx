@@ -1,4 +1,8 @@
-const TONE = { confirmed: 'bg-ok-bg text-ok', checked_in: 'bg-ok-bg text-ok', completed: 'bg-ok-bg text-ok', pending: 'bg-warn-bg text-warn', held: 'bg-warn-bg text-warn' };
+const TONE = {
+    confirmed: 'bg-ok-bg text-ok', checked_in: 'bg-ok-bg text-ok', completed: 'bg-ok-bg text-ok', delivered: 'bg-ok-bg text-ok', seated: 'bg-ok-bg text-ok', paid: 'bg-ok-bg text-ok',
+    pending: 'bg-warn-bg text-warn', held: 'bg-warn-bg text-warn', requested: 'bg-warn-bg text-warn',
+    accepted: 'bg-info-bg text-info', preparing: 'bg-info-bg text-info', ready: 'bg-info-bg text-info', out_for_delivery: 'bg-info-bg text-info',
+};
 
 export const TripStatus = ({ status, label }) => <span className={`inline-block px-2 py-0.5 text-[12px] font-medium ${TONE[status] ?? 'bg-soft text-fg-3'}`}>{label}</span>;
 

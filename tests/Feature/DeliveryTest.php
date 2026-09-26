@@ -152,7 +152,7 @@ it('checks out a delivery from the cart with a zone', function () {
     $order = Order::forCustomer($guest)->firstOrFail();
     expect((float) $order->delivery_fee)->toBe(50.0)->and($order->delivery_zone_id)->toBe($this->station->id);
 
-    $this->get(route('account.orders.show', $order->reference))->assertOk()->assertSee('Delivery fee')->assertSee('₱350.00');
+    $this->get(route('account.orders.show', $order->reference))->assertOk()->assertSee('Delivery fee')->assertInertia(fn ($p) => $p->where('order.total', fn ($t) => str_contains($t, '350.00')));
 });
 
 it('runs the delivery setup screen with permissions and isolation', function () {

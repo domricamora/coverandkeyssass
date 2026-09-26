@@ -64,11 +64,24 @@ class GuestReservationController extends Controller
 
     public function index(Request $request)
     {
-        return view('restaurant-management::account.reservations', [
-            'reservations' => TableReservation::forCustomer($request->user())
-                ->with('restaurant')
-                ->orderByDesc('reserved_at')
-                ->paginate(15),
+        $page = TableReservation::forCustomer($request->user())->with('restaurant')->orderByDesc('reserved_at')->paginate(15);
+        $reviewed = \App\Modules\Marketplace\Models\Review::query()->withTrashed()->whereIn('table_reservation_id', $page->pluck('id'))->pluck('table_reservation_id')->all();
+
+        return \Inertia\Inertia::render('Account/Tables', [
+            'reservations' => $page->through(fn (TableReservation $r) => [
+                'reference' => $r->reference,
+                'restaurant' => $r->restaurant?->name ?? 'Restaurant',
+                'when' => $r->reserved_at->format('D, M j, Y · g:i A'),
+                'party' => $r->party_size,
+                'requests' => $r->special_requests,
+                'status' => $r->status,
+                'statusLabel' => $r->statusLabel(),
+                'canCancel' => $r->guestCancellable(),
+                'canReview' => in_array($r->status, ['seated', 'completed'], true) && ! in_array($r->id, $reviewed, true),
+                'urls' => ['cancel' => route('account.reservations.cancel', $r->reference), 'review' => route('account.reservations.review', $r->reference)],
+            ]),
+            'tabs' => \App\Modules\Customer\Controllers\AccountController::nav('account.reservations.index'),
+            'urls' => ['browse' => route('marketplace.restaurants.index')],
         ]);
     }
 

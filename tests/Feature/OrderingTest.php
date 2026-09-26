@@ -129,7 +129,7 @@ it('runs cart to checkout and snapshots the order', function () {
     $burger->update(['price' => 999, 'name' => 'Mega Burger']);
     MarketplaceFixtures::asTenant(null);
 
-    $this->get(route('account.orders.show', $order->reference))->assertOk()->assertSee('Burger')->assertSee('₱660.00')->assertDontSee('Mega');
+    $this->get(route('account.orders.show', $order->reference))->assertOk()->assertSee('Burger')->assertDontSee('Mega')->assertInertia(fn ($p) => $p->where('order.total', fn ($t) => str_contains($t, '660.00')));
     $this->get(route('cart.show'))->assertInertia(fn ($p) => $p->component('Order/Checkout')->where('lines', []));
 });
 

@@ -28,20 +28,65 @@ class CustomerOrderController extends Controller
 
     public function index(Request $request)
     {
-        return view('ordering::account.index', [
-            'orders' => Order::forCustomer($request->user())->with('restaurant')->latest()->paginate(15),
+        return \Inertia\Inertia::render('Account/Orders', [
+            'orders' => Order::forCustomer($request->user())->with('restaurant')->latest()->paginate(15)->through(fn (Order $o) => [
+                'reference' => $o->reference,
+                'restaurant' => $o->restaurant?->name ?? 'Restaurant',
+                'when' => $o->created_at->format('M j, Y · g:i A'),
+                'how' => $o->fulfillmentLabel(),
+                'status' => $o->status,
+                'statusLabel' => $o->statusLabel(),
+                'total' => $o->money($o->total),
+                'href' => route('account.orders.show', $o->reference),
+            ]),
+            'tabs' => \App\Modules\Customer\Controllers\AccountController::nav('account.orders.index'),
+            'urls' => ['browse' => route('marketplace.restaurants.index')],
         ]);
     }
 
     public function show(Request $request, string $order)
     {
         $order = $this->find($request, $order);
+        $items = $this->context->runAs($order, fn () => $order->load('driver')->items()->get());
+        $open = in_array($order->status, Order::OPEN, true);
 
-        return view('ordering::account.show', [
-            'order' => $order,
-            'items' => $this->context->runAs($order, fn () => $order->load('driver')->items()->get()),
-            'reviewed' => \App\Modules\Marketplace\Models\Review::query()->withTrashed()->where('order_id', $order->id)->exists(),
-            'onlinePayments' => PaymentService::enabled(),
+        return \Inertia\Inertia::render('Account/Order', [
+            'order' => [
+                'reference' => $order->reference,
+                'restaurant' => $order->restaurant?->name ?? 'Restaurant',
+                'meta' => $order->created_at->format('M j, Y · g:i A').' · '.$order->fulfillmentLabel().' · '.$order->paymentLabel(),
+                'status' => $order->status,
+                'statusLabel' => $order->statusLabel(),
+                'payment' => ucfirst((string) $order->payment_status),
+                'details' => array_values(array_filter([
+                    $order->delivery_address ? 'Deliver to: '.$order->delivery_address : null,
+                    $order->scheduled_for ? 'Scheduled for '.$order->scheduled_for->format('D, M j · g:i A') : null,
+                    $order->status === 'out_for_delivery' && $order->driver ? 'On the way with '.$order->driver->name.($order->driver->phone ? ' · '.$order->driver->phone : '') : null,
+                    $order->delivered_at ? 'Delivered '.$order->delivered_at->format('g:i A') : null,
+                ])),
+                'eta' => $order->estimated_at && $open ? 'Estimated '.($order->fulfillment === 'delivery' ? 'arrival' : 'ready').': '.$order->estimated_at->format('g:i A') : null,
+                'lines' => $items->map(fn ($i) => ['id' => $i->id, 'qty' => $i->quantity, 'name' => $i->name, 'mods' => $i->modifiers ? $i->modifierLabel() : null, 'notes' => $i->notes, 'total' => $order->money($i->line_total), 'menuItemId' => $i->menu_item_id]),
+                'totals' => array_values(array_filter([
+                    ['Subtotal', $order->money($order->subtotal)],
+                    (float) $order->discount_total > 0 ? ['Discount', '−'.$order->money($order->discount_total)] : null,
+                    ['Tax ('.(float) $order->tax_rate.'% '.($order->tax_inclusive ? 'included' : 'added').')', $order->money($order->tax_total)],
+                    (float) $order->delivery_fee > 0 ? ['Delivery fee', $order->money($order->delivery_fee)] : null,
+                ])),
+                'total' => $order->money($order->total),
+            ],
+            'providers' => $order->needsPayment() ? PaymentService::providers() : [],
+            'can' => [
+                'cancel' => $order->status === Order::PENDING,
+                'review' => $order->status === 'completed' && ! \App\Modules\Marketplace\Models\Review::query()->withTrashed()->where('order_id', $order->id)->exists(),
+            ],
+            'tabs' => \App\Modules\Customer\Controllers\AccountController::nav('account.orders.index'),
+            'urls' => [
+                'orders' => route('account.orders.index'),
+                'pay' => route('account.orders.pay', $order->reference),
+                'cancel' => route('account.orders.cancel', $order->reference),
+                'review' => route('account.orders.review', $order->reference),
+                'message' => route('account.messages.create', ['order' => $order->reference]),
+            ],
         ]);
     }
 

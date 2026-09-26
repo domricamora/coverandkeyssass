@@ -15,7 +15,6 @@ class OrderingServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadMigrationsFrom(__DIR__.'/../Migrations');
-        $this->loadViewsFrom(__DIR__.'/../Views', 'ordering');
 
         Route::middleware('web')->group(__DIR__.'/../routes.php');
     }
