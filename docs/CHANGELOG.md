@@ -1,5 +1,23 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Photo tours, full demo history, marketing redesign, SEO/AI, OTA features
+
+(verified: 321 tests / 2110 assertions; public pages QA-passed at 390 and 1440 px)
+
+- **Guest photo tour:** Airbnb-style mosaic plus a tour by area, with a fullscreen viewer (arrows, swipe, Esc). Demo listings are seeded with captioned Unsplash photos.
+- **Demo platform:** `DemoHistorySeeder` gives each of the 3 businesses a 20-person team (logins and roles), rota, clock-ins and leave. It adds ~90 days of stays and ~60 days of register tickets through the real services, a live "today", and a group-owner login across all businesses.
+- **Marketing site:**
+  - Rebuilt in Tailwind, full width: home, For hosts, pricing, contact, layout and footer.
+  - Lagoon & Coral palette across the platform (public, Blade dashboard, React dashboard).
+  - SEO and AI search: keyword-led titles, answer-first copy, FAQPage, ItemList, SoftwareApplication and Organization structured data, and a live `/llms.txt`.
+- **OTA features** (Booking.com / Airbnb / Agoda research):
+  - Date search showing only available stays, with the total stay price from the booking engine.
+  - Honest "only N left".
+  - Free-cancellation policy with badge and filter; review-score filter.
+  - Listing-page quote with the cancellation deadline and a pre-filled reserve form ("You won't be charged yet").
+  - Review category scores with a Booking-style summary.
+- **Fixes:** WebP conversion is memory-safe for large phone photos; public mobile layout fixes; one gutter scale on the public site.
+
 ## 2026-09-26 — Dashboard rebuild, step 1: React front desk + photo tours (in progress)
 
 - **Front desk (React + Inertia):** `/dashboard/front-desk`. It shows today's arrivals, departures and in-house guests with one-click check-in and check-out; settling a balance comes before check-out. KPIs cover occupancy, dirty rooms and out-of-order rooms. A 14-day room tape chart lets staff drag a stay to another room (`BookingService::moveRoom` moves the remaining nights; the unique index catches conflicts), and a booking drawer holds the folio, quick payment and charges.
