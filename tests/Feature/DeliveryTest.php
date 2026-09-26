@@ -143,7 +143,7 @@ it('checks out a delivery from the cart with a zone', function () {
     $this->post(route('cart.add', $this->restaurant->slug), ['item_id' => $this->item->id, 'quantity' => 1]);
 
     $guest = User::factory()->create();
-    $this->actingAs($guest)->get(route('cart.show'))->assertSee('Station 2')->assertSee('Within 2 km');
+    $this->actingAs($guest)->get(route('cart.show'))->assertInertia(fn ($p) => $p->where('zones.0.name', 'Station 2')->where('zones.1.name', 'Within 2 km')->where('zones.1.radius', true));
     $this->post(route('cart.checkout'), [
         'fulfillment' => 'delivery', 'payment_method' => 'cash', 'customer_phone' => '0917',
         'delivery_zone_id' => $this->station->id, 'delivery_address' => 'Near D*Mall',

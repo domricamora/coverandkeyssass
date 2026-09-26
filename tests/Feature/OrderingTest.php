@@ -105,7 +105,7 @@ it('runs cart to checkout and snapshots the order', function () {
 
     $this->post(route('cart.add', $restaurant->slug), ['item_id' => $burger->id, 'options' => [$opt['Cheese'], $opt['Bacon']], 'quantity' => 2])
         ->assertSessionHasNoErrors();
-    $this->get(route('cart.show'))->assertOk()->assertSee('₱660.00')->assertSee('Sign in to check out');
+    $this->get(route('cart.show'))->assertOk()->assertInertia(fn ($p) => $p->component('Order/Checkout')->where('quote.total', 660)->where('signedIn', false));
 
     $this->post(route('cart.checkout'), ['fulfillment' => 'pickup', 'payment_method' => 'cash', 'customer_phone' => '0917'])
         ->assertRedirect(route('login'));
@@ -130,7 +130,7 @@ it('runs cart to checkout and snapshots the order', function () {
     MarketplaceFixtures::asTenant(null);
 
     $this->get(route('account.orders.show', $order->reference))->assertOk()->assertSee('Burger')->assertSee('₱660.00')->assertDontSee('Mega');
-    $this->get(route('cart.show'))->assertSee('Your cart is empty');
+    $this->get(route('cart.show'))->assertInertia(fn ($p) => $p->component('Order/Checkout')->where('lines', []));
 });
 
 it('rejects bad modifier choices, unavailable items and closed restaurants', function () {

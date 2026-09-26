@@ -13,6 +13,7 @@ use App\Support\TenantContext;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Inertia\Inertia;
 
 /**
  * Marketplace cart and checkout (Phase 11). Browsing and the cart work
@@ -84,15 +85,52 @@ class CartController extends Controller
             }
         }
 
-        return view('ordering::cart', [
-            'cart' => $cart,
-            'keys' => array_keys($cart['lines']),
-            'listing' => $listing,
-            'quote' => $quote,
+        $zones = $listing && $listing->delivery_enabled ? $this->context->runAs($listing, fn () => $listing->deliveryZones()->active()->get()) : collect();
+        $stays = $listing ? $this->context->runAs($listing, fn () => $this->orders->roomServiceStays($listing, $request->user())) : collect();
+
+        return Inertia::render('Order/Checkout', [
+            'restaurant' => $listing ? [
+                'name' => $listing->name,
+                'url' => route('marketplace.restaurants.show', $listing->slug),
+                'tax_rate' => (float) $listing->tax_rate,
+                'tax_inclusive' => (bool) $listing->tax_inclusive,
+                'prep_minutes' => (int) $listing->prep_minutes,
+            ] : null,
+            'lines' => $quote ? array_map(fn (string $key, array $line) => [
+                'key' => $key,
+                'name' => $line['name'],
+                'unit' => $line['unit_price'],
+                'mods' => collect($line['modifiers'])->pluck('name')->implode(', '),
+                'notes' => $line['notes'],
+                'qty' => $line['quantity'],
+                'total' => $line['line_total'],
+            ], array_keys($cart['lines']), $quote['lines']) : [],
+            'quote' => $quote ? [
+                'subtotal' => $quote['subtotal'],
+                'discount' => $quote['discount'],
+                'tax' => $quote['tax'],
+                'total' => $quote['total'],
+                'promo' => $quote['promotion'] ? ['code' => $quote['promotion']->code, 'label' => $quote['promotion']->label()] : null,
+            ] : null,
             'error' => $error,
+            'promoCode' => (string) $request->query('promo_code', ''),
             'onlinePayments' => PaymentService::enabled(),
-            'zones' => $listing ? $this->context->runAs($listing, fn () => $listing->deliveryZones()->active()->get()) : collect(),
-            'stays' => $listing ? $this->context->runAs($listing, fn () => $this->orders->roomServiceStays($listing, $request->user())) : collect(),
+            'zones' => $zones->map(fn ($z) => ['id' => $z->id, 'name' => $z->name, 'terms' => $z->termsLabel(), 'fee' => (float) $z->fee, 'free_over' => $z->free_over !== null ? (float) $z->free_over : null, 'radius' => $z->radius_km !== null])->values(),
+            'stays' => $stays->flatMap(fn ($stay) => $stay->rooms->map(fn ($r) => [
+                'value' => $stay->id.':'.$r->room_id,
+                'label' => 'Room '.$r->room?->label().' · '.$stay->property->name.' ('.$stay->reference.')',
+            ]))->values(),
+            'minSchedule' => $listing ? now()->addMinutes((int) $listing->prep_minutes)->format('Y-m-d\TH:i') : null,
+            'old' => (object) $request->old(),
+            'signedIn' => (bool) $request->user(),
+            'urls' => [
+                'self' => route('cart.show'),
+                'checkout' => route('cart.checkout'),
+                'cartBase' => url('/cart'),
+                'signIn' => route('continue', ['to' => '/cart']),
+                'browse' => route('marketplace.restaurants.index'),
+                'home' => url('/'),
+            ],
         ]);
     }
 

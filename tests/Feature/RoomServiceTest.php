@@ -62,7 +62,7 @@ it('offers room service to a checked-in guest and charges it to the stay', funct
     $this->post(route('cart.add', $this->restaurant->slug), ['item_id' => $this->item->id, 'quantity' => 2]);
 
     $this->actingAs($this->guest)->get(route('cart.show'))
-        ->assertOk()->assertSee('Room service')->assertSee('Room 101')->assertSee('Charge to my room');
+        ->assertOk()->assertInertia(fn ($p) => $p->where('stays.0.value', $this->stay->id.':'.$this->roomId)->where('stays.0.label', fn ($l) => str_starts_with($l, 'Room 101')));
 
     $this->post(route('cart.checkout'), [
         'fulfillment' => 'room_service', 'payment_method' => 'room_charge', 'customer_phone' => '0917',
