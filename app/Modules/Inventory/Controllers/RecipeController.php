@@ -24,15 +24,35 @@ class RecipeController extends Controller
         $restaurants = Restaurant::query()->orderBy('name')->get(['id', 'name', 'slug', 'stock_location_id']);
         $restaurant = $restaurants->firstWhere('slug', $request->query('restaurant')) ?? $restaurants->first();
 
-        return view('inventory::recipes', [
-            'restaurants' => $restaurants,
-            'restaurant' => $restaurant,
-            'menuItems' => $restaurant ? $restaurant->menuItems()->orderBy('name')->get() : collect(),
-            'ingredients' => $restaurant ? MenuItemIngredient::query()->whereIn('menu_item_id', $restaurant->menuItems()->pluck('id'))->with('item')->get()->groupBy('menu_item_id') : collect(),
-            'items' => InventoryItem::query()->where('is_active', true)->orderBy('name')->get(),
-            'locations' => StockLocation::query()->orderBy('name')->get(),
+        $ingredients = $restaurant ? MenuItemIngredient::query()->whereIn('menu_item_id', $restaurant->menuItems()->pluck('id'))->with('item')->get()->groupBy('menu_item_id') : collect();
+        $qty = fn ($n) => rtrim(rtrim(number_format((float) $n, 3), '0'), '.');
+
+        return \Inertia\Inertia::render('Inventory/Recipes', [
+            'restaurants' => $restaurants->map(fn ($r) => [$r->slug, $r->name]),
+            'restaurant' => $restaurant ? [
+                'slug' => $restaurant->slug,
+                'name' => $restaurant->name,
+                'stock_location_id' => $restaurant->stock_location_id,
+                'location' => route('inventory.recipes.location', $restaurant->slug),
+                'store' => route('inventory.recipes.store', $restaurant->slug),
+            ] : null,
+            'dishes' => $restaurant ? $restaurant->menuItems()->orderBy('name')->get()->map(fn ($m) => [
+                'id' => $m->id,
+                'name' => $m->name,
+                'price' => $m->priceLabel(),
+                'ingredients' => $ingredients->get($m->id, collect())->map(fn ($ing) => [
+                    'id' => $ing->id,
+                    'text' => ($ing->entered_quantity ? $qty($ing->entered_quantity).' '.$ing->entered_unit : $ing->item->qty($ing->quantity)).' '.$ing->item?->name,
+                    'base' => $ing->entered_unit && $ing->entered_unit !== $ing->item?->unit ? '= '.$ing->item->qty($ing->quantity) : null,
+                    'destroy' => route('inventory.recipes.destroy', [$restaurant->slug, $ing->id]),
+                ])->values(),
+            ]) : [],
+            'items' => InventoryItem::query()->where('is_active', true)->orderBy('name')->get(['id', 'name', 'unit'])->map(fn ($i) => [$i->id, $i->name.' ('.$i->unit.')']),
+            'locations' => StockLocation::query()->orderBy('name')->get(['id', 'name'])->map(fn ($l) => [$l->id, $l->name]),
             'units' => Unit::all(),
-            'title' => 'Recipes',
+            'tabs' => InventoryController::tabs('recipes'),
+            'can' => ['manage' => $request->user()->hasPermissionTo('inventory.manage')],
+            'urls' => ['self' => route('inventory.recipes')],
         ]);
     }
 

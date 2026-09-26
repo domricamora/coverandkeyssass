@@ -9,7 +9,6 @@ use App\Modules\Inventory\Models\StockLocation;
 use App\Modules\Inventory\Models\Supplier;
 use App\Modules\Inventory\Services\InventoryService;
 use App\Modules\Inventory\Support\Unit;
-use App\Modules\Marketplace\Models\Property;
 use App\Support\TenantContext;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -28,15 +27,42 @@ class InventoryController extends Controller
             ->when($request->boolean('low'), fn ($q) => $q->lowStock())
             ->orderBy('name')->get();
 
-        return view('inventory::index', [
-            'items' => $items,
+        $user = $request->user();
+
+        return \Inertia\Inertia::render('Inventory/Index', [
+            'items' => $items->map(function (InventoryItem $i) {
+                $total = $i->totalStock();
+
+                return [
+                    'id' => $i->id,
+                    'name' => $i->name,
+                    'sku' => $i->sku,
+                    'category' => $i->category?->name,
+                    'on_hand' => $i->qty($total),
+                    'low' => (float) $i->reorder_level > 0 && $total <= (float) $i->reorder_level,
+                    'reorder' => (float) $i->reorder_level > 0 ? $i->qty($i->reorder_level) : null,
+                    'cost' => '₱'.number_format((float) $i->cost_per_unit, 2).'/'.$i->unit,
+                    'active' => (bool) $i->is_active,
+                    'href' => route('inventory.items.show', $i->id),
+                ];
+            }),
             'lowCount' => InventoryItem::query()->lowStock()->count(),
-            'categories' => InventoryCategory::query()->orderBy('name')->get(),
-            'locations' => StockLocation::query()->orderBy('name')->get(),
-            'suppliers' => Supplier::query()->orderBy('name')->get(),
-            'properties' => Property::query()->orderBy('name')->get(['id', 'name']),
+            'filters' => ['category' => $request->query('category'), 'low' => $request->boolean('low') ? 1 : null],
+            'lists' => [
+                'categories' => InventoryCategory::query()->orderBy('name')->get(['id', 'name'])->map(fn ($c) => [$c->id, $c->name]),
+                'locations' => StockLocation::query()->orderBy('name')->pluck('name'),
+                'suppliers' => Supplier::query()->orderBy('name')->pluck('name'),
+            ],
             'units' => Unit::all(),
-            'title' => 'Inventory',
+            'tabs' => self::tabs('stock'),
+            'can' => ['manage' => $user->hasPermissionTo('inventory.manage'), 'buy' => $user->hasPermissionTo('purchasing.manage')],
+            'urls' => [
+                'self' => route('inventory.index'),
+                'addItem' => route('inventory.items.store'),
+                'addCategory' => route('inventory.categories.store'),
+                'addLocation' => route('inventory.locations.store'),
+                'addSupplier' => route('inventory.suppliers.store'),
+            ],
         ]);
     }
 
@@ -78,12 +104,31 @@ class InventoryController extends Controller
         $this->authorizeTo($request, 'inventory.view');
         $item = InventoryItem::query()->with(['category', 'levels.location'])->findOrFail($item);
 
-        return view('inventory::item', [
-            'item' => $item,
-            'movements' => $item->movements()->with(['location', 'user'])->limit(50)->get(),
-            'locations' => StockLocation::query()->orderBy('name')->get(),
-            'categories' => InventoryCategory::query()->orderBy('name')->get(),
-            'title' => $item->name,
+        return \Inertia\Inertia::render('Inventory/Item', [
+            'item' => [
+                'name' => $item->name,
+                'sku' => $item->sku,
+                'unit' => $item->unit,
+                'summary' => $item->qty($item->totalStock()).' on hand · avg ₱'.number_format((float) $item->cost_per_unit, 2).'/'.$item->unit.' · reorder at '.$item->qty($item->reorder_level),
+                'fields' => ['name' => $item->name, 'inventory_category_id' => $item->inventory_category_id ?? '', 'reorder_level' => (float) $item->reorder_level, 'is_active' => (bool) $item->is_active],
+                'levels' => $item->levels->map(fn ($l) => ['location' => $l->location?->name, 'qty' => $item->qty($l->quantity), 'negative' => (float) $l->quantity < 0]),
+            ],
+            'movements' => $item->movements()->with(['location', 'user'])->limit(50)->get()->map(fn ($m) => [
+                'id' => $m->id,
+                'at' => $m->created_at->format('M j, g:i A'),
+                'type' => $m->typeLabel(),
+                'notes' => $m->notes,
+                'location' => $m->location?->name,
+                'qty' => ((float) $m->quantity > 0 ? '+' : '').$item->qty($m->quantity),
+                'out' => (float) $m->quantity < 0,
+                'balance' => $item->qty($m->balance_after),
+                'by' => ($m->user?->name ?? 'system').($m->reference ? ' · '.$m->reference : ''),
+            ]),
+            'locations' => StockLocation::query()->orderBy('name')->get(['id', 'name'])->map(fn ($l) => [$l->id, $l->name]),
+            'categories' => InventoryCategory::query()->orderBy('name')->get(['id', 'name'])->map(fn ($c) => [$c->id, $c->name]),
+            'tabs' => self::tabs('stock'),
+            'can' => ['manage' => $request->user()->hasPermissionTo('inventory.manage')],
+            'urls' => ['index' => route('inventory.index'), 'move' => route('inventory.items.move', $item->id), 'update' => route('inventory.items.update', $item->id)],
         ]);
     }
 
@@ -150,6 +195,13 @@ class InventoryController extends Controller
         ]));
 
         return back()->with('success', 'Supplier added.');
+    }
+
+    /** Sub-navigation shared by the inventory screens (React). */
+    public static function tabs(string $active): array
+    {
+        return collect([['stock', 'Stock', 'inventory.index'], ['po', 'Purchase orders', 'inventory.purchase-orders.index'], ['recipes', 'Recipes', 'inventory.recipes']])
+            ->map(fn ($t) => ['label' => $t[1], 'href' => route($t[2]), 'active' => $t[0] === $active])->all();
     }
 
     private function authorizeTo(Request $request, string $permission): void

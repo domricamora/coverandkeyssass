@@ -19,12 +19,22 @@ class PurchaseOrderController extends Controller
     {
         $this->authorizeTo($request, 'inventory.view');
 
-        return view('inventory::purchase-orders.index', [
-            'orders' => PurchaseOrder::query()->with(['supplier', 'location'])->latest()->paginate(20),
-            'suppliers' => Supplier::query()->orderBy('name')->get(),
-            'locations' => StockLocation::query()->orderBy('name')->get(),
-            'items' => InventoryItem::query()->where('is_active', true)->orderBy('name')->get(),
-            'title' => 'Purchase orders',
+        return \Inertia\Inertia::render('Inventory/PurchaseOrders', [
+            'orders' => PurchaseOrder::query()->with(['supplier', 'location'])->latest()->paginate(20)->through(fn (PurchaseOrder $po) => [
+                'reference' => $po->reference,
+                'when' => $po->created_at->format('M j').($po->expected_on ? ' · due '.$po->expected_on->format('M j') : ''),
+                'supplier' => $po->supplier?->name,
+                'location' => $po->location?->name,
+                'status' => $po->status,
+                'total' => '₱'.number_format((float) $po->total, 2),
+                'href' => route('inventory.purchase-orders.show', $po->reference),
+            ]),
+            'suppliers' => Supplier::query()->orderBy('name')->get(['id', 'name'])->map(fn ($s) => [$s->id, $s->name]),
+            'locations' => StockLocation::query()->orderBy('name')->get(['id', 'name'])->map(fn ($l) => [$l->id, $l->name]),
+            'items' => InventoryItem::query()->where('is_active', true)->orderBy('name')->get(['id', 'name', 'unit'])->map(fn ($i) => [$i->id, $i->name.' ('.$i->unit.')']),
+            'tabs' => InventoryController::tabs('po'),
+            'can' => ['buy' => $request->user()->hasPermissionTo('purchasing.manage')],
+            'urls' => ['store' => route('inventory.purchase-orders.store')],
         ]);
     }
 
@@ -56,9 +66,38 @@ class PurchaseOrderController extends Controller
     {
         $this->authorizeTo($request, 'inventory.view');
 
-        return view('inventory::purchase-orders.show', [
-            'po' => $this->find($po)->load(['supplier', 'location', 'lines.item']),
-            'title' => 'Purchase order '.$po,
+        $po = $this->find($po)->load(['supplier', 'location', 'lines.item']);
+        $user = $request->user();
+        $buy = $user->hasPermissionTo('purchasing.manage');
+
+        return \Inertia\Inertia::render('Inventory/PurchaseOrder', [
+            'po' => [
+                'reference' => $po->reference,
+                'status' => $po->status,
+                'summary' => $po->supplier?->name.' → '.$po->location?->name.($po->expected_on ? ' · expected '.$po->expected_on->format('M j') : ''),
+                'total' => '₱'.number_format((float) $po->total, 2),
+                'lines' => $po->lines->map(fn ($l) => [
+                    'id' => $l->id,
+                    'item' => $l->item?->name,
+                    'ordered' => $l->item?->qty($l->quantity),
+                    'received' => $l->item?->qty($l->received_quantity),
+                    'cost' => '₱'.number_format((float) $l->unit_cost, 2),
+                    'line' => '₱'.number_format((float) $l->quantity * (float) $l->unit_cost, 2),
+                    'outstanding' => (float) $l->outstanding(),
+                ]),
+            ],
+            'can' => [
+                'order' => $buy && $po->status === 'draft',
+                'cancel' => $buy && in_array($po->status, ['draft', 'ordered'], true),
+                'receive' => $user->hasPermissionTo('inventory.manage') && in_array($po->status, ['ordered', 'partially_received'], true),
+            ],
+            'tabs' => InventoryController::tabs('po'),
+            'urls' => [
+                'index' => route('inventory.purchase-orders.index'),
+                'order' => route('inventory.purchase-orders.order', $po->reference),
+                'cancel' => route('inventory.purchase-orders.cancel', $po->reference),
+                'receive' => route('inventory.purchase-orders.receive', $po->reference),
+            ],
         ]);
     }
 
