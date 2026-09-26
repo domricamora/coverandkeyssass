@@ -63,11 +63,21 @@ class PaymentController extends Controller
 
     public function index(Request $request)
     {
-        return view('payments::customer.index', [
+        return \Inertia\Inertia::render('Account/Payments', [
+            'tabs' => \App\Modules\Customer\Controllers\AccountController::nav('account.payments.index'),
             'payments' => Payment::forCustomer($request->user())
                 ->with(['booking' => fn ($q) => $q->withoutGlobalScope('tenant'), 'order' => fn ($q) => $q->withoutGlobalScope('tenant')])
                 ->latest()
-                ->paginate(15),
+                ->paginate(15)
+                ->through(fn (Payment $p) => [
+                    'id' => $p->id,
+                    'date' => ($p->paid_at ?? $p->created_at)->format('M j, Y'),
+                    'for' => $p->booking ? 'Stay '.$p->booking->reference : ($p->order ? 'Order '.$p->order->reference : 'Payment'),
+                    'href' => $p->booking ? route('account.bookings.show', $p->booking->reference) : ($p->order ? route('account.orders.show', $p->order->reference) : null),
+                    'method' => \Illuminate\Support\Str::headline($p->method ?: $p->provider),
+                    'status' => $p->status,
+                    'amount' => $p->currency.' '.number_format((float) $p->amount, 2),
+                ]),
         ]);
     }
 

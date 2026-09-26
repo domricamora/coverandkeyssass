@@ -20,7 +20,6 @@ class PaymentsServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadMigrationsFrom(__DIR__.'/../Migrations');
-        $this->loadViewsFrom(__DIR__.'/../Views', 'payments');
 
         Route::middleware('web')->group(__DIR__.'/../routes.php');
 
