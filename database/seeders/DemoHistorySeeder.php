@@ -530,6 +530,10 @@ class DemoHistorySeeder
                     'assigned_to' => $attendants[$i % $attendants->count()]->id,
                     'started_at' => $start,
                     'completed_at' => $start->copy()->addMinutes(25 + $i % 20),
+                    // Past cleans were signed off by the executive housekeeper.
+                    'inspected_at' => $start->copy()->addMinutes(50 + $i % 20),
+                    'inspected_by' => $attendants[0]->id,
+                    'inspection_passed' => true,
                 ])->save();
             });
 

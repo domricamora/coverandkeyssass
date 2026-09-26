@@ -122,7 +122,8 @@ it('runs the board with module gating, permissions and isolation', function () {
     $task = hk()->createTask($this->room, 'checkout_clean', '2030-09-05', $this->owner, $this->housekeeper);
 
     PropertyManagementFixtures::login($this->housekeeper, $this->tenant);
-    $this->get(route('housekeeping.index', ['mine' => 1]))->assertOk()->assertSee('Room 101')->assertSee('Checkout Clean');
+    $this->get(route('housekeeping.index', ['mine' => 1]))->assertOk()->assertInertia(fn (\Inertia\Testing\AssertableInertia $page) => $page
+        ->component('Housekeeping/Index')->where('tasks.0.room', '101')->where('tasks.0.type', 'Checkout Clean')->where('tasks.0.mine', true)->where('can.manage', false));
     $this->post(route('housekeeping.tasks.start', $task->id))->assertSessionHasNoErrors();
     $this->post(route('housekeeping.tasks.complete', $task->id))->assertSessionHasNoErrors();
     $this->post(route('housekeeping.rooms.status', $this->room->id), ['housekeeping_status' => 'clean'])->assertForbidden();
@@ -141,7 +142,7 @@ it('runs the board with module gating, permissions and isolation', function () {
     $this->get(route('housekeeping.index'))->assertForbidden();
 
     app(ModuleService::class)->enableForTenant(Module::query()->where('slug', 'workforce')->firstOrFail(), $tenantB);
-    $this->get(route('housekeeping.index'))->assertOk()->assertDontSee('Room 101');
+    $this->get(route('housekeeping.index'))->assertOk()->assertInertia(fn (\Inertia\Testing\AssertableInertia $page) => $page->has('rooms', 0)->has('tasks', 0));
     $this->post(route('housekeeping.rooms.status', $this->room->id), ['housekeeping_status' => 'dirty'])->assertNotFound();
     $this->post(route('housekeeping.tasks.cancel', $task->id))->assertNotFound();
 });

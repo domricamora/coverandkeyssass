@@ -38,15 +38,64 @@ class HousekeepingController extends Controller
             ->orderByRaw("FIELD(priority, 'high', 'normal')")->orderBy('due_on')->orderBy('id')
             ->get();
 
-        return view('housekeeping::board', [
-            'properties' => $properties,
-            'property' => $property,
+        // React board (dashboard rebuild, phase 3): mobile-first rooms, task queue, maintenance, on duty.
+        $user = $request->user();
+        $rooms = $property ? Room::query()->where('property_id', $property->id)->where('status', '!=', Room::STATUS_INACTIVE)->with('roomType:id,name')->orderBy('room_number')->get() : collect();
+        $openByRoom = $tasks->groupBy('room_id');
+        $label = fn (string $v) => \Illuminate\Support\Str::headline($v);
+
+        return \Inertia\Inertia::render('Housekeeping/Index', [
+            'properties' => $properties->map(fn ($p) => ['slug' => $p->slug, 'name' => $p->name]),
+            'property' => $property?->slug,
             'mine' => $mine,
-            'rooms' => $property ? Room::query()->where('property_id', $property->id)->where('status', '!=', Room::STATUS_INACTIVE)->orderBy('room_number')->get() : collect(),
-            'tasks' => $tasks,
-            'members' => app(TenantContext::class)->tenant()->users()->wherePivot('status', 'active')->orderBy('name')->get(['users.id', 'users.name']),
-            'tickets' => $property ? MaintenanceTicket::query()->where('property_id', $property->id)->active()->with('room')->latest()->limit(10)->get() : collect(),
-            'title' => 'Housekeeping',
+            'today' => today()->toDateString(),
+            'can' => ['manage' => $user->hasPermissionTo('housekeeping.manage'), 'work' => $user->hasPermissionTo('housekeeping.work'), 'maintenance' => $user->hasPermissionTo('maintenance.work')],
+            'counts' => collect(Room::HK_STATUSES)->mapWithKeys(fn ($s) => [$s => $rooms->where('housekeeping_status', $s)->count()]),
+            'rooms' => $rooms->map(fn (Room $r) => [
+                'id' => $r->id,
+                'number' => $r->room_number,
+                'type' => $r->roomType?->name,
+                'hk' => $r->housekeeping_status,
+                'tasks' => $openByRoom->get($r->id, collect())->count(),
+                'urls' => ['status' => route('housekeeping.rooms.status', $r->id), 'issue' => route('housekeeping.rooms.issue', $r->id)],
+            ])->values(),
+            'tasks' => $tasks->map(fn (HousekeepingTask $t) => [
+                'id' => $t->id,
+                'room' => $t->room?->room_number,
+                'room_id' => $t->room_id,
+                'type' => $label($t->type),
+                'status' => $t->status,
+                'priority' => $t->priority,
+                'due' => $t->due_on?->toDateString(),
+                'notes' => $t->notes,
+                'assignee' => $t->assignee ? ['id' => $t->assignee->id, 'name' => $t->assignee->name] : null,
+                'mine' => (int) $t->assigned_to === (int) $user->id,
+                'urls' => collect(['start', 'complete', 'inspect', 'assign', 'cancel'])->mapWithKeys(fn ($a) => [$a => route('housekeeping.tasks.'.$a, $t->id)]),
+            ])->values(),
+            'members' => app(TenantContext::class)->tenant()->users()->wherePivot('status', 'active')->orderBy('name')->get(['users.id', 'users.name'])->map(fn ($m) => ['id' => $m->id, 'name' => $m->name]),
+            'tickets' => $property ? MaintenanceTicket::query()->where('property_id', $property->id)->active()->with('room:id,room_number')->orderByRaw("FIELD(priority, 'urgent', 'high', 'normal', 'low')")->latest()->limit(12)->get()->map(fn (MaintenanceTicket $m) => [
+                'reference' => $m->reference,
+                'title' => $m->title,
+                'room' => $m->room?->room_number,
+                'priority' => $m->priority,
+                'status' => $m->status,
+                'blocks' => (bool) $m->room_out_of_order,
+                'next' => MaintenanceTicket::TRANSITIONS[$m->status] ?? [],
+                'url' => route('maintenance.show', $m->reference),
+                'transition' => route('maintenance.transition', $m->reference),
+            ]) : [],
+            'onDuty' => $property ? \App\Modules\Workforce\Models\Shift::query()->with(['employee.position:id,name', 'employee.attendances' => fn ($q) => $q->whereDate('clock_in_at', today())])
+                ->where(fn ($q) => $q->where('property_id', $property->id)->orWhereNull('property_id'))
+                ->whereDate('starts_at', today())->orderBy('starts_at')->get()
+                ->map(fn ($s) => [
+                    'name' => $s->employee?->name,
+                    'position' => $s->employee?->position?->name,
+                    'from' => $s->starts_at->format('g:i A'),
+                    'to' => $s->ends_at->format('g:i A'),
+                    'in' => (bool) $s->employee?->attendances->first(),
+                ]) : [],
+            'urls' => ['self' => route('housekeeping.index'), 'task' => route('housekeeping.tasks.store'), 'maintenance' => route('maintenance.index')],
+            'types' => collect(HousekeepingTask::TYPES)->map(fn ($t) => ['value' => $t, 'label' => $label($t)]),
         ]);
     }
 
