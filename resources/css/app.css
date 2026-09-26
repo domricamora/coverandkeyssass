@@ -1703,7 +1703,7 @@ body.admin-body {
 .public-body .check input[type="checkbox"],
 .public-body input[type="checkbox"] { appearance: auto; accent-color: var(--primary); background: #fff; width: 16px; height: 16px; }
 .filter-bar__form { gap: 8px; }
-.filter-bar__field--sm { min-width: 120px; }
+.filter-bar__field--sm { min-width: 150px; }
 .filter-bar__field--sm select { padding-right: 28px; }
 .filter-bar__search { flex: none; }
 
@@ -1721,3 +1721,5 @@ body.admin-body {
 .dash-body .side-nav a.is-active .side-nav__icon { color: var(--primary) !important; }
 .dash-body .avatar, .admin-body .avatar, .public-body .avatar { background: var(--primary) !important; color: #fff !important; }
 .side-nav__badge { background: var(--coral) !important; color: #fff !important; }
+.listing-card__perk { margin-top: 4px; font-size: .82rem; font-weight: 600; color: var(--primary); }
+.listing-card__scarce { margin-top: 2px; font-size: .8rem; font-weight: 600; color: var(--coral-deep); }

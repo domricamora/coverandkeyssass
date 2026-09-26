@@ -20,6 +20,16 @@
                 </div>
                 <div class="filter-bar__divider" aria-hidden="true"></div>
                 <div class="filter-bar__field filter-bar__field--sm">
+                    <label class="filter-bar__label" for="bar-in">Check-in</label>
+                    <input class="filter-bar__input" id="bar-in" type="date" name="check_in" min="{{ today()->toDateString() }}" value="{{ $filters['check_in'] ?? '' }}">
+                </div>
+                <div class="filter-bar__divider" aria-hidden="true"></div>
+                <div class="filter-bar__field filter-bar__field--sm">
+                    <label class="filter-bar__label" for="bar-out">Check-out</label>
+                    <input class="filter-bar__input" id="bar-out" type="date" name="check_out" min="{{ today()->addDay()->toDateString() }}" value="{{ $filters['check_out'] ?? '' }}">
+                </div>
+                <div class="filter-bar__divider" aria-hidden="true"></div>
+                <div class="filter-bar__field filter-bar__field--sm">
                     <label class="filter-bar__label" for="bar-guests">Guests</label>
                     <input class="filter-bar__input" id="bar-guests" type="number" name="guests" min="1" max="50" value="{{ $filters['guests'] ?? '' }}" placeholder="Any">
                 </div>
@@ -47,6 +57,8 @@
                 'guests' => $filters['guests'] ?? null,
                 'price_min' => $filters['price_min'] ?? null,
                 'price_max' => $filters['price_max'] ?? null,
+                'free_cancellation' => ! empty($filters['free_cancellation']) ? 'Yes' : null,
+                'min_rating' => $filters['min_rating'] ?? null,
             ])->filter()->all();
             $activeAmenities = (array) ($filters['amenities'] ?? []);
         @endphp
@@ -94,7 +106,12 @@
                     <h1>{{ $destination ? 'Stays in '.$destination->name : 'Stays' }}</h1>
                     <p class="results__count">
                         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18M5 21V8l7-5 7 5v13"/></svg>
-                        {{ $properties->total() }} {{ Str::plural('stay', $properties->total()) }} match your filters
+                        {{ $properties->total() }} {{ Str::plural('stay', $properties->total()) }}
+                        @if (! empty($filters['check_in']) && ! empty($filters['check_out']))
+                            available {{ \Carbon\Carbon::parse($filters['check_in'])->format('M j') }} – {{ \Carbon\Carbon::parse($filters['check_out'])->format('M j') }} · prices are totals for your stay
+                        @else
+                            match your filters · add dates to see total prices
+                        @endif
                         @if (! empty($filters['q']))
                             &middot; searching &ldquo;{{ $filters['q'] }}&rdquo;
                         @endif

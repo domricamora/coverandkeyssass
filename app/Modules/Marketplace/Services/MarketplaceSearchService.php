@@ -36,7 +36,18 @@ class MarketplaceSearchService
         $this->applyPropertyFilters($query, $filters);
         $this->applyPropertySort($query, (string) ($filters['sort'] ?? 'recommended'));
 
-        return $query->paginate(self::PER_PAGE)->withQueryString();
+        $page = $query->paginate(self::PER_PAGE)->withQueryString();
+
+        // With dates, every card shows the real total for the stay and how many rooms are left.
+        if (! empty($filters['check_in']) && ! empty($filters['check_out'])) {
+            $quotes = app(StayQuoteService::class);
+            $page->getCollection()->each(fn (Property $p) => $p->setAttribute(
+                'stay',
+                $quotes->quote($p, $filters['check_in'], $filters['check_out'], (int) ($filters['guests'] ?? 1)),
+            ));
+        }
+
+        return $page;
     }
 
     /** Same filters, scoped to one destination (SEO landing pages). */
@@ -78,6 +89,18 @@ class MarketplaceSearchService
 
         if (isset($filters['price_max']) && $filters['price_max'] !== null && $filters['price_max'] !== '') {
             $query->where('base_price', '<=', (float) $filters['price_max']);
+        }
+
+        if (! empty($filters['check_in']) && ! empty($filters['check_out'])) {
+            $query->whereIn('id', app(StayQuoteService::class)->availablePropertyIds($filters['check_in'], $filters['check_out']));
+        }
+
+        if (! empty($filters['free_cancellation'])) {
+            $query->whereNotNull('policies->free_cancellation_days');
+        }
+
+        if (! empty($filters['min_rating'])) {
+            $query->where('avg_rating', '>=', (float) $filters['min_rating']);
         }
 
         // Amenity filters are conjunctive: a stay must have every amenity asked for.

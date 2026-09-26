@@ -32,6 +32,11 @@ class PropertySearchRequest extends FormRequest
             'cuisines.*' => ['string', 'max:60'],
             'price_level' => ['nullable', 'integer', 'min:1', 'max:4'],
             'sort' => ['nullable', 'string', 'in:'.implode(',', MarketplaceSearchService::SORTS)],
+            // Date search (total price for the stay, only stays with a room free every night).
+            'check_in' => ['nullable', 'date', 'after_or_equal:today', 'required_with:check_out'],
+            'check_out' => ['nullable', 'date', 'after:check_in', 'required_with:check_in', 'before:'.now()->addYear()->toDateString()],
+            'free_cancellation' => ['nullable', 'boolean'],
+            'min_rating' => ['nullable', 'numeric', 'in:3,3.5,4,4.5'],
         ];
     }
 }

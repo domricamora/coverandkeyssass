@@ -31,7 +31,7 @@
             <h1 class="mt-4 max-w-4xl font-display text-[clamp(2.6rem,6vw,5.2rem)] font-medium leading-[1.02] tracking-[-0.02em] text-white">Wake up somewhere you'll want to tell people about.</h1>
             <p class="mt-5 max-w-xl text-[17px] leading-relaxed text-white/90">Beachfront suites, garden villas and city lofts, plus the restaurants worth the trip. Booked direct with the people who run them.</p>
 
-            <form method="GET" action="{{ route('marketplace.hotels') }}" role="search" class="mt-9 grid max-w-4xl gap-px bg-line shadow-[0_30px_60px_-30px_rgba(0,0,0,.6)] sm:grid-cols-[1.6fr_1fr_1fr_auto]">
+            <form method="GET" action="{{ route('marketplace.hotels') }}" role="search" class="mt-9 grid max-w-5xl gap-px bg-line shadow-[0_30px_60px_-30px_rgba(0,0,0,.6)] sm:grid-cols-2 lg:grid-cols-[1.5fr_1fr_1fr_0.8fr_auto]">
                 <label class="bg-white px-5 py-3.5">
                     <span class="block text-[11px] font-semibold uppercase tracking-[0.1em] text-fg-3">Where to?</span>
                     <input name="q" list="home-destinations" placeholder="Boracay, El Nido, Siargao…" class="mt-0.5 w-full border-0 bg-transparent p-0 text-[15px] text-fg placeholder:text-fg-4 focus:ring-0">
@@ -40,17 +40,18 @@
                     </datalist>
                 </label>
                 <label class="bg-white px-5 py-3.5">
-                    <span class="block text-[11px] font-semibold uppercase tracking-[0.1em] text-fg-3">Stay type</span>
-                    <select name="type" class="mt-0.5 w-full border-0 bg-transparent p-0 text-[15px] text-fg focus:ring-0">
-                        <option value="">Any</option>
-                        @foreach ($types as $type)<option value="{{ $type->slug }}">{{ $type->name }}</option>@endforeach
-                    </select>
+                    <span class="block text-[11px] font-semibold uppercase tracking-[0.1em] text-fg-3">Check-in</span>
+                    <input type="date" name="check_in" min="{{ today()->toDateString() }}" class="mt-0.5 w-full border-0 bg-transparent p-0 text-[15px] text-fg focus:ring-0">
+                </label>
+                <label class="bg-white px-5 py-3.5">
+                    <span class="block text-[11px] font-semibold uppercase tracking-[0.1em] text-fg-3">Check-out</span>
+                    <input type="date" name="check_out" min="{{ today()->addDay()->toDateString() }}" class="mt-0.5 w-full border-0 bg-transparent p-0 text-[15px] text-fg focus:ring-0">
                 </label>
                 <label class="bg-white px-5 py-3.5">
                     <span class="block text-[11px] font-semibold uppercase tracking-[0.1em] text-fg-3">Guests</span>
                     <input type="number" name="guests" min="1" max="50" placeholder="2 guests" class="mt-0.5 w-full border-0 bg-transparent p-0 text-[15px] text-fg placeholder:text-fg-4 focus:ring-0">
                 </label>
-                <button type="submit" class="flex items-center justify-center gap-2 bg-coral px-8 py-4 text-[15px] font-semibold text-white transition-colors hover:bg-coral-deep active:scale-[0.99]">
+                <button type="submit" class="flex items-center justify-center gap-2 bg-coral px-8 py-4 sm:col-span-2 lg:col-span-1 text-[15px] font-semibold text-white transition-colors hover:bg-coral-deep active:scale-[0.99]">
                     <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/></svg>
                     Search
                 </button>

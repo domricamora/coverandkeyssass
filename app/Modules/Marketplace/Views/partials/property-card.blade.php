@@ -1,7 +1,10 @@
 @php
     $favoriteIds = $favoriteIds ?? [];
     $isFavorited = in_array($property->id, $favoriteIds, true);
-    $url = route('marketplace.properties.show', $property->slug);
+    $stay = $property->getAttribute('stay');
+    $dates = array_filter(request()->only('check_in', 'check_out', 'guests'));
+    $url = route('marketplace.properties.show', ['property' => $property->slug] + $dates);
+    $freeCancelDays = $property->policies['free_cancellation_days'] ?? null;
 @endphp
 
 <article class="listing-card">
@@ -55,6 +58,18 @@
             {{ $property->bedrooms }} {{ Str::plural('bedroom', $property->bedrooms) }} &middot;
             {{ $property->max_guests }} {{ Str::plural('guest', $property->max_guests) }}
         </p>
-        <p class="listing-card__price">{{ $property->priceLabel() }} <span>/ night</span></p>
+        @if ($freeCancelDays !== null)
+            <p class="listing-card__perk">Free cancellation</p>
+        @endif
+        @if ($stay)
+            <p class="listing-card__price">{{ $stay['currency'] }} {{ number_format($stay['total'], 0) }} <span>total · {{ $stay['nights'] }} {{ Str::plural('night', $stay['nights']) }}</span></p>
+            @if ($stay['rooms_left'] <= 2)
+                <p class="listing-card__scarce">Only {{ $stay['rooms_left'] }} {{ Str::plural('room', $stay['rooms_left']) }} left for your dates</p>
+            @endif
+        @elseif ($dates['check_in'] ?? false)
+            <p class="listing-card__price"><span>Minimum stay not met for these dates</span></p>
+        @else
+            <p class="listing-card__price">{{ $property->priceLabel() }} <span>/ night</span></p>
+        @endif
     </div>
 </article>

@@ -37,7 +37,15 @@ class PropertyController extends Controller
             ? in_array($listing->id, $this->favorites->favoritedIds($request->user(), $listing->getMorphClass(), [$listing->id]), true)
             : false;
 
+        // Dates carried over from search (or the "check availability" form): quote the whole stay.
+        $checkIn = (string) $request->query('check_in');
+        $checkOut = (string) $request->query('check_out');
+        $datesValid = strtotime($checkIn) && strtotime($checkOut) && $checkIn >= today()->toDateString() && $checkOut > $checkIn;
+        $quote = $datesValid ? app(\App\Modules\Marketplace\Services\StayQuoteService::class)->quote($listing, $checkIn, $checkOut, max(1, (int) $request->query('guests', 1))) : null;
+
         return view('marketplace::properties.show', [
+            'stayDates' => $datesValid ? ['check_in' => $checkIn, 'check_out' => $checkOut, 'guests' => max(1, (int) $request->query('guests', 2))] : null,
+            'quote' => $quote,
             'property' => $listing,
             'similar' => $this->search->similarProperties($listing),
             'isFavorited' => $isFavorited,

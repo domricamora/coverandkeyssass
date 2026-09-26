@@ -472,7 +472,9 @@ class MarketplaceDemoSeeder extends Seeder
                     'children_welcome' => true,
                     'pets' => in_array('Pet friendly', $definition['amenities'], true),
                     'smoking' => false,
-                    'cancellation' => 'Free cancellation up to 7 days before check-in.',
+                    // Varied per listing so the "Free cancellation" badge and filter have something to show.
+                    'cancellation' => [7 => 'Free cancellation up to 7 days before check-in.', 2 => 'Free cancellation up to 2 days before check-in.', 0 => 'Non-refundable rate: the first night is charged on cancellation.'][[7, 2, 0][crc32($definition['name']) % 3]],
+                    ...([7, 2, 0][crc32($definition['name']) % 3] ? ['free_cancellation_days' => [7, 2, 0][crc32($definition['name']) % 3]] : []),
                 ],
                 'status' => $definition['status'] ?? Property::STATUS_PUBLISHED,
                 'published_at' => $published ? now() : null,

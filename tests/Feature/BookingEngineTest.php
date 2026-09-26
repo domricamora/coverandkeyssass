@@ -256,7 +256,7 @@ it('lets a signed-in guest request a stay from the marketplace', function () {
     $this->actingAs($guest)
         ->get(route('marketplace.properties.show', $property->slug))
         ->assertOk()
-        ->assertSee('Request to book');
+        ->assertSee("You won't be charged yet", false);
 
     $this->post(route('marketplace.properties.reserve', $property->slug), [
         'check_in' => '2030-09-05', 'check_out' => '2030-09-08',

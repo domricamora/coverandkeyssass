@@ -152,46 +152,90 @@
 
             <div>
                 <div class="card booking-widget">
-                    <p class="booking-widget__price">
-                        {{ $p->priceLabel() }} <span>/ night</span>
-                    </p>
+                    @php
+                        $freeCancelDays = $p->policies['free_cancellation_days'] ?? null;
+                        $cancelBy = ($freeCancelDays !== null && $stayDates) ? \Carbon\Carbon::parse($stayDates['check_in'])->subDays((int) $freeCancelDays) : null;
+                    @endphp
 
-                    <div class="price-breakdown">
-                        <p><span>Nightly rate</span> <strong>{{ $p->priceLabel() }}</strong></p>
-                        @if ((float) $p->cleaning_fee > 0)
-                            <p><span>Cleaning fee</span> <strong>{{ $p->currency }} {{ number_format((float) $p->cleaning_fee, 0) }}</strong></p>
+                    @if ($quote)
+                        <p class="booking-widget__price">
+                            {{ $quote['currency'] }} {{ number_format($quote['total'], 0) }} <span>total</span>
+                        </p>
+                        <div class="price-breakdown">
+                            <p><span>{{ \Carbon\Carbon::parse($stayDates['check_in'])->format('D, M j') }} – {{ \Carbon\Carbon::parse($stayDates['check_out'])->format('D, M j') }}</span> <strong>{{ $quote['nights'] }} {{ Str::plural('night', $quote['nights']) }}</strong></p>
+                            <p><span>{{ $quote['room_type'] }}</span> <strong>{{ $quote['currency'] }} {{ number_format($quote['per_night'], 0) }} avg / night</strong></p>
+                            <p class="price-breakdown__total"><span>Total for your stay</span> <span>{{ $quote['currency'] }} {{ number_format($quote['total'], 0) }}</span></p>
+                        </div>
+                        @if ($quote['rooms_left'] <= 2)
+                            <p class="listing-card__scarce" style="margin-top:10px;">Only {{ $quote['rooms_left'] }} {{ Str::plural('room', $quote['rooms_left']) }} left for these dates</p>
                         @endif
-                        @if ($p->weekend_price)
-                            <p><span>Weekend rate</span> <strong>{{ $p->currency }} {{ number_format((float) $p->weekend_price, 0) }}</strong></p>
-                        @endif
-                        <p class="price-breakdown__total"><span>Stay total</span> <span>Calculated on your dates</span></p>
-                    </div>
+                    @elseif ($stayDates)
+                        <p class="booking-widget__price">Not available <span>for these dates</span></p>
+                        <p class="muted" style="margin:6px 0 0;">No room is free every night of your stay, or a minimum stay applies. Try other dates.</p>
+                    @else
+                        <p class="booking-widget__price">
+                            {{ $p->priceLabel() }} <span>/ night</span>
+                        </p>
+                        <div class="price-breakdown">
+                            <p><span>Nightly rate</span> <strong>{{ $p->priceLabel() }}</strong></p>
+                            @if ($p->weekend_price)
+                                <p><span>Weekend rate</span> <strong>{{ $p->currency }} {{ number_format((float) $p->weekend_price, 0) }}</strong></p>
+                            @endif
+                            <p class="price-breakdown__total"><span>Stay total</span> <span>Add dates to see it</span></p>
+                        </div>
+                    @endif
+
+                    @if ($freeCancelDays !== null)
+                        <p class="listing-card__perk" style="margin-top:10px;">
+                            @if ($cancelBy && $cancelBy->isFuture())
+                                Free cancellation until {{ $cancelBy->format('M j, Y') }}
+                            @elseif (! $cancelBy)
+                                Free cancellation up to {{ $freeCancelDays }} {{ Str::plural('day', (int) $freeCancelDays) }} before check-in
+                            @endif
+                        </p>
+                    @endif
+
+                    {{-- Check availability: reloads the page with a live quote for the dates. --}}
+                    <form method="GET" action="{{ route('marketplace.properties.show', $p->slug) }}" style="margin-top:14px;display:grid;gap:8px;">
+                        <div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:8px;">
+                            <label>Check-in <input class="form-input" type="date" name="check_in" value="{{ $stayDates['check_in'] ?? '' }}" min="{{ today()->toDateString() }}" required></label>
+                            <label>Check-out <input class="form-input" type="date" name="check_out" value="{{ $stayDates['check_out'] ?? '' }}" min="{{ today()->addDay()->toDateString() }}" required></label>
+                            <label>Guests <input class="form-input" type="number" name="guests" min="1" max="50" value="{{ $stayDates['guests'] ?? 2 }}"></label>
+                        </div>
+                        <button class="btn btn-outline btn-block" type="submit">{{ $stayDates ? 'Update dates' : 'Check availability' }}</button>
+                    </form>
 
                     @if (! empty($reservableRoomTypes) && $reservableRoomTypes->isNotEmpty())
                         @auth
                             <form method="POST" action="{{ route('marketplace.properties.reserve', $p->slug) }}" style="margin-top:14px;display:grid;gap:8px;">
                                 @csrf
-                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                                    <label>Check-in <input class="form-input" type="date" name="check_in" value="{{ old('check_in') }}" min="{{ today()->toDateString() }}" required></label>
-                                    <label>Check-out <input class="form-input" type="date" name="check_out" value="{{ old('check_out') }}" min="{{ today()->addDay()->toDateString() }}" required></label>
-                                </div>
+                                @if ($quote)
+                                    <input type="hidden" name="check_in" value="{{ $stayDates['check_in'] }}">
+                                    <input type="hidden" name="check_out" value="{{ $stayDates['check_out'] }}">
+                                @else
+                                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                                        <label>Check-in <input class="form-input" type="date" name="check_in" value="{{ old('check_in', $stayDates['check_in'] ?? '') }}" min="{{ today()->toDateString() }}" required></label>
+                                        <label>Check-out <input class="form-input" type="date" name="check_out" value="{{ old('check_out', $stayDates['check_out'] ?? '') }}" min="{{ today()->addDay()->toDateString() }}" required></label>
+                                    </div>
+                                @endif
                                 <label>Room
                                     <select class="form-input" name="room_type_id">
                                         @foreach ($reservableRoomTypes as $type)
-                                            <option value="{{ $type->id }}" @selected((int) old('room_type_id') === $type->id)>{{ $type->name }} · {{ $type->priceLabel() }} · sleeps {{ $type->max_guests }}</option>
+                                            <option value="{{ $type->id }}" @selected((int) old('room_type_id', $quote['room_type_id'] ?? 0) === $type->id)>{{ $type->name }} · {{ $type->priceLabel() }} · sleeps {{ $type->max_guests }}</option>
                                         @endforeach
                                     </select>
                                 </label>
                                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
                                     <label>Rooms <input class="form-input" type="number" name="quantity" min="1" max="10" value="{{ old('quantity', 1) }}"></label>
-                                    <label>Adults <input class="form-input" type="number" name="adults" min="1" value="{{ old('adults', 2) }}"></label>
+                                    <label>Adults <input class="form-input" type="number" name="adults" min="1" value="{{ old('adults', $stayDates['guests'] ?? 2) }}"></label>
                                     <label>Children <input class="form-input" type="number" name="children" min="0" value="{{ old('children', 0) }}"></label>
                                 </div>
                                 <label>Promo code <input class="form-input" name="promo_code" value="{{ old('promo_code') }}"></label>
                                 @foreach (['check_in', 'check_out', 'rooms', 'adults', 'promo_code', 'room_type_id'] as $field)
                                     @error($field) <p class="muted" style="color:var(--danger, #b42318);margin:0;">{{ $message }}</p> @enderror
                                 @endforeach
-                                <button class="btn btn-primary btn-block" type="submit">Request to book</button>
+                                <button class="btn btn-primary btn-block" type="submit">Reserve</button>
+                                <p class="muted" style="margin:0;text-align:center;font-size:.85rem;">You won't be charged yet. The host confirms your request first.</p>
                             </form>
                         @else
                             <a class="btn btn-primary btn-block" style="margin-top:14px;" href="{{ route('login') }}">Sign in to book</a>

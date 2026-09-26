@@ -124,6 +124,12 @@
             @method('PATCH')
             <div class="grid grid-cols-2 gap-4">
                 <div>
+                    <label for="policy_free_cancellation_days" class="form-label">Free cancellation (days before check-in)</label>
+                    <input id="policy_free_cancellation_days" name="policy_free_cancellation_days" type="number" min="0" max="60" class="form-input" value="{{ old('policy_free_cancellation_days', $property->policies['free_cancellation_days'] ?? '') }}" placeholder="Empty = non-refundable">
+                    <p class="mt-1 text-xs" style="color:var(--text-3)">Shows a “Free cancellation” badge and lets guests filter for it. 0 = free until the day of arrival.</p>
+                    <x-input-error :messages="$errors->get('policy_free_cancellation_days')" />
+                </div>
+                <div>
                     <label for="policy_cancellation" class="form-label">Cancellation</label>
                     <textarea id="policy_cancellation" name="policy_cancellation" rows="2" class="form-input">{{ old('policy_cancellation', $property->policies['cancellation'] ?? '') }}</textarea>
                 </div>

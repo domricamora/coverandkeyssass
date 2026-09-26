@@ -18,9 +18,11 @@
     Filters @if ($hasFilters)<span class="filter-bar__count">on</span>@endif
 </button>
 <form class="card filter-rail" id="filter-rail" :class="{ 'is-open': open }" method="GET" action="{{ $action }}">
-    @if (! empty($filters['q']))
-        <input type="hidden" name="q" value="{{ $filters['q'] }}">
-    @endif
+    @foreach (['q', 'check_in', 'check_out'] as $keep)
+        @if (! empty($filters[$keep]))
+            <input type="hidden" name="{{ $keep }}" value="{{ $filters[$keep] }}">
+        @endif
+    @endforeach
 
     <div class="filter-rail__group">
         <p class="filter-rail__title">Destination</p>
@@ -48,6 +50,24 @@
         <div class="filter-rail__group">
             <p class="filter-rail__title">Guests</p>
             <input class="form-input" type="number" name="guests" min="1" max="50" value="{{ $filters['guests'] ?? '' }}" placeholder="Any">
+        </div>
+
+        <div class="filter-rail__group">
+            <p class="filter-rail__title">Booking</p>
+            <label class="check">
+                <input type="checkbox" name="free_cancellation" value="1" @checked(! empty($filters['free_cancellation']))>
+                Free cancellation
+            </label>
+        </div>
+
+        <div class="filter-rail__group">
+            <p class="filter-rail__title">Guest review score</p>
+            <select class="form-input" name="min_rating">
+                <option value="">Any score</option>
+                @foreach (['4.5' => 'Exceptional: 4.5+', '4' => 'Very good: 4+', '3.5' => 'Good: 3.5+', '3' => 'Pleasant: 3+'] as $value => $label)
+                    <option value="{{ $value }}" @selected((string) ($filters['min_rating'] ?? '') === $value)>{{ $label }}</option>
+                @endforeach
+            </select>
         </div>
 
         <div class="filter-rail__group">

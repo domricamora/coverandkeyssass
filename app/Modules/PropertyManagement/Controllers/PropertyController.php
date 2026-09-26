@@ -263,6 +263,17 @@ class PropertyController extends PropertyManagementController
      */
     private function policiesFrom(Request $request, array $current): array
     {
+        // Structured free-cancellation window (drives the marketplace badge and filter); empty = non-refundable.
+        if ($request->has('policy_free_cancellation_days')) {
+            $days = $request->validate(['policy_free_cancellation_days' => ['nullable', 'integer', 'min:0', 'max:60']])['policy_free_cancellation_days'] ?? null;
+
+            if ($days === null || $days === '') {
+                unset($current['free_cancellation_days']);
+            } else {
+                $current['free_cancellation_days'] = (int) $days;
+            }
+        }
+
         foreach (['cancellation', 'children', 'pets', 'noise', 'smoking'] as $field) {
             $value = trim((string) $request->input("policy_{$field}", ''));
 
