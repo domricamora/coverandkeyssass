@@ -18,11 +18,33 @@ class DeliveryController extends RestaurantManagementController
         $this->authorizeTo($request, 'delivery.manage');
         $restaurant = $this->resolveRestaurant($restaurant);
 
-        return view('delivery::index', [
-            'restaurant' => $restaurant,
-            'zones' => $restaurant->deliveryZones()->orderBy('sort_order')->orderBy('name')->get(),
-            'drivers' => Driver::query()->orderByDesc('is_active')->orderBy('name')->get(),
-            'title' => 'Delivery — '.$restaurant->name,
+        $r = $restaurant;
+        $zones = $r->deliveryZones()->orderBy('sort_order')->orderBy('name')->get();
+
+        return \Inertia\Inertia::render('Restaurants/Delivery', [
+            'restaurant' => ['name' => $r->name, 'enabled' => (bool) $r->delivery_enabled, 'prep_minutes' => $r->prep_minutes, 'latitude' => $r->latitude, 'longitude' => $r->longitude],
+            'tabs' => $this->tabs($r, 'delivery'),
+            'zones' => $zones->map(fn ($z) => [
+                'id' => $z->id,
+                'name' => $z->name,
+                'terms' => $z->termsLabel(),
+                'active' => (bool) $z->is_active,
+                'toggle' => route('restaurants.delivery.zones.toggle', [$r, $z->id]),
+                'destroy' => route('restaurants.delivery.zones.destroy', [$r, $z->id]),
+            ]),
+            'drivers' => Driver::query()->orderByDesc('is_active')->orderBy('name')->get()->map(fn ($d) => [
+                'id' => $d->id,
+                'name' => $d->name,
+                'detail' => collect([$d->vehicle, $d->phone])->filter()->implode(' · '),
+                'active' => (bool) $d->is_active,
+                'toggle' => route('restaurants.delivery.drivers.toggle', [$r, $d->id]),
+            ]),
+            'urls' => [
+                'settings' => route('restaurants.delivery.settings', $r),
+                'addZone' => route('restaurants.delivery.zones.store', $r),
+                'addDriver' => route('restaurants.delivery.drivers.store', $r),
+                'profile' => route('restaurants.edit', $r),
+            ],
         ]);
     }
 

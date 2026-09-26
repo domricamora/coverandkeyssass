@@ -27,6 +27,24 @@ abstract class RestaurantManagementController extends Controller
         return $restaurant;
     }
 
+    /** Sub-navigation shared by the restaurant screens (React). */
+    protected function tabs(Restaurant $restaurant, string $active): array
+    {
+        $user = request()->user();
+        $slug = $restaurant->slug;
+
+        return collect([
+            ['show', 'Overview', route('restaurants.show', $slug), 'restaurants.view'],
+            ['edit', 'Profile & photos', route('restaurants.edit', $slug), 'restaurants.update'],
+            ['menu', 'Menu', route('restaurants.menu', $slug), 'menu.view'],
+            ['tables', 'Tables', route('restaurants.tables', $slug), 'tables.view'],
+            ['reservations', 'Reservations', route('restaurants.reservations', $slug), 'reservations.view'],
+            ['orders', 'Orders', route('restaurants.orders.index', $slug), 'orders.view'],
+            ['delivery', 'Delivery', route('restaurants.delivery.index', $slug), 'delivery.manage'],
+        ])->filter(fn ($t) => $user->hasPermissionTo($t[3]))
+            ->map(fn ($t) => ['label' => $t[1], 'href' => $t[2], 'active' => $t[0] === $active])->values()->all();
+    }
+
     /** 403 unless the actor holds the permission inside the active tenant. */
     protected function authorizeTo(Request $request, string $permission): void
     {

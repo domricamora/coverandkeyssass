@@ -30,13 +30,34 @@ class ReservationController extends RestaurantManagementController
             ->orderBy('reserved_at')
             ->get();
 
-        return view('restaurant-management::restaurants.reservations', [
-            'restaurant' => $restaurant,
-            'date' => $date,
-            'reservations' => $reservations,
-            'tables' => $restaurant->tables()->active()->get(),
-            'slots' => $this->reservations->slotsFor($restaurant, $date),
-            'title' => 'Reservations — '.$restaurant->name,
+        $r = $restaurant;
+        $manage = $request->user()->hasPermissionTo('reservations.manage');
+
+        return \Inertia\Inertia::render('Restaurants/Reservations', [
+            'restaurant' => ['name' => $r->name],
+            'tabs' => $this->tabs($r, 'reservations'),
+            'date' => $date->toDateString(),
+            'dateLabel' => $date->format('l, M j, Y'),
+            'covers' => (int) $reservations->whereIn('status', TableReservation::BLOCKING)->sum('party_size'),
+            'reservations' => $reservations->map(fn (TableReservation $x) => [
+                'reference' => $x->reference,
+                'time' => $x->reserved_at->format('g:i A'),
+                'span' => $x->reserved_at->format('g:i').'–'.$x->ends_at->format('g:i A'),
+                'name' => $x->guest_name,
+                'party' => $x->party_size,
+                'table_id' => $x->restaurant_table_id,
+                'table' => $x->table?->label,
+                'status' => $x->status,
+                'source' => $x->source,
+                'phone' => $x->guest_phone,
+                'note' => $x->special_requests,
+                'next' => $manage ? (TableReservation::TRANSITIONS[$x->status] ?? []) : [],
+                'transition' => route('restaurants.reservations.transition', [$r, $x->reference]),
+            ]),
+            'tables' => $r->tables()->active()->get()->map(fn ($t) => ['id' => $t->id, 'label' => $t->label, 'seats' => $t->seats]),
+            'slots' => $this->reservations->slotsFor($r, $date),
+            'can' => ['manage' => $manage],
+            'urls' => ['self' => route('restaurants.reservations', $r), 'store' => route('restaurants.reservations.store', $r)],
         ]);
     }
 

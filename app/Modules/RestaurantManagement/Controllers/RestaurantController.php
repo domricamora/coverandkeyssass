@@ -7,7 +7,9 @@ use App\Modules\Marketplace\Models\Location;
 use App\Modules\Marketplace\Models\Restaurant;
 use App\Support\AuditLogger;
 use Illuminate\Http\Request;
+use App\Support\MediaUploads;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 /**
  * Host-side restaurant profile (Phase 09): CRUD, opening hours, cuisines,
@@ -24,13 +26,18 @@ class RestaurantController extends RestaurantManagementController
     {
         $this->authorizeTo($request, 'restaurants.view');
 
-        return view('restaurant-management::restaurants.index', [
-            'restaurants' => Restaurant::query()
-                ->with('location')
-                ->withCount(['menuItems', 'tables'])
-                ->latest()
-                ->paginate(15),
-            'title' => 'Restaurants',
+        return Inertia::render('Restaurants/Index', [
+            'restaurants' => Restaurant::query()->with('location')->withCount(['menuItems', 'tables'])->latest()->paginate(15)
+                ->through(fn (Restaurant $r) => [
+                    'name' => $r->name,
+                    'where' => $r->locationLabel() ?: null,
+                    'status' => $r->status,
+                    'items' => $r->menu_items_count,
+                    'tables' => $r->tables_count,
+                    'urls' => ['show' => route('restaurants.show', $r), 'menu' => route('restaurants.menu', $r), 'orders' => route('restaurants.orders.index', $r), 'reservations' => route('restaurants.reservations', $r)],
+                ]),
+            'can' => ['create' => $request->user()->hasPermissionTo('restaurants.create')],
+            'urls' => ['create' => route('restaurants.create')],
         ]);
     }
 
@@ -38,7 +45,9 @@ class RestaurantController extends RestaurantManagementController
     {
         $this->authorizeTo($request, 'restaurants.create');
 
-        return view('restaurant-management::restaurants.form', $this->formData(new Restaurant) + ['title' => 'New restaurant']);
+        return Inertia::render('Restaurants/Form', $this->formData(null) + [
+            'urls' => ['submit' => route('restaurants.store'), 'back' => route('restaurants.index')],
+        ]);
     }
 
     public function store(Request $request)
@@ -68,9 +77,34 @@ class RestaurantController extends RestaurantManagementController
         $restaurant->load(['location', 'cuisines', 'media']);
         $restaurant->loadCount(['menuCategories', 'menuItems', 'diningAreas', 'tables']);
 
-        return view('restaurant-management::restaurants.show', [
-            'restaurant' => $restaurant,
-            'title' => $restaurant->name,
+        $r = $restaurant;
+        $onOff = fn ($v) => $v ? 'On' : 'Off';
+        $user = $request->user();
+
+        return Inertia::render('Restaurants/Show', [
+            'restaurant' => [
+                'name' => $r->name,
+                'summary' => ($r->cuisines->pluck('name')->implode(', ') ?: 'Restaurant').' · '.($r->locationLabel() ?: 'No destination set').' · '.$r->priceLevelLabel(),
+                'status' => $r->status,
+                'published' => $r->isPublished(),
+                'tagline' => $r->tagline,
+                'description' => $r->description,
+                'facts' => [
+                    ['Address', $r->address_line ?: '—'],
+                    ['Contact', ($r->phone ?: '—').' · '.($r->email ?: '—')],
+                    ['Reservations', $onOff($r->reservations_enabled)],
+                    ['Online ordering', $onOff($r->ordering_enabled)],
+                    ['Delivery', $onOff($r->delivery_enabled)],
+                    ['Tax', (float) $r->tax_rate.'% '.($r->tax_inclusive ? 'included in prices' : 'added at checkout')],
+                ],
+                'hours' => collect($r->opening_hours ?? [])->map(fn ($v, $k) => [ucfirst($k), $v])->values(),
+                'counts' => ['categories' => $r->menu_categories_count, 'items' => $r->menu_items_count, 'tables' => $r->tables_count, 'areas' => $r->dining_areas_count],
+                'cover' => $r->coverMedia()?->url(),
+                'public' => route('marketplace.restaurants.show', $r->slug),
+            ],
+            'tabs' => $this->tabs($r, 'show'),
+            'can' => ['publish' => $user->hasPermissionTo('restaurants.publish'), 'delete' => $user->hasPermissionTo('restaurants.delete')],
+            'urls' => ['publish' => route('restaurants.publish', $r), 'unpublish' => route('restaurants.unpublish', $r), 'destroy' => route('restaurants.destroy', $r), 'floor' => route('floor.index', ['restaurant' => $r->slug])],
         ]);
     }
 
@@ -79,9 +113,13 @@ class RestaurantController extends RestaurantManagementController
         $this->authorizeTo($request, 'restaurants.update');
         $restaurant = $this->resolveRestaurant($restaurant);
 
-        return view('restaurant-management::restaurants.form', $this->formData($restaurant) + [
-            'photos' => $restaurant->media()->where('kind', 'image')->get(),
-            'title' => 'Edit — '.$restaurant->name,
+        return Inertia::render('Restaurants/Form', $this->formData($restaurant) + [
+            'media' => MediaUploads::payload($restaurant, fn ($m) => [
+                'make_cover' => route('restaurants.media.cover', [$restaurant, $m]),
+                'destroy' => route('restaurants.media.destroy', [$restaurant, $m]),
+            ]) + ['store' => route('restaurants.media.store', $restaurant), 'areas' => MediaUploads::AREAS['restaurant']],
+            'tabs' => $this->tabs($restaurant, 'edit'),
+            'urls' => ['submit' => route('restaurants.update', $restaurant), 'back' => route('restaurants.show', $restaurant)],
         ]);
     }
 
@@ -183,12 +221,16 @@ class RestaurantController extends RestaurantManagementController
         return back()->with('success', $publish ? 'Restaurant is live on the marketplace.' : 'Restaurant unpublished.');
     }
 
-    private function formData(Restaurant $restaurant): array
+    private function formData(?Restaurant $restaurant): array
     {
         return [
-            'restaurant' => $restaurant,
-            'locations' => Location::query()->orderBy('name')->get(),
-            'cuisines' => Cuisine::query()->orderBy('name')->get(),
+            'restaurant' => $restaurant ? $restaurant->only(['name', 'tagline', 'description', 'location_id', 'address_line', 'city', 'region', 'phone', 'email', 'price_level', 'reservations_enabled', 'reservation_duration_minutes', 'delivery_enabled', 'ordering_enabled', 'room_service_enabled', 'tax_inclusive', 'tax_rate']) + [
+                'cuisines' => $restaurant->cuisines()->pluck('cuisines.id'),
+                'hours' => collect(self::DAYS)->mapWithKeys(fn ($d) => [$d => $restaurant->opening_hours[$d] ?? ''])->all(),
+            ] : null,
+            'title' => $restaurant?->name,
+            'locations' => Location::query()->orderBy('name')->get(['id', 'name'])->map(fn ($l) => [$l->id, $l->name]),
+            'cuisines' => Cuisine::query()->orderBy('name')->get(['id', 'name'])->map(fn ($c) => [$c->id, $c->name]),
             'days' => self::DAYS,
         ];
     }

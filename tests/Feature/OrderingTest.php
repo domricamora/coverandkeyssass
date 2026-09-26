@@ -255,7 +255,8 @@ it('runs the host order queue with permissions and tenant isolation', function (
     PropertyManagementFixtures::login($owner, $tenant);
 
     $this->get(route('restaurants.orders.index', $restaurant))->assertOk()->assertSee($order->reference);
-    $this->get(route('restaurants.orders.show', [$restaurant, $order->reference]))->assertOk()->assertSee('3 × ');
+    $this->get(route('restaurants.orders.show', [$restaurant, $order->reference]))->assertOk()
+        ->assertInertia(fn (\Inertia\Testing\AssertableInertia $page) => $page->component('Restaurants/Order')->where('order.lines.0.qty', 3));
     $this->post(route('restaurants.orders.transition', [$restaurant, $order->reference]), ['status' => 'accepted'])->assertSessionHasNoErrors();
     $this->post(route('restaurants.orders.transition', [$restaurant, $order->reference]), ['status' => 'completed'])->assertSessionHasErrors('status');
     expect($order->refresh()->status)->toBe(Order::ACCEPTED);

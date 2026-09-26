@@ -3,6 +3,7 @@
 namespace App\Modules\RestaurantManagement\Controllers;
 
 use App\Modules\Marketplace\Models\Restaurant;
+use App\Modules\RestaurantManagement\Models\MenuItem;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -17,10 +18,43 @@ class MenuController extends RestaurantManagementController
         $this->authorizeTo($request, 'menu.view');
         $restaurant = $this->resolveRestaurant($restaurant);
 
-        return view('restaurant-management::restaurants.menu', [
-            'restaurant' => $restaurant,
-            'categories' => $restaurant->menuCategories()->with('items.modifierGroups.options')->get(),
-            'title' => 'Menu — '.$restaurant->name,
+        $r = $restaurant;
+
+        return \Inertia\Inertia::render('Restaurants/Menu', [
+            'restaurant' => ['name' => $r->name],
+            'tabs' => $this->tabs($r, 'menu'),
+            'categories' => $r->menuCategories()->with('items.modifierGroups.options')->get()->map(fn ($c) => [
+                'id' => $c->id,
+                'name' => $c->name,
+                'description' => $c->description,
+                'active' => (bool) $c->is_active,
+                'update' => route('restaurants.categories.update', [$r, $c->id]),
+                'destroy' => route('restaurants.categories.destroy', [$r, $c->id]),
+                'items' => $c->items->map(fn ($i) => [
+                    'id' => $i->id,
+                    'fields' => $i->only(['menu_category_id', 'name', 'description', 'price', 'photo_url', 'sort_order']),
+                    'price' => $i->priceLabel(),
+                    'available' => (bool) $i->is_available,
+                    'update' => route('restaurants.items.update', [$r, $i->id]),
+                    'destroy' => route('restaurants.items.destroy', [$r, $i->id]),
+                    'addGroup' => route('restaurants.groups.store', [$r, $i->id]),
+                    'groups' => $i->modifierGroups->map(fn ($g) => [
+                        'id' => $g->id,
+                        'name' => $g->name,
+                        'rule' => $g->ruleLabel(),
+                        'destroy' => route('restaurants.groups.destroy', [$r, $i->id, $g->id]),
+                        'addOption' => route('restaurants.options.store', [$r, $i->id, $g->id]),
+                        'options' => $g->options->map(fn ($o) => [
+                            'id' => $o->id,
+                            'name' => $o->name,
+                            'price' => MenuItem::money((float) $o->price, $i->currency),
+                            'destroy' => route('restaurants.options.destroy', [$r, $i->id, $g->id, $o->id]),
+                        ]),
+                    ]),
+                ]),
+            ]),
+            'can' => ['manage' => $request->user()->hasPermissionTo('menu.manage')],
+            'urls' => ['addCategory' => route('restaurants.categories.store', $r), 'addItem' => route('restaurants.items.store', $r)],
         ]);
     }
 

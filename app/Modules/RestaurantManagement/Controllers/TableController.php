@@ -15,11 +15,27 @@ class TableController extends RestaurantManagementController
         $this->authorizeTo($request, 'tables.view');
         $restaurant = $this->resolveRestaurant($restaurant);
 
-        return view('restaurant-management::restaurants.tables', [
-            'restaurant' => $restaurant,
-            'areas' => $restaurant->diningAreas()->get(),
-            'tables' => $restaurant->tables()->with('area')->get(),
-            'title' => 'Tables — '.$restaurant->name,
+        $r = $restaurant;
+        $tables = $r->tables()->with('area')->get();
+
+        return \Inertia\Inertia::render('Restaurants/Tables', [
+            'restaurant' => ['name' => $r->name],
+            'tabs' => $this->tabs($r, 'tables'),
+            'areas' => $r->diningAreas()->get()->map(fn ($a) => [
+                'id' => $a->id,
+                'name' => $a->name,
+                'tables' => $tables->where('dining_area_id', $a->id)->count(),
+                'destroy' => route('restaurants.areas.destroy', [$r, $a->id]),
+            ]),
+            'tables' => $tables->map(fn ($t) => [
+                'id' => $t->id,
+                'fields' => $t->only(['label', 'seats', 'dining_area_id', 'status']),
+                'area' => $t->area?->name,
+                'update' => route('restaurants.tables.update', [$r, $t->id]),
+                'destroy' => route('restaurants.tables.destroy', [$r, $t->id]),
+            ]),
+            'can' => ['manage' => $request->user()->hasPermissionTo('tables.manage')],
+            'urls' => ['addArea' => route('restaurants.areas.store', $r), 'addTable' => route('restaurants.tables.store', $r)],
         ]);
     }
 
