@@ -20,6 +20,7 @@ final class Events
         'reservation_update' => ['Table reservation update', 'guest', ['mail', 'push']],
         'review_replied' => ['Reply to your review', 'guest', []],
         'new_message' => ['New message', 'guest', ['mail', 'push']],
+        'price_drop' => ['Price drop on a saved stay', 'guest', ['mail', 'push']],
         'order_received' => ['New order received', 'staff', ['push']],
         'task_assigned' => ['Housekeeping task assigned', 'staff', ['push']],
         'ticket_assigned' => ['Maintenance ticket assigned', 'staff', ['push']],

@@ -43,5 +43,30 @@ class MarketplaceServiceProvider extends ServiceProvider
         Gate::policy(Property::class, PropertyPolicy::class);
 
         Route::middleware('web')->group(__DIR__.'/../routes.php');
+
+        // Price-drop alerts on wish-listed stays (daily, routes/console.php): at least 5% below the
+        // price when saved / last alerted; the saved price then moves down so one drop alerts once.
+        \Illuminate\Support\Facades\Artisan::command('favorites:price-drops', function (): void {
+            $sent = 0;
+            \App\Modules\Marketplace\Models\Favorite::query()
+                ->where('favoritable_type', 'property')->whereNotNull('saved_price')
+                ->with(['user', 'favoritable' => fn ($q) => $q->withoutGlobalScope('tenant')])
+                ->chunkById(200, function ($favorites) use (&$sent): void {
+                    foreach ($favorites as $favorite) {
+                        $property = $favorite->favoritable;
+                        $was = (float) $favorite->saved_price;
+                        $now = (float) $property?->base_price;
+
+                        if (! $property || ! $favorite->user || $property->status !== 'published' || $now <= 0 || $now > $was * 0.95) {
+                            continue;
+                        }
+
+                        $favorite->user->notify(new \App\Modules\Marketplace\Notifications\PriceDropped($property, $was));
+                        $favorite->forceFill(['saved_price' => $now])->save();
+                        $sent++;
+                    }
+                });
+            $this->info("Price-drop alerts sent: {$sent}");
+        })->purpose('Alert guests when a stay on their wish list gets at least 5% cheaper');
     }
 }

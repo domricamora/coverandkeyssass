@@ -26,6 +26,9 @@ Artisan::command('inspire', function () {
 // Warn owners before module trials end.
 \Illuminate\Support\Facades\Schedule::command('notifications:trials')->dailyAt('08:00')->onOneServer();
 
+// Price-drop alerts on wish-listed stays.
+\Illuminate\Support\Facades\Schedule::command('favorites:price-drops')->dailyAt('09:00')->withoutOverlapping()->onOneServer();
+
 // Queue worker for shared hosting (no supervisor): drain the queue each minute
 // and exit before the next run. On a VPS with supervisor, run `queue:work`
 // under supervisor instead and remove this entry.

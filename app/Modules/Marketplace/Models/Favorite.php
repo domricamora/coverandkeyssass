@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * A guest's saved listing. Favorites are personal: the controller always
  * scopes reads and writes to the authenticated user.
  */
-#[Fillable(['user_id', 'favoritable_type', 'favoritable_id'])]
+#[Fillable(['user_id', 'favoritable_type', 'favoritable_id', 'saved_price'])]
 class Favorite extends Model
 {
     use HasFactory;
