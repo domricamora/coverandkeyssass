@@ -24,16 +24,58 @@ class GuestMessageController extends Controller
 
     public function index(Request $request)
     {
-        $threads = Thread::query()->where('guest_user_id', $request->user()->id)->with(['tenant', 'participants'])->latest('last_message_at')->paginate(20);
-
-        return view('messaging::account.index', ['threads' => $threads]);
+        return $this->inbox($request, null);
     }
 
     public function create(Request $request)
     {
         $about = $this->about($request);
+        $support = $about === null;
 
-        return view('messaging::account.create', ['about' => $about, 'support' => $about === null]);
+        return \Inertia\Inertia::render('Account/MessageNew', [
+            'title' => $support ? 'How can we help?' : 'About '.($about->name ?? $about->reference),
+            'subject' => $support ? '' : 'Question about '.($about->name ?? $about->reference),
+            'support' => $support,
+            'tabs' => \App\Modules\Customer\Controllers\AccountController::nav('account.messages.index'),
+            'urls' => ['store' => route('account.messages.store', $request->only(['property', 'restaurant', 'booking', 'order', 'reservation'])), 'inbox' => route('account.messages.index')],
+        ]);
+    }
+
+    /** React inbox for guests: conversations + the open one (two panes). */
+    private function inbox(Request $request, ?Thread $open)
+    {
+        $user = $request->user();
+
+        return \Inertia\Inertia::render('Account/Messages', [
+            'threads' => Thread::query()->where('guest_user_id', $user->id)->with(['tenant'])->latest('last_message_at')->paginate(20)->through(fn (Thread $t) => [
+                'id' => $t->id,
+                'subject' => $t->subject,
+                'who' => $t->tenant?->name ?? 'Cover & Keys support',
+                'when' => $t->last_message_at?->diffForHumans(),
+                'unread' => $t->unreadFor($user),
+                'closed' => $t->status === 'closed',
+                'href' => route('account.messages.show', $t->id),
+                'active' => $open?->id === $t->id,
+            ]),
+            'thread' => $open ? [
+                'id' => $open->id,
+                'subject' => $open->subject,
+                'who' => $open->tenant?->name ?? 'Cover & Keys support',
+                'status' => $open->status,
+                'messages' => $open->messages->map(fn ($m) => [
+                    'id' => $m->id,
+                    'author' => $m->author?->name ?? 'Deleted user',
+                    'when' => $m->created_at->format('M j, g:i A'),
+                    'body' => $m->body,
+                    'mine' => (int) $m->user_id === (int) $user->id,
+                    'files' => $m->attachments->map(fn ($f) => ['id' => $f->id, 'name' => $f->alt ?? 'Attachment', 'url' => route('messages.attachment', [$open->id, $f->id])]),
+                ]),
+                'canReply' => $this->messaging->canReply($user, $open),
+                'urls' => ['reply' => route('account.messages.reply', $open->id), 'close' => route('account.messages.close', $open->id)],
+            ] : null,
+            'tabs' => \App\Modules\Customer\Controllers\AccountController::nav('account.messages.index'),
+            'urls' => ['inbox' => route('account.messages.index'), 'support' => route('account.messages.create')],
+        ]);
     }
 
     public function store(Request $request)
@@ -54,10 +96,7 @@ class GuestMessageController extends Controller
         $thread = $this->find($request, $thread);
         $this->messaging->markRead($thread, $request->user());
 
-        return view('messaging::account.show', [
-            'thread' => $thread->load(['messages.author', 'messages.attachments', 'tenant']),
-            'canReply' => $this->messaging->canReply($request->user(), $thread),
-        ]);
+        return $this->inbox($request, $thread->load(['messages.author', 'messages.attachments', 'tenant']));
     }
 
     public function reply(Request $request, string $thread)
