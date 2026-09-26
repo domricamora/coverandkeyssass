@@ -59,6 +59,78 @@ The target is conventional cPanel hosting or a Z.com / other VPS (Apache or Ngin
     - Sign in as the Super Admin.
     - Make one test-mode booking payment and one billing invoice before switching PayMongo to live keys.
 
+## Shared cPanel hosting (this build: `ck.deskpulse.click`)
+
+The temporary domain `ck.deskpulse.click` is a cPanel account. There are three ways in; pick one and stay with it.
+
+### Server setup (once, in cPanel)
+
+1. **PHP 8.3** — *MultiPHP Manager*: set the domain to `ea-php83`. In *Select PHP Version* enable `pdo_mysql`, `mbstring`, `intl`, `gd`, `zip`, `curl`, `openssl`, `bcmath`, `fileinfo`.
+2. **Database** — *MySQL Databases*: create the database and a user with all privileges on it, then put the `cpanelaccount_`-prefixed names in `.env`.
+3. **Document root** — *Domains*. Either set it to `<app>/public` (the clean way), or leave it and let the repo's root `.htaccess` route everything into `public/` while returning 403 for `.env`, `storage`, `vendor`, `docs` and source files. **This account uses the second option:** the app lives in `$HOME/ck.deskpulse.click` and the root `.htaccess` funnels requests into `public/`.
+4. **SSL** — *SSL/TLS Status* → *Run AutoSSL*. Production forces HTTPS and sends HSTS.
+5. **Cron** — one entry under *Cron Jobs* (the table above): `* * * * * cd /home/USER/ck.deskpulse.click && /opt/cpanel/ea-php83/root/usr/bin/php artisan schedule:run >> /dev/null 2>&1`
+6. **`.env`** — create it inside the app directory from `.env.production.example` and fill the database, mail, PayMongo and `APP_URL` values. Get an `APP_KEY` with `php artisan key:generate --show` and paste it in **before** the first deploy: the deploy caches the config, so a key added afterwards is only picked up by the next deploy (or by `optimize:clear` + `config:cache`). Never upload a local `.env`.
+
+### Route A — Git Version Control + `.cpanel.yml` (recommended)
+
+1. *Files → Git Version Control* → **Clone** `https://github.com/domricamora/coverandkeyssass.git` into a directory **outside** the site root, e.g. `~/repos/coverandkeys`. A private repository needs *Set Up Access to Private Repositories* first.
+2. Open the repository's **Pull or Deploy** tab: **Update from Remote** (pulls `master`), then **Deploy HEAD Commit**. That runs `.cpanel.yml`, which:
+   - rsyncs the working tree into `$HOME/ck.deskpulse.click`, skipping `.git`, `.env`, `node_modules`, `tests` and `storage/app/public` (live uploads stay in place);
+   - recreates the writable `storage/…` and `bootstrap/cache/` directories and fixes their permissions;
+   - stops if `.env` is missing, then runs `composer install --no-dev --optimize-autoloader`, `migrate --force`, `optimize:clear`, the four `*:cache` commands, `storage:link` and `queue:restart`.
+3. Every update is the same three steps: `git push` locally → **Update from Remote** → **Deploy HEAD Commit**. Only commits reach the server, so commit before you deploy.
+
+Change the target by editing `DEPLOYPATH` at the top of `.cpanel.yml` (verify the real path in *Domains*). If the host lacks `rsync`, use Route B or ask the host to enable it.
+
+**Assets need no Node on the server.** `public/build` is committed, so the Vite output travels with the code. `/public/build` is also in `.gitignore` (a leftover from before the first commit), so after a local `npm run build` the new hashed chunk files are untracked — add them by force:
+
+```bash
+npm run build
+git add -f public/build
+git commit -m "Rebuild assets"
+```
+
+### Route B — FTP / SFTP upload (no Git, no Terminal)
+
+`.deploy.env` (gitignored, local only) holds the FTP account for `ck.deskpulse.click`; the FTP root **is** the site root, so the whole app is uploaded into it.
+
+1. Mirror the app with an SFTP client — FileZilla, `lftp mirror -R`, or `curl --ftp-create-dirs`.
+2. Upload everything **except**: `.env`, `.env.production`, `.git/`, `node_modules/`, `tests/`, `storage/app/public` (the live uploads) and `public/hot`.
+3. FTP cannot run `composer`, `artisan` or the caches. Use cPanel → *Terminal* for the post-upload steps, or ask the host to run them:
+
+   ```bash
+   composer install --no-dev --optimize-autoloader
+   php artisan optimize:clear && php artisan config:cache route:cache view:cache event:cache
+   ```
+
+### Route C — SSH / cPanel Terminal
+
+When *Terminal* is available, it is the documented flow exactly:
+
+```bash
+git clone https://github.com/domricamora/coverandkeyssass.git ~/coverandkeys
+cd ~/coverandkeys    # first install: the numbered list above, then:
+bash deploy.sh       # every update from then on
+```
+
+### First deploy, in this order
+
+1. Create `.env` with an `APP_KEY` (server setup, step 6) — the deploy aborts without it.
+2. Deploy: **Deploy HEAD Commit**, the FTP mirror, or `bash deploy.sh`.
+3. Once, in *Terminal*:
+
+   ```bash
+   cd ~/ck.deskpulse.click
+   php artisan db:seed --force   # permissions, roles, modules, reference data only
+   php artisan superadmin:create "Your Name" you@domain.com
+   ```
+
+   `DatabaseSeeder` calls only `PermissionSeeder`, `RoleSeeder` and `ModuleSeeder`. The marketplace and demo-operations seeders are separate classes that refuse to run in production.
+4. Smoke test: `/up` returns 200, `/robots.txt` lists the sitemap, sign in as the Super Admin, then make one test-mode booking payment before switching PayMongo to live keys.
+
+Changing `.env` later needs `php artisan optimize:clear && php artisan config:cache route:cache view:cache event:cache`, or simply deploy again — the deploy does exactly that.
+
 ## Queue worker
 
 Notifications go through the queue.

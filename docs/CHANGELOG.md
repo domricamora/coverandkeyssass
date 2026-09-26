@@ -1,5 +1,10 @@
 # CHANGELOG.md
 
+## 2026-09-27 — cPanel deploy path hardened and documented
+
+- `.cpanel.yml` recreates `storage/app/public`, the framework cache directories, `storage/logs` and `bootstrap/cache` and fixes their permissions before artisan runs. rsync skips `storage/app/public`, so a fresh target had no upload directory and `storage:link` failed silently. The deploy now also stops with a visible failure when `.env` is missing, and prints the target path.
+- `docs/DEPLOYMENT.md` gained a cPanel section: the three ways in (Git Version Control + `.cpanel.yml`, FTP upload, SSH + `deploy.sh`), the first-deploy order (`.env` with an `APP_KEY` before the first deploy, then `db:seed`, then `superadmin:create`), and the note that `public/build` is committed so no Node.js is needed on the server.
+
 ## 2026-09-27 — Every dashboard screen on React
 
 - **Accounting:** overview (P&L, VAT, balances), invoices plus invoice detail (issue, void, record payment), expenses, payables & receivables (pay suppliers), journal, trial balance. Fix: an empty period now falls back to month-to-date instead of today.
