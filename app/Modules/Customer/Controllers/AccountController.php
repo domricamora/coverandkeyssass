@@ -173,19 +173,40 @@ class AccountController extends Controller
 
     public function reviews(Request $request)
     {
-        return view('customer::reviews', [
+        return Inertia::render('Account/Reviews', [
             'reviews' => Review::query()
                 ->where('user_id', $request->user()->id)
                 ->with(['reviewable' => fn ($q) => $q->withoutGlobalScope('tenant')])
                 ->latest()
-                ->paginate(10),
+                ->paginate(10)
+                ->through(fn (Review $r) => [
+                    'id' => $r->id,
+                    'listing' => $r->reviewable?->name ?? 'Listing',
+                    'rating' => (int) $r->rating,
+                    'status' => Str::headline($r->status),
+                    'date' => $r->created_at->format('M j, Y'),
+                    'title' => $r->title,
+                    'comment' => $r->comment,
+                    'reply' => $r->host_response,
+                ]),
+            'tabs' => self::nav('account.reviews'),
         ]);
     }
 
     public function notifications(Request $request)
     {
-        return view('customer::notifications', [
-            'notifications' => $request->user()->notifications()->paginate(20),
+        return Inertia::render('Account/Notifications', [
+            'notifications' => $request->user()->notifications()->paginate(20)->through(fn ($n) => [
+                'id' => $n->id,
+                'message' => $n->data['message'] ?? 'Update',
+                'href' => ! empty($n->data['link']) ? route('notifications.open', $n->id)
+                    : (! empty($n->data['booking_reference']) ? route('account.bookings.show', $n->data['booking_reference']) : null),
+                'when' => $n->created_at->diffForHumans(),
+                'unread' => $n->read_at === null,
+            ]),
+            'unread' => $request->user()->unreadNotifications()->count(),
+            'tabs' => self::nav('account.notifications'),
+            'urls' => ['read' => route('account.notifications.read'), 'settings' => route('account.notification-settings')],
         ]);
     }
 
