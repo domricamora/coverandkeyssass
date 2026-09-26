@@ -10,6 +10,7 @@ use App\Modules\Crm\Services\CrmService;
 use App\Modules\Crm\Support\Segments;
 use App\Support\TenantContext;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 /** Guest contacts, profiles, segments and communication history (Phase 21). */
@@ -32,12 +33,24 @@ class CrmController extends Controller
             ->orderByDesc('last_activity_at')->orderBy('name')
             ->paginate(30)->withQueryString();
 
-        return view('crm::index', [
-            'contacts' => $contacts,
-            'segments' => collect(Segments::all())->map(fn ($label, $key) => ['label' => $label, 'count' => Segments::apply(Contact::query(), $key)->count()]),
-            'segment' => $segment,
-            'tags' => Tag::query()->withCount('contacts')->orderBy('name')->get(),
-            'title' => 'Guests',
+        return \Inertia\Inertia::render('Crm/Index', [
+            'contacts' => $contacts->through(fn (Contact $c) => [
+                'id' => $c->id,
+                'name' => $c->name,
+                'vip' => (bool) $c->is_vip,
+                'reach' => $c->email ?? $c->phone ?? '—',
+                'tags' => $c->tags->pluck('name'),
+                'stays' => $c->bookings_count,
+                'orders' => $c->orders_count + $c->reservations_count,
+                'spend' => '₱'.number_format((float) $c->total_spend, 0),
+                'seen' => $c->last_activity_at?->diffForHumans() ?? '—',
+                'href' => route('crm.show', $c->id),
+            ]),
+            'segments' => collect(Segments::all())->map(fn ($label, $key) => ['key' => $key, 'label' => $label, 'count' => Segments::apply(Contact::query(), $key)->count()])->values(),
+            'filters' => ['segment' => $segment, 'q' => $q ?: null, 'tag' => $request->query('tag')],
+            'tags' => Tag::query()->withCount('contacts')->orderBy('name')->get()->map(fn ($t) => ['id' => $t->id, 'name' => $t->name, 'count' => $t->contacts_count]),
+            'can' => ['manage' => $request->user()->hasPermissionTo('crm.manage')],
+            'urls' => ['self' => route('crm.index'), 'store' => route('crm.store')],
         ]);
     }
 
@@ -62,13 +75,36 @@ class CrmController extends Controller
         $this->authorizeTo($request, 'crm.view');
         $contact = $this->crm->refreshMetrics(Contact::query()->with(['tags', 'notes.author', 'interactions.author', 'user'])->findOrFail($contact));
 
-        return view('crm::show', [
-            'contact' => $contact,
-            'bookings' => $contact->bookingsQuery()->with('property')->latest('check_in')->limit(20)->get(),
-            'orders' => $contact->ordersQuery()->with('restaurant')->latest()->limit(20)->get(),
-            'reservations' => $contact->reservationsQuery()->with('restaurant')->latest('reserved_at')->limit(20)->get(),
-            'segments' => collect(Segments::all())->filter(fn ($label, $key) => Segments::apply(Contact::query()->whereKey($contact->id), $key)->exists()),
-            'title' => $contact->name,
+        $c = $contact;
+        $history = $c->ordersQuery()->with('restaurant')->latest()->limit(20)->get()->map(fn ($o) => [
+            'ref' => $o->reference, 'place' => $o->restaurant?->name, 'when' => $o->created_at->format('M j, Y').' · '.$o->fulfillmentLabel(), 'status' => $o->status, 'total' => $o->money($o->total),
+        ])->concat($c->reservationsQuery()->with('restaurant')->latest('reserved_at')->limit(20)->get()->map(fn ($r) => [
+            'ref' => $r->reference, 'place' => $r->restaurant?->name, 'when' => $r->reserved_at->format('M j, Y g:i A').' · table for '.$r->party_size, 'status' => $r->status, 'total' => null,
+        ]));
+
+        return \Inertia\Inertia::render('Crm/Show', [
+            'contact' => [
+                'name' => $c->name,
+                'vip' => (bool) $c->is_vip,
+                'summary' => ($c->email ?? 'no email').' · '.($c->phone ?? 'no phone').' · '.($c->user ? 'has an account' : 'no account').' · first seen '.($c->first_seen_at?->format('M j, Y') ?? '—'),
+                'segments' => collect(Segments::all())->filter(fn ($label, $key) => Segments::apply(Contact::query()->whereKey($c->id), $key)->exists())->values(),
+                'tags' => $c->tags->pluck('name'),
+                'stats' => [['Lifetime spend', '₱'.number_format((float) $c->total_spend, 2)], ['Stays', $c->bookings_count], ['Food orders', $c->orders_count], ['Table visits', $c->reservations_count]],
+                'fields' => ['name' => $c->name, 'email' => $c->email ?? '', 'phone' => $c->phone ?? '', 'tags' => $c->tags->pluck('name')->implode(', '), 'is_vip' => (bool) $c->is_vip, 'marketing_consent' => (bool) $c->marketing_consent],
+                'consent_at' => $c->consent_at?->format('M j, Y'),
+                'notes' => $c->notes->map(fn ($n) => ['id' => $n->id, 'body' => $n->body, 'by' => ($n->author?->name ?? '—').' · '.$n->created_at->format('M j, Y')]),
+                'interactions' => $c->interactions->map(fn ($i) => [
+                    'id' => $i->id, 'head' => Str::headline($i->channel).' · '.$i->direction.' · '.$i->occurred_at->format('M j, g:i A').' · '.($i->author?->name ?? 'system'),
+                    'subject' => $i->subject, 'body' => $i->body ? Str::limit($i->body, 300) : null,
+                ]),
+            ],
+            'bookings' => $c->bookingsQuery()->with('property')->latest('check_in')->limit(20)->get()->map(fn ($b) => [
+                'ref' => $b->reference, 'place' => $b->property?->name, 'when' => $b->check_in->format('M j').'–'.$b->check_out->format('M j, Y'), 'status' => $b->status, 'total' => '₱'.number_format((float) $b->total, 2),
+            ]),
+            'history' => $history,
+            'channels' => Interaction::CHANNELS,
+            'can' => ['manage' => $request->user()->hasPermissionTo('crm.manage')],
+            'urls' => ['index' => route('crm.index'), 'update' => route('crm.update', $c->id), 'note' => route('crm.notes.store', $c->id), 'interaction' => route('crm.interactions.store', $c->id)],
         ]);
     }
 

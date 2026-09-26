@@ -28,18 +28,38 @@ class LoyaltyController extends Controller
         $this->loyalty->sync();
         $q = trim((string) $request->query('q'));
 
-        return view('loyalty::index', [
-            'program' => $this->loyalty->program(),
+        $program = $this->loyalty->program();
+        $tierCounts = LoyaltyAccount::query()->selectRaw('tier, COUNT(*) AS n')->groupBy('tier')->pluck('n', 'tier');
+
+        return \Inertia\Inertia::render('Loyalty/Index', [
+            'program' => ['enabled' => (bool) $program->enabled, 'pesos_per_point' => (float) $program->pesos_per_point, 'referral_points' => (int) $program->referral_points],
+            'tiers' => collect(LoyaltyAccount::TIERS)->map(fn ($t, $key) => [$t[1], (int) ($tierCounts[$key] ?? 0)])->values(),
             'members' => LoyaltyAccount::query()->with('contact')
                 ->when($q !== '', fn ($query) => $query->where(fn ($w) => $w->whereHas('contact', fn ($c) => $c->where('name', 'like', "%{$q}%")->orWhere('email', 'like', "%{$q}%"))->orWhere('referral_code', strtoupper($q))))
-                ->orderByDesc('lifetime_points')->paginate(25)->withQueryString(),
-            'tierCounts' => LoyaltyAccount::query()->selectRaw('tier, COUNT(*) AS n')->groupBy('tier')->pluck('n', 'tier'),
-            'rewards' => Reward::query()->with('promotion')->orderBy('points_cost')->get(),
-            'promotions' => Promotion::query()->where('is_active', true)->orderBy('code')->get(),
-            'giftCards' => GiftCard::query()->with('contact')->latest()->limit(20)->get(),
-            'outstanding' => round((float) GiftCard::query()->where('status', 'active')->sum('balance'), 2),
-            'contacts' => Contact::query()->orderBy('name')->limit(500)->get(['id', 'name', 'email']),
-            'title' => 'Loyalty',
+                ->orderByDesc('lifetime_points')->paginate(25)->withQueryString()
+                ->through(fn (LoyaltyAccount $m) => [
+                    'id' => $m->id, 'name' => $m->contact?->name, 'email' => $m->contact?->email, 'tier' => $m->tierLabel(),
+                    'points' => number_format($m->points_balance), 'lifetime' => number_format($m->lifetime_points), 'code' => $m->referral_code,
+                    'href' => route('loyalty.members.show', $m->id),
+                ]),
+            'rewards' => Reward::query()->with('promotion')->orderBy('points_cost')->get()->map(fn (Reward $r) => [
+                'id' => $r->id,
+                'text' => $r->name.' · '.number_format($r->points_cost).' pts · '.($r->kind === 'coupon' ? 'coupon '.$r->promotion?->code : '₱'.number_format((float) $r->credit_amount, 0).' credit'),
+                'active' => (bool) $r->is_active,
+                'toggle' => route('loyalty.rewards.toggle', $r->id),
+            ]),
+            'promotions' => Promotion::query()->where('is_active', true)->orderBy('code')->get()->map(fn ($p) => [$p->id, $p->code.' — '.$p->label()]),
+            'giftCards' => GiftCard::query()->with('contact')->latest()->limit(20)->get()->map(fn (GiftCard $c) => [
+                'id' => $c->id, 'code' => $c->code, 'kind' => $c->kind, 'guest' => $c->contact?->name ?? '—',
+                'balance' => '₱'.number_format((float) $c->balance, 2).' / '.number_format((float) $c->initial_value, 2),
+                'note' => $c->status === 'void' ? 'void' : ($c->expires_on ? 'expires '.$c->expires_on->format('M j, Y') : ''),
+                'void' => $c->status === 'active' ? route('loyalty.gift-cards.void', $c->id) : null,
+            ]),
+            'outstanding' => '₱'.number_format((float) GiftCard::query()->where('status', 'active')->sum('balance'), 2),
+            'contacts' => Contact::query()->orderBy('name')->limit(500)->get(['id', 'name', 'email'])->map(fn ($c) => [$c->id, $c->name.($c->email ? ' · '.$c->email : '')]),
+            'q' => $q ?: null,
+            'can' => ['manage' => $request->user()->hasPermissionTo('loyalty.manage')],
+            'urls' => ['self' => route('loyalty.index'), 'program' => route('loyalty.program'), 'addReward' => route('loyalty.rewards.store'), 'sellCard' => route('loyalty.gift-cards.store')],
         ]);
     }
 
@@ -84,12 +104,30 @@ class LoyaltyController extends Controller
         $this->authorizeTo($request, 'loyalty.view');
         $account = LoyaltyAccount::query()->with(['contact', 'referrer.contact'])->findOrFail($account);
 
-        return view('loyalty::member', [
-            'account' => $account,
-            'transactions' => $account->transactions()->with('user')->limit(50)->get(),
-            'rewards' => Reward::query()->where('is_active', true)->orderBy('points_cost')->get(),
-            'cards' => GiftCard::query()->where('crm_contact_id', $account->crm_contact_id)->latest()->get(),
-            'title' => $account->contact?->name ?? 'Member',
+        $next = $account->nextTier();
+
+        return \Inertia\Inertia::render('Loyalty/Member', [
+            'account' => [
+                'name' => $account->contact?->name ?? 'Member',
+                'tier' => $account->tierLabel(),
+                'summary' => number_format($account->points_balance).' points · '.number_format($account->lifetime_points).' lifetime · '
+                    .($next ? number_format($next[1]).' to '.$next[0] : 'top tier').' · referral code '.$account->referral_code
+                    .($account->referrer ? ' · referred by '.$account->referrer->contact?->name : ''),
+                'balance' => (int) $account->points_balance,
+            ],
+            'transactions' => $account->transactions()->with('user')->limit(50)->get()->map(fn ($t) => [
+                'id' => $t->id, 'at' => $t->created_at->format('M j, Y'), 'what' => $t->description, 'by' => $t->user?->name,
+                'points' => ($t->points > 0 ? '+' : '').number_format($t->points), 'minus' => $t->points < 0, 'balance' => number_format($t->balance_after),
+            ]),
+            'rewards' => Reward::query()->where('is_active', true)->orderBy('points_cost')->get()->map(fn ($r) => ['id' => $r->id, 'name' => $r->name.' ('.number_format($r->points_cost).' pts)', 'affordable' => $r->points_cost <= $account->points_balance]),
+            'cards' => GiftCard::query()->where('crm_contact_id', $account->crm_contact_id)->latest()->get()->map(fn ($c) => $c->code.' · '.$c->kind.' · ₱'.number_format((float) $c->balance, 2).' left'.($c->status === 'void' ? ' · void' : '')),
+            'can' => ['manage' => $request->user()->hasPermissionTo('loyalty.manage')],
+            'urls' => [
+                'index' => route('loyalty.index'),
+                'guest' => $account->contact ? route('crm.show', $account->crm_contact_id) : null,
+                'redeem' => route('loyalty.members.redeem', $account->id),
+                'adjust' => route('loyalty.members.adjust', $account->id),
+            ],
         ]);
     }
 

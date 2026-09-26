@@ -20,14 +20,30 @@ class HostReviewController extends Controller
 
         $base = Review::query()->where('tenant_id', $tenantId);
 
-        return view('reviews::host', [
+        return \Inertia\Inertia::render('Reviews/Index', [
             'reviews' => (clone $base)->with(['user', 'reviewable', 'itemRatings.menuItem', 'roomType'])
                 ->when($request->query('filter') === 'unanswered', fn ($q) => $q->whereNull('host_response'))
                 ->when($request->query('filter') === 'low', fn ($q) => $q->where('rating', '<=', 2))
-                ->latest()->paginate(20)->withQueryString(),
+                ->latest()->paginate(20)->withQueryString()
+                ->through(fn (Review $r) => [
+                    'id' => $r->id,
+                    'guest' => $r->user?->name ?? 'Guest',
+                    'rating' => (int) $r->rating,
+                    'about' => collect([$r->reviewable?->name, $r->roomType?->name, $r->booking_id ? 'stay' : ($r->order_id ? 'order' : ($r->table_reservation_id ? 'table visit' : null)), $r->created_at->format('M j, Y')])->filter()->implode(' · '),
+                    'status' => $r->status,
+                    'flagged' => $r->flagged_at !== null,
+                    'categories' => collect(Review::CATEGORIES)->filter(fn ($c) => $r->{'rating_'.$c})->map(fn ($c) => ucfirst($c).' '.$r->{'rating_'.$c})->values(),
+                    'title' => $r->title,
+                    'comment' => $r->comment,
+                    'dishes' => $r->itemRatings->map(fn ($ir) => $ir->menuItem?->name.' '.$ir->rating.'★')->implode(' · '),
+                    'reply' => $r->host_response,
+                    'urls' => ['reply' => route('reviews.reply', $r->id), 'flag' => route('reviews.flag', $r->id)],
+                ]),
             'average' => round((float) (clone $base)->published()->avg('rating'), 1),
             'unanswered' => (clone $base)->published()->whereNull('host_response')->count(),
-            'title' => 'Reviews',
+            'filter' => (string) $request->query('filter', ''),
+            'can' => ['reply' => $request->user()->hasPermissionTo('reviews.reply')],
+            'urls' => ['self' => route('reviews.index')],
         ]);
     }
 
