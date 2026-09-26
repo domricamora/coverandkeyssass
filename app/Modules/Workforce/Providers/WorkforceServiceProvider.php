@@ -14,7 +14,6 @@ class WorkforceServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadMigrationsFrom(__DIR__.'/../Migrations');
-        $this->loadViewsFrom(__DIR__.'/../Views', 'workforce');
 
         Route::middleware('web')->group(__DIR__.'/../routes.php');
     }

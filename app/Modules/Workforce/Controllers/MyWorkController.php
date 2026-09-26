@@ -10,6 +10,7 @@ use App\Modules\Workforce\Models\LeaveRequest;
 use App\Modules\Workforce\Services\WorkforceService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Inertia\Inertia;
 
 /**
  * Self-service for staff (Phase 17): my shifts, my housekeeping tasks and
@@ -25,13 +26,38 @@ class MyWorkController extends Controller
         $employee = Employee::forUser($request->user())?->load('openAttendance');
         $userId = $request->user()->id;
 
-        return view('workforce::my-work', [
-            'employee' => $employee,
-            'shifts' => $employee ? $employee->shifts()->scheduled()->whereBetween('starts_at', [today(), today()->addDays(7)])->with('property')->get() : collect(),
-            'tasks' => HousekeepingTask::query()->where('assigned_to', $userId)->open()->with('room')->orderBy('due_on')->get(),
-            'tickets' => MaintenanceTicket::query()->where('assigned_to', $userId)->active()->with('room')->latest()->get(),
-            'leave' => $employee ? $employee->leaveRequests()->limit(10)->get() : collect(),
-            'title' => 'My work',
+        return Inertia::render('MyWork/Index', [
+            'employee' => $employee ? [
+                'name' => $employee->name,
+                'no' => $employee->employee_no,
+                'since' => $employee->openAttendance?->clock_in_at->format('g:i A'),
+            ] : null,
+            'shifts' => $employee ? $employee->shifts()->scheduled()->whereBetween('starts_at', [today(), today()->addDays(7)])->with('property')->get()->map(fn ($s) => [
+                'id' => $s->id,
+                'text' => $s->starts_at->format('D, M j').' · '.$s->label().($s->property ? ' · '.$s->property->name : ''),
+            ]) : [],
+            'tasks' => HousekeepingTask::query()->where('assigned_to', $userId)->open()->with('room')->orderBy('due_on')->get()->map(fn ($t) => [
+                'id' => $t->id,
+                'text' => 'Room '.$t->room?->room_number.' · '.$t->typeLabel().' · due '.$t->due_on->format('M j'),
+                'high' => $t->priority === 'high',
+            ]),
+            'tickets' => MaintenanceTicket::query()->where('assigned_to', $userId)->active()->with('room')->latest()->get()->map(fn ($t) => [
+                'id' => $t->id,
+                'reference' => $t->reference,
+                'text' => $t->title.($t->room ? ' · room '.$t->room->room_number : ''),
+                'href' => route('maintenance.show', $t->reference),
+            ]),
+            'leave' => $employee ? $employee->leaveRequests()->limit(10)->get()->map(fn ($l) => [
+                'id' => $l->id,
+                'text' => ucfirst($l->type).' · '.$l->starts_on->format('M j').'–'.$l->ends_on->format('M j'),
+                'status' => $l->status,
+                'note' => $l->decision_note,
+                'cancel' => $l->status === LeaveRequest::PENDING ? route('my-work.leave.cancel', $l->id) : null,
+            ]) : [],
+            'types' => LeaveRequest::TYPES,
+            'today' => today()->toDateString(),
+            'tabs' => $request->user()->hasPermissionTo('staff.view') ? StaffController::tabs('my-work.index') : [],
+            'urls' => ['clock' => route('my-work.clock'), 'leave' => route('my-work.leave.store'), 'board' => route('housekeeping.index', ['mine' => 1])],
         ]);
     }
 

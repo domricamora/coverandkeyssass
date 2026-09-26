@@ -125,14 +125,17 @@ it('gives staff a "My work" page with shifts, tasks, clock and leave', function 
     app(HousekeepingService::class)->createTask($room, 'checkout_clean', '2030-06-03', $this->owner, $this->account);
 
     PropertyManagementFixtures::login($this->account, $this->tenant);
-    $this->get(route('my-work.index'))->assertOk()->assertSee('7:00 AM–3:00 PM')->assertSee('Checkout Clean')->assertSee('Clock in');
+    $this->get(route('my-work.index'))->assertOk()->assertInertia(fn ($p) => $p->component('MyWork/Index')
+        ->where('shifts.0.text', fn ($t) => str_contains($t, '7:00 AM–3:00 PM'))
+        ->where('tasks.0.text', fn ($t) => str_contains($t, 'Checkout Clean'))
+        ->where('employee.since', null));
 
     $this->travelTo(CarbonImmutable::parse('2030-06-03 07:05'));
     $this->post(route('my-work.clock'), ['action' => 'in'])->assertSessionHasNoErrors();
     expect(Attendance::query()->first()->late_minutes)->toBe(5);
 
     $this->post(route('my-work.leave.store'), ['type' => 'vacation', 'starts_on' => '2030-07-01', 'ends_on' => '2030-07-03'])->assertSessionHasNoErrors();
-    $this->get(route('my-work.index'))->assertSee('Clock out')->assertSee('Vacation');
+    $this->get(route('my-work.index'))->assertInertia(fn ($p) => $p->where('employee.since', '7:05 AM')->where('leave.0.text', fn ($t) => str_starts_with($t, 'Vacation')));
 
     // Staff cannot open the manager screens.
     $this->get(route('staff.index'))->assertForbidden();
@@ -140,7 +143,7 @@ it('gives staff a "My work" page with shifts, tasks, clock and leave', function 
 
     // A member without an employee profile gets a hint, and cannot clock.
     PropertyManagementFixtures::login(MarketplaceFixtures::member($this->tenant, 'staff'), $this->tenant);
-    $this->get(route('my-work.index'))->assertOk()->assertSee('not linked');
+    $this->get(route('my-work.index'))->assertOk()->assertInertia(fn ($p) => $p->where('employee', null));
     $this->post(route('my-work.clock'), ['action' => 'in'])->assertForbidden();
 });
 
@@ -155,10 +158,11 @@ it('runs the manager screens with permissions and isolation', function () {
     expect(Shift::query()->where('employee_id', $ben->id)->first()->ends_at->toDateTimeString())->toBe('2030-06-05 06:00:00');
 
     $this->get(route('staff.index'))->assertOk()->assertSee('Maria Santos')->assertSee('Ben Reyes');
-    $this->get(route('staff.schedule', ['week' => '2030-06-03']))->assertOk()->assertSee('10:00 PM–6:00 AM');
+    $this->get(route('staff.schedule', ['week' => '2030-06-03']))->assertOk()->assertInertia(fn ($p) => $p->component('Staff/Schedule')
+        ->where('rows', fn ($rows) => collect($rows)->firstWhere('name', 'Ben Reyes')['cells'][1]['shifts'][0]['label'] === '10:00 PM–6:00 AM'));
     $this->post(route('staff.attendance.clock', $ben->id), ['action' => 'in'])->assertSessionHasNoErrors();
     $this->get(route('staff.attendance'))->assertOk()->assertSee('Ben Reyes');
-    $this->get(route('staff.show', $this->maria->id))->assertOk()->assertSee('Access: Staff');
+    $this->get(route('staff.show', $this->maria->id))->assertOk()->assertInertia(fn ($p) => $p->where('employee.summary', fn ($s) => str_contains($s, 'Access: Staff')));
 
     // Front desk sees but cannot change.
     PropertyManagementFixtures::login(MarketplaceFixtures::member($this->tenant, 'front_desk'), $this->tenant);

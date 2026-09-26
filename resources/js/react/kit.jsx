@@ -197,7 +197,7 @@ export function Input({ form, name, label: text, hint, type = 'text', className,
     if (type === 'checkbox') {
         return (
             <label className={cx('flex items-center gap-2 text-[13px] text-fg', className)}>
-                <input type="checkbox" className="h-4 w-4 accent-[var(--primary)]" checked={!!form.data[name]} onChange={(e) => set(e.target.checked)} {...rest} />
+                <input type="checkbox" className="h-4 w-4 accent-[var(--primary)] text-brand" checked={!!form.data[name]} onChange={(e) => set(e.target.checked)} {...rest} />
                 {text}
             </label>
         );
