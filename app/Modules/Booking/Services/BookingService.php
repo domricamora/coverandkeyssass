@@ -348,7 +348,8 @@ class BookingService
         return app(TenantContext::class)->runAs($model, $callback);
     }
 
-    private function promotionFor(Property $property, ?string $code, CarbonImmutable $checkIn, int $nights): ?Promotion
+    /** The stay promotion for a code, or a promo_code ValidationException (also used by the live quote). */
+    public function promotionFor(Property $property, ?string $code, CarbonImmutable $checkIn, int $nights): ?Promotion
     {
         if (blank($code)) {
             return null;

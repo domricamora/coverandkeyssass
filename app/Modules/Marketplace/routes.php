@@ -33,6 +33,7 @@ Route::get('/hotels', [PropertySearchController::class, 'index'])->name('marketp
 Route::get('/search', [PropertySearchController::class, 'index'])->name('marketplace.search');
 Route::get('/hotels/{location}', [PropertySearchController::class, 'location'])->name('marketplace.locations.show');
 Route::get('/property/{property}', [PropertyController::class, 'show'])->name('marketplace.properties.show');
+Route::get('/property/{property}/quote', \App\Modules\Marketplace\Controllers\StayQuoteController::class)->middleware('throttle:120,1')->name('marketplace.properties.quote');
 
 Route::get('/restaurants', [RestaurantController::class, 'index'])->name('marketplace.restaurants.index');
 Route::get('/restaurant/{restaurant}', [RestaurantController::class, 'show'])->name('marketplace.restaurants.show');
