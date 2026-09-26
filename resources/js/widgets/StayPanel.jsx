@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { BTN, FIELD, LABEL, Stepper, continueUrl, cx, json, money } from './ui';
+import { BTN, FIELD, LABEL, Stepper, cx, json, money } from './ui';
 
 /**
  * Property page booking panel: dates, guests, rooms → live quote for every
@@ -57,7 +57,7 @@ export default function StayPanel({ quoteUrl, reviewUrl, root, signedIn, currenc
 
     const reserve = () => {
         const url = `${reviewUrl}?${new URLSearchParams({ check_in: checkIn, check_out: checkOut, guests, room_type_id: selected.room_type_id, quantity: rooms })}`;
-        window.location.href = signedIn ? url : continueUrl(root, url);
+        window.location.href = url; // guests fill in their details on the review step
     };
 
     return (
@@ -155,7 +155,7 @@ export default function StayPanel({ quoteUrl, reviewUrl, root, signedIn, currenc
             )}
 
             <button type="button" className={BTN} disabled={!selected || loading} onClick={reserve}>
-                {signedIn ? 'Reserve' : 'Sign in to reserve'}
+                Reserve
             </button>
             <p className="text-center text-[12px] text-fg-3">You won't be charged yet. You review everything on the next step.</p>
         </div>

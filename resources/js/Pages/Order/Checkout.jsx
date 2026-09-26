@@ -1,7 +1,7 @@
 import { Head, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import PublicShell from '../../react/PublicShell';
-import { BTN, FIELD, LABEL, Stepper, cx, json, money, postForm } from '../../widgets/ui';
+import { BTN, FIELD, LABEL, Stepper, cx, json, money, postForm, useGuest } from '../../widgets/ui';
 
 /**
  * Food order checkout: edit quantities, pick pickup / delivery / room
@@ -9,7 +9,7 @@ import { BTN, FIELD, LABEL, Stepper, cx, json, money, postForm } from '../../wid
  * come from the server quote; the delivery fee preview mirrors
  * DeliveryZone::feeFor and is charged from the server again on submit.
  */
-export default function Checkout({ restaurant, lines, quote, error, promoCode, onlinePayments, zones, stays, minSchedule, old, signedIn, urls }) {
+export default function Checkout({ restaurant, lines, quote, error, promoCode, onlinePayments, zones, stays, minSchedule, old, guest, urls }) {
     const { errors } = usePage().props;
     const [mode, setMode] = useState(old.fulfillment ?? 'pickup');
     const [zoneId, setZoneId] = useState(Number(old.delivery_zone_id) || zones[0]?.id || null);
@@ -19,7 +19,8 @@ export default function Checkout({ restaurant, lines, quote, error, promoCode, o
     const [stay, setStay] = useState(old.room_stay ?? stays[0]?.value ?? '');
     const [when, setWhen] = useState(old.scheduled_for ? 'later' : 'asap');
     const [scheduled, setScheduled] = useState(old.scheduled_for ?? '');
-    const [phone, setPhone] = useState(old.customer_phone ?? '');
+    const { guestUrls } = usePage().props;
+    const who = useGuest({ user: guest, urls: guestUrls, returnTo: '/cart', phone: old.customer_phone ?? '' });
     const [notes, setNotes] = useState(old.notes ?? '');
     const [code, setCode] = useState(promoCode);
     const [pay, setPay] = useState(old.payment_method ?? (onlinePayments ? 'online' : 'cash'));
@@ -62,12 +63,12 @@ export default function Checkout({ restaurant, lines, quote, error, promoCode, o
     ].filter(Boolean);
     const payment = paymentOptions.some(([v]) => v === pay) ? pay : paymentOptions[0][0];
 
-    const submit = (e) => {
+    const submit = async (e) => {
         e.preventDefault();
-        if (!signedIn) { window.location.href = urls.signIn; return; }
         setBusy(true);
+        if (!(await who.ensure())) { setBusy(false); return; }
         postForm(urls.checkout, {
-            fulfillment: mode, payment_method: payment, customer_phone: phone, notes, promo_code: quote.promo?.code,
+            fulfillment: mode, payment_method: payment, customer_phone: who.phone, notes, promo_code: quote.promo?.code,
             scheduled_for: when === 'later' ? scheduled : '',
             ...(mode === 'delivery' ? { delivery_zone_id: zoneId, delivery_address: address, delivery_lat: coords?.lat, delivery_lng: coords?.lng } : {}),
             ...(room ? { room_stay: stay } : {}),
@@ -145,12 +146,10 @@ export default function Checkout({ restaurant, lines, quote, error, promoCode, o
                         {fieldError('scheduled_for') && <p className="text-[13px] text-bad">{fieldError('scheduled_for')}</p>}
                     </section>
 
-                    <section className="grid gap-4 sm:grid-cols-2">
-                        <label className="block">
-                            <span className={LABEL}>Mobile number</span>
-                            <input type="tel" autoComplete="tel" required className={FIELD} value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+63 917 000 0000" />
-                            {fieldError('customer_phone') && <span className="mt-1 block text-[13px] text-bad">{fieldError('customer_phone')}</span>}
-                        </label>
+                    <section className="space-y-4">
+                        <h2 className="text-[16px] font-semibold">Your details</h2>
+                        {who.view}
+                        {fieldError('customer_phone') && <p className="text-[13px] text-bad">{fieldError('customer_phone')}</p>}
                         <label className="block">
                             <span className={LABEL}>Notes for the restaurant <span className="font-normal text-fg-3">(optional)</span></span>
                             <input className={FIELD} value={notes} maxLength={1000} onChange={(e) => setNotes(e.target.value)} placeholder="Gate code, cutlery" />
@@ -206,7 +205,7 @@ export default function Checkout({ restaurant, lines, quote, error, promoCode, o
                             <div className="flex justify-between border-t border-line pt-2 text-[16px] font-semibold"><dt>Total</dt><dd aria-live="polite">{money(total, 'PHP', 2)}</dd></div>
                         </dl>
                         <button type="submit" className={BTN} disabled={busy}>
-                            {!signedIn ? 'Sign in to place order' : busy ? 'Placing order…' : `Place order · ${money(total, 'PHP', 2)}`}
+                            {busy ? 'Placing order…' : `Place order · ${money(total, 'PHP', 2)}`}
                         </button>
                     </div>
                 </aside>

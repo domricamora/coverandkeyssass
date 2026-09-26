@@ -81,12 +81,13 @@ class StayReviewController extends Controller
             'stay' => $stay + ['nights' => $nights, 'from' => $in->format('D, M j, Y'), 'to' => $out->format('D, M j, Y')],
             'option' => $option,
             'cancellation' => $cancelBy && $cancelBy->isFuture() ? 'Free cancellation until '.$cancelBy->format('M j, Y') : ($days === null ? 'Non-refundable once the host confirms' : null),
-            'guest' => ['name' => $user->name, 'email' => $user->email],
+            'guest' => $user ? ['name' => $user->name, 'email' => $user->email] : null,
             'urls' => [
                 'quote' => route('marketplace.properties.quote', $listing->slug),
                 'reserve' => route('marketplace.properties.reserve', $listing->slug),
                 'back' => $back,
                 'home' => url('/'),
+                'here' => $request->getPathInfo().'?'.$request->getQueryString(),
             ],
         ]);
     }

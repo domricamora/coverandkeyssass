@@ -105,7 +105,7 @@ it('runs cart to checkout and snapshots the order', function () {
 
     $this->post(route('cart.add', $restaurant->slug), ['item_id' => $burger->id, 'options' => [$opt['Cheese'], $opt['Bacon']], 'quantity' => 2])
         ->assertSessionHasNoErrors();
-    $this->get(route('cart.show'))->assertOk()->assertInertia(fn ($p) => $p->component('Order/Checkout')->where('quote.total', 660)->where('signedIn', false));
+    $this->get(route('cart.show'))->assertOk()->assertInertia(fn ($p) => $p->component('Order/Checkout')->where('quote.total', 660)->where('guest', null));
 
     $this->post(route('cart.checkout'), ['fulfillment' => 'pickup', 'payment_method' => 'cash', 'customer_phone' => '0917'])
         ->assertRedirect(route('login'));

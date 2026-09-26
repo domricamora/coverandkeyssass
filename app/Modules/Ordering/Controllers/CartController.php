@@ -122,12 +122,11 @@ class CartController extends Controller
             ]))->values(),
             'minSchedule' => $listing ? now()->addMinutes((int) $listing->prep_minutes)->format('Y-m-d\TH:i') : null,
             'old' => (object) $request->old(),
-            'signedIn' => (bool) $request->user(),
+            'guest' => $request->user() ? ['name' => $request->user()->name, 'email' => $request->user()->email] : null,
             'urls' => [
                 'self' => route('cart.show'),
                 'checkout' => route('cart.checkout'),
                 'cartBase' => url('/cart'),
-                'signIn' => route('continue', ['to' => '/cart']),
                 'browse' => route('marketplace.restaurants.index'),
                 'home' => url('/'),
             ],

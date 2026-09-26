@@ -207,7 +207,8 @@
                                 'reserveUrl' => route('marketplace.restaurants.reserve', $r->slug),
                                 'pageUrl' => route('marketplace.restaurants.show', $r->slug),
                                 'root' => url('/'),
-                                'signedIn' => auth()->check(),
+                                'user' => auth()->user() ? ['name' => auth()->user()->name, 'email' => auth()->user()->email] : null,
+                                'guestUrls' => ['identify' => route('guest.identify'), 'password' => route('guest.password'), 'link' => route('login.link.send')],
                                 'today' => today()->toDateString(),
                                 'prefill' => [
                                     'date' => old('date', request('date')), 'time' => old('time', request('time')), 'party' => old('party_size', request('party')),

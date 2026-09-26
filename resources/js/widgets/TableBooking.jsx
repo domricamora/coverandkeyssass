@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { BTN, FIELD, LABEL, Stepper, continueUrl, cx, json, postForm } from './ui';
+import { BTN, FIELD, LABEL, Stepper, cx, json, postForm, useGuest } from './ui';
 
 /**
  * Table booking: 14-day date strip, party size, live time slots, then
@@ -11,7 +11,7 @@ import { BTN, FIELD, LABEL, Stepper, continueUrl, cx, json, postForm } from './u
  */
 const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 
-export default function TableBooking({ slotsUrl, reserveUrl, pageUrl, root, signedIn, today, prefill = {}, error }) {
+export default function TableBooking({ slotsUrl, reserveUrl, pageUrl, root, user, guestUrls, today, prefill = {}, error }) {
     const days = useMemo(() => Array.from({ length: 14 }, (_, i) => {
         const d = new Date(`${today}T00:00:00`);
         d.setDate(d.getDate() + i);
@@ -22,9 +22,10 @@ export default function TableBooking({ slotsUrl, reserveUrl, pageUrl, root, sign
     const [party, setParty] = useState(Number(prefill.party) || 2);
     const [time, setTime] = useState(prefill.time ?? null);
     const [slots, setSlots] = useState(null);
-    const [phone, setPhone] = useState(prefill.phone ?? '');
     const [requests, setRequests] = useState(prefill.requests ?? '');
     const [busy, setBusy] = useState(false);
+    const back = `${pageUrl.slice(root.length) || '/'}?${new URLSearchParams({ date, time: time ?? '', party })}#book`;
+    const who = useGuest({ user, urls: guestUrls, returnTo: back, phone: prefill.phone ?? '', stacked: true });
 
     useEffect(() => {
         const ctrl = new AbortController();
@@ -35,14 +36,10 @@ export default function TableBooking({ slotsUrl, reserveUrl, pageUrl, root, sign
         return () => ctrl.abort();
     }, [date, slotsUrl]);
 
-    const book = () => {
-        if (!signedIn) {
-            const back = `${pageUrl}?${new URLSearchParams({ date, time, party })}#book`;
-            window.location.href = continueUrl(root, back);
-            return;
-        }
+    const book = async () => {
         setBusy(true);
-        postForm(reserveUrl, { date, time, party_size: party, guest_phone: phone, special_requests: requests });
+        if (!(await who.ensure())) { setBusy(false); return; }
+        postForm(reserveUrl, { date, time, party_size: party, guest_phone: who.phone, special_requests: requests });
     };
 
     return (
@@ -87,12 +84,9 @@ export default function TableBooking({ slotsUrl, reserveUrl, pageUrl, root, sign
                 )}
             </div>
 
-            {time && signedIn && (
+            {time && (
                 <div className="space-y-3">
-                    <label className="block">
-                        <span className={LABEL}>Mobile number <span className="font-normal text-fg-3">(optional)</span></span>
-                        <input type="tel" autoComplete="tel" className={FIELD} value={phone} onChange={(e) => setPhone(e.target.value)} />
-                    </label>
+                    {who.view}
                     <label className="block">
                         <span className={LABEL}>Requests <span className="font-normal text-fg-3">(optional)</span></span>
                         <textarea rows={2} className={cx(FIELD, 'h-auto py-2.5')} value={requests} onChange={(e) => setRequests(e.target.value)} placeholder="Birthday, high chair, window seat" />
@@ -101,7 +95,7 @@ export default function TableBooking({ slotsUrl, reserveUrl, pageUrl, root, sign
             )}
 
             <button type="button" className={BTN} disabled={!time || busy} onClick={book}>
-                {!time ? 'Pick a time' : !signedIn ? 'Sign in to book' : busy ? 'Booking…' : `Book table for ${party} at ${time}`}
+                {!time ? 'Pick a time' : busy ? 'Booking…' : `Book table for ${party} at ${time}`}
             </button>
             <p className="text-center text-[12px] text-fg-3">The restaurant confirms your request.</p>
         </div>

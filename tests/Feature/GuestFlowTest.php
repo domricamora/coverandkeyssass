@@ -51,10 +51,11 @@ it('mounts the React stay panel and runs the review step before reserving', func
 
     $this->get(route('marketplace.properties.show', $property->slug))->assertOk()
         ->assertSee('data-widget="StayPanel"', false)
-        ->assertSee('Sign in to book'); // server-rendered no-JS fallback stays inside the mount
+        ->assertSee('Sign in to book'); // no-JS fallback inside the mount
 
     $query = ['check_in' => '2030-09-02', 'check_out' => '2030-09-04', 'guests' => 2, 'room_type_id' => $type->id, 'quantity' => 1];
-    $this->get(route('stay.review', $property->slug).'?'.http_build_query($query))->assertRedirect(route('login'));
+    $this->get(route('stay.review', $property->slug).'?'.http_build_query($query))->assertOk() // no registration step
+        ->assertInertia(fn ($p) => $p->component('Stay/Review')->where('guest', null)->where('guestUrls.identify', route('guest.identify')));
 
     $guest = User::factory()->create();
     $this->actingAs($guest)->get(route('stay.review', $property->slug).'?'.http_build_query($query))->assertOk()

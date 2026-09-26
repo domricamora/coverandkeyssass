@@ -23,6 +23,7 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'app' => ['name' => config('app.name'), 'home' => route('home')],
+            'guestUrls' => fn () => $user ? null : ['identify' => route('guest.identify'), 'password' => route('guest.password'), 'link' => route('login.link.send')],
             'auth' => $user ? [
                 'name' => $user->name,
                 'email' => $user->email,

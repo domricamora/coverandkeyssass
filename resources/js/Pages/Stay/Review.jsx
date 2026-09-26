@@ -1,14 +1,14 @@
 import { Head, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import PublicShell from '../../react/PublicShell';
-import { BTN, FIELD, LABEL, Stepper, json, money, postForm } from '../../widgets/ui';
+import { BTN, FIELD, LABEL, Stepper, json, money, postForm, useGuest } from '../../widgets/ui';
 
 /** Stay booking, step 2 of 2: review the stay, add details and a promo code, request the booking. */
 export default function StayReview({ property, stay, option, cancellation, guest, urls }) {
-    const { errors } = usePage().props;
+    const { errors, guestUrls } = usePage().props;
+    const who = useGuest({ user: guest, urls: guestUrls, returnTo: urls.here });
     const [adults, setAdults] = useState(Math.max(1, stay.guests));
     const [children, setChildren] = useState(0);
-    const [phone, setPhone] = useState('');
     const [requests, setRequests] = useState('');
     const [code, setCode] = useState('');
     const [promo, setPromo] = useState(null);
@@ -30,12 +30,13 @@ export default function StayReview({ property, stay, option, cancellation, guest
         }
     };
 
-    const submit = (e) => {
+    const submit = async (e) => {
         e.preventDefault();
         setSending(true);
+        if (!(await who.ensure())) { setSending(false); return; }
         postForm(urls.reserve, {
             check_in: stay.check_in, check_out: stay.check_out, room_type_id: stay.room_type_id, quantity: stay.quantity,
-            adults, children, guest_phone: phone, special_requests: requests, promo_code: promo?.code,
+            adults, children, guest_phone: who.phone, special_requests: requests, promo_code: promo?.code,
         });
     };
 
@@ -54,14 +55,10 @@ export default function StayReview({ property, stay, option, cancellation, guest
 
                     <section className="space-y-4">
                         <h2 className="text-[16px] font-semibold">Your details</h2>
-                        <p className="text-[14px] text-fg-2">{guest.name} · {guest.email}</p>
-                        <div className="grid gap-4 sm:grid-cols-3">
+                        {who.view}
+                        <div className="grid gap-4 sm:grid-cols-2">
                             <div><span className={LABEL}>Adults</span><Stepper value={adults} min={1} max={50} onChange={setAdults} label="adults" /></div>
                             <div><span className={LABEL}>Children</span><Stepper value={children} min={0} max={50} onChange={setChildren} label="children" /></div>
-                            <label className="block">
-                                <span className={LABEL}>Mobile number</span>
-                                <input type="tel" autoComplete="tel" className={FIELD} value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+63 917 000 0000" />
-                            </label>
                         </div>
                         {(errors?.adults || errors?.guest_phone) && <p className="text-[13px] text-bad">{errors.adults ?? errors.guest_phone}</p>}
                         <label className="block">
