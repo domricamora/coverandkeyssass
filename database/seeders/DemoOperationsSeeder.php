@@ -18,9 +18,6 @@ use App\Modules\Ordering\Models\Order;
 use App\Modules\Ordering\Services\OrderService;
 use App\Modules\RestaurantManagement\Models\MenuCategory;
 use App\Modules\RestaurantManagement\Models\MenuItem;
-use App\Modules\Workforce\Models\Department;
-use App\Modules\Workforce\Models\Position;
-use App\Modules\Workforce\Services\WorkforceService;
 use App\Support\TenantContext;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
@@ -82,12 +79,6 @@ class DemoOperationsSeeder extends Seeder
         ],
     ];
 
-    private const STAFF = [
-        ['Front Office', 'Guest Relations Officer', 110, ['Carmela Villanueva', 'Rafael Mendoza']],
-        ['Housekeeping', 'Room Attendant', 95, ['Liza Bautista', 'Joel Ramos', 'Maricel Aquino']],
-        ['Kitchen', 'Line Cook', 105, ['Paolo Fernandez']],
-        ['Maintenance', 'Maintenance Technician', 115, ['Dante Castillo']],
-    ];
 
     private const STOCK = [
         // sku, name, unit, reorder level, received qty, unit cost
@@ -108,7 +99,11 @@ class DemoOperationsSeeder extends Seeder
         $context = app(TenantContext::class);
         $guests = User::query()->where('email', 'like', '%@example.test')->where('email', 'not like', 'owner@%')->orderBy('id')->get()->values();
 
-        foreach (Tenant::query()->whereIn('slug', ['aplaya-beach-resort', 'kalye-suite-company', 'nido-cove-escapes'])->get() as $tenant) {
+        // Months of trading history: full scale on a dev database, a few days under tests.
+        $history = app()->runningUnitTests() ? new DemoHistorySeeder(stayDays: 4, ticketDays: 2) : new DemoHistorySeeder;
+        $tenants = Tenant::query()->whereIn('slug', ['aplaya-beach-resort', 'kalye-suite-company', 'nido-cove-escapes'])->orderBy('id')->get();
+
+        foreach ($tenants as $t => $tenant) {
             $owner = User::query()->where('email', 'like', 'owner@%')->whereHas('tenants', fn ($q) => $q->whereKey($tenant->id))->first();
 
             if (! $owner) {
@@ -117,59 +112,32 @@ class DemoOperationsSeeder extends Seeder
 
             $context->set($tenant);
 
-            if (Booking::query()->exists()) {
-                $this->settleFolios($owner);
-                $this->extras($owner, $guests);
-                $context->forget();
+            if (! Booking::query()->exists()) {
+                $this->inventory($owner);
 
-                continue;
+                foreach (Property::query()->get() as $i => $property) {
+                    $this->bookings($property, $guests, $i);
+                    $this->maintenance($property, $owner, $i);
+                }
+
+                foreach (Restaurant::query()->get() as $restaurant) {
+                    $this->menu($restaurant);
+                    $this->orders($restaurant, $guests);
+                }
             }
 
-            $this->staff($owner);
-            $this->inventory($owner);
-
-            foreach (Property::query()->get() as $i => $property) {
-                $this->bookings($property, $guests, $i);
-                $this->maintenance($property, $owner, $i);
-            }
-
-            foreach (Restaurant::query()->get() as $restaurant) {
-                $this->menu($restaurant);
-                $this->orders($restaurant, $guests);
-            }
-
-            $this->settleFolios($owner);
             $this->extras($owner, $guests);
+            $history->forTenant($tenant, $owner, $t);
+            $this->settleFolios($owner);
             app(CrmService::class)->sync();
             $context->forget();
         }
 
+        DemoHistorySeeder::groupOwner();
         Artisan::call('accounting:sync');
         $this->command?->info('Demo operations seeded: bookings, staff, inventory, maintenance, menus, orders.');
     }
 
-    private function staff(User $owner): void
-    {
-        $service = app(WorkforceService::class);
-
-        foreach (self::STAFF as [$departmentName, $positionName, $rate, $people]) {
-            $department = Department::query()->firstOrCreate(['name' => $departmentName]);
-            $position = Position::query()->firstOrCreate(
-                ['name' => $positionName, 'department_id' => $department->id],
-                ['hourly_rate' => $rate],
-            );
-
-            foreach ($people as $n => $name) {
-                $service->hire([
-                    'name' => $name,
-                    'employment_type' => 'full_time',
-                    'department_id' => $department->id,
-                    'position_id' => $position->id,
-                    'hire_date' => now()->subMonths(6 + $n * 5)->toDateString(),
-                ], $owner);
-            }
-        }
-    }
 
     private function inventory(User $owner): void
     {
@@ -268,7 +236,6 @@ class DemoOperationsSeeder extends Seeder
         $this->promotions();
         $this->loyaltyProgram();
         $this->campaigns($owner);
-        $this->rota($owner);
         $this->purchasing($owner);
         $this->conversations($owner, $guests);
     }
@@ -362,27 +329,6 @@ class DemoOperationsSeeder extends Seeder
         \App\Modules\Marketing\Models\Campaign::query()->create(['name' => 'Weekend brunch launch', 'channel' => 'email', 'audience' => 'all', 'subject' => 'Brunch is back on weekends', 'body' => "Hi {name},\n\nWeekend brunch starts this Saturday. See you there.\n\n{business}", 'status' => 'draft', 'created_by' => $owner->id]);
     }
 
-    /** Next week's rota for every employee: day or evening shifts, one day off. */
-    private function rota(User $owner): void
-    {
-        if (\App\Modules\Workforce\Models\Shift::query()->exists()) {
-            return;
-        }
-
-        $service = app(WorkforceService::class);
-        $propertyId = Property::query()->value('id');
-
-        foreach (\App\Modules\Workforce\Models\Employee::query()->get() as $e => $employee) {
-            foreach (range(1, 6) as $day) {
-                if (($day + $e) % 7 === 0) {
-                    continue;
-                }
-                $date = today()->addDays($day)->toDateString();
-                [$from, $to] = $e % 2 === 0 ? ['07:00', '15:00'] : ['14:00', '22:00'];
-                rescue(fn () => $service->scheduleShift($employee, "{$date} {$from}", "{$date} {$to}", $owner, $propertyId), report: false);
-            }
-        }
-    }
 
     private function purchasing(User $owner): void
     {
