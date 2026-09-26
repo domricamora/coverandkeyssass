@@ -88,13 +88,22 @@ class DemoHistorySeeder
         $this->rotaAndAttendance($team, $owner);
         $this->leave($team, $owner);
 
+        // Each generator runs once per business; the flag lives on the tenant so a
+        // day with no successful reservation can't cause a second pass.
+        $done = (array) ($tenant->settings['demo_seeded'] ?? []);
+
         foreach (Property::query()->orderBy('id')->get() as $property) {
-            $this->stays($property);
+            isset($done['stays']) || $this->stays($property);
+            isset($done['live']) || $this->live($property);
         }
 
         foreach (Restaurant::query()->orderBy('id')->get() as $restaurant) {
-            $this->tickets($restaurant, $team);
+            isset($done['tickets']) || $this->tickets($restaurant, $team);
         }
+
+        $tenant->forceFill(['settings' => array_merge((array) $tenant->settings, [
+            'demo_seeded' => ['stays' => true, 'live' => true, 'tickets' => true],
+        ])])->save();
 
         $this->housekeeping($team);
         Carbon::setTestNow();
@@ -260,7 +269,8 @@ class DemoHistorySeeder
 
         for ($d = -$this->stayDays; $d <= -2; $d++) {
             $day = today()->addDays($d);
-            $arrivals = mt_rand(0, 2) + ($day->isFriday() || $day->isSaturday() ? 1 : 0);
+            // At least one arrival on day one (empty calendar), so the idempotency marker always exists.
+            $arrivals = max($d === -$this->stayDays ? 1 : 0, mt_rand(0, 2) + ($day->isFriday() || $day->isSaturday() ? 1 : 0));
 
             for ($a = 0; $a < $arrivals; $a++) {
                 $nights = min(mt_rand(1, 4), -$d - 1);
@@ -307,6 +317,59 @@ class DemoHistorySeeder
 
                 Carbon::setTestNow($day->copy()->addDays($nights)->setTime(11, mt_rand(0, 40)));
                 $service->transition($booking->refresh(), Booking::CHECKED_OUT);
+            }
+        }
+
+        Carbon::setTestNow();
+    }
+
+    /**
+     * Today looks like a working day: guests in house (arrived in the last
+     * few days), departures and arrivals due today, and a month of upcoming
+     * reservations. Skipped once a live stay from this seeder exists.
+     */
+    private function live(Property $property): void
+    {
+        if (Booking::query()->where('property_id', $property->id)->where('guest_email', 'like', '%@guestmail.example.test')->where('check_out', '>=', today())->exists()) {
+            return;
+        }
+
+        $types = $property->roomTypes()->active()->get();
+
+        if ($types->isEmpty()) {
+            return;
+        }
+
+        $service = app(BookingService::class);
+        $lastDay = app()->runningUnitTests() ? 3 : 30;
+
+        for ($d = -3; $d <= $lastDay; $d++) {
+            $day = today()->addDays($d);
+            $arrivals = $d <= 0 ? mt_rand(1, 2) : mt_rand(0, 2) + ($day->isFriday() || $day->isSaturday() ? 1 : 0);
+
+            for ($a = 0; $a < $arrivals; $a++) {
+                $nights = max(mt_rand(1, 4), -$d); // stays that started earlier are still open today
+                $guest = self::GUESTS[mt_rand(0, count(self::GUESTS) - 1)];
+                $source = $d > 0 && mt_rand(1, 4) === 1 ? Booking::SOURCE_MARKETPLACE : Booking::SOURCE_MANUAL;
+
+                Carbon::setTestNow(($d < 0 ? $day : today())->copy()->setTime(9 + $a, 5));
+
+                $booking = rescue(fn () => $service->reserve($property, [
+                    'check_in' => $day->toDateString(),
+                    'check_out' => $day->copy()->addDays($nights)->toDateString(),
+                    'rooms' => [['room_type_id' => $types[mt_rand(0, $types->count() - 1)]->id, 'quantity' => 1]],
+                    'adults' => mt_rand(1, 2),
+                    'guest_name' => $guest,
+                    'guest_email' => Str::slug($guest, '.').'@guestmail.example.test',
+                    'guest_phone' => '+63 918 '.mt_rand(100, 999).' '.mt_rand(1000, 9999),
+                    'special_requests' => mt_rand(1, 5) === 1 ? ['Late arrival, around 10 pm', 'Celebrating an anniversary', 'High floor if possible', 'Airport pick-up please'][mt_rand(0, 3)] : null,
+                ], $source), report: false);
+
+                // Arrived earlier (or checked in early today): in house now.
+                if ($booking && ($d < 0 || ($d === 0 && mt_rand(1, 3) === 1))) {
+                    Carbon::setTestNow($day->copy()->setTime(14, mt_rand(0, 59)));
+                    $service->transition($booking, Booking::CHECKED_IN);
+                }
             }
         }
 

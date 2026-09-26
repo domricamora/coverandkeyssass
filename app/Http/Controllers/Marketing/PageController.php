@@ -36,8 +36,13 @@ class PageController extends Controller
         return view('marketing.home', [
             'title' => null,
             'stats' => $this->marketplace->stats(),
-            'featured' => $this->marketplace->featuredProperties(3),
-            'destinations' => $this->marketplace->destinations(6),
+            'featured' => $this->marketplace->featuredProperties(6),
+            'restaurants' => $this->marketplace->featuredRestaurants(3),
+            // Each destination card shows the cover of its best listing.
+            'destinations' => $this->marketplace->destinations(6)->each(fn ($location) => $location->setAttribute(
+                'cover',
+                \App\Modules\Marketplace\Models\Property::publicQuery()->where('location_id', $location->id)->ranked()->first()?->galleryUrls()[0] ?? null,
+            )),
             'types' => $this->marketplace->filterOptions()['property_types'],
             'modules' => $this->modules(),
             'roadmap' => self::roadmap(),

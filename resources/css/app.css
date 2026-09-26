@@ -1633,3 +1633,66 @@ h2,
     .tour__stage { padding: 0 8px; }
     .tour__nav { display: none; }
 }
+
+/* ============================================================================
+   Palette v3 "Lagoon & Coral" — whole platform (2026-09-26)
+   Owner: "too dark … i want it to look inviting and fresh, since we are a
+   hospitality site". Light sea-mist canvas, lagoon teal primary, sunset coral
+   accent, deep-sea ink text. Legacy token names are remapped so every
+   existing screen follows; --gold now means "primary accent" (lagoon).
+   ========================================================================== */
+:root,
+body.public-body,
+.dash-body,
+.admin-body {
+    --primary: #0e6461;
+    --primary-deep: #0a4f4d;
+    --primary-soft: #e1f0ee;
+    --coral: #d9603f;
+    --coral-deep: #b84a2c;
+    --coral-soft: #fcebe4;
+    --brand: var(--primary);
+
+    --gold: var(--primary);
+    --gold-soft: var(--primary-deep);
+    --gold-deep: var(--primary-deep);
+    --gold-dim: rgba(14, 100, 97, 0.1);
+
+    --bg: #f7faf9;
+    --bg-raised: #eef4f2;
+    --surface: #ffffff;
+    --surface-2: #ffffff;
+    --border: #dde7e4;
+    --hairline: #dde7e4;
+    --input-border: #c3d1cd;
+    --input-bg: #ffffff;
+    --text: #10252a;
+    --text-2: #3b5157;
+    --text-3: #5e7277;
+    --text-4: #7f9095;
+    --soft: #eef4f2;
+    --soft-2: #e1ece9;
+    --ink: #10252a;
+    --shadow-color: 16, 37, 42;
+}
+
+body.public-body,
+body.dash-body,
+body.admin-body {
+    background: var(--bg);
+    color: var(--text);
+}
+
+.btn-primary,
+.btn-primary:hover,
+.dash-body .btn-primary,
+.dash-body .btn-primary:hover {
+    color: #fff;
+}
+.btn-outline:hover { color: var(--primary); border-color: var(--primary); }
+.btn-coral { background: var(--coral); color: #fff; border-color: var(--coral); }
+.btn-coral:hover { background: var(--coral-deep); border-color: var(--coral-deep); }
+.dash-body .side-nav a.is-active { color: var(--primary-deep); }
+
+/* Public site is full width (owner: "not boxed, i want it full width"). */
+.public-body .container { max-width: none; padding-left: clamp(20px, 4vw, 64px); padding-right: clamp(20px, 4vw, 64px); }
