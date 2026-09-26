@@ -26,11 +26,20 @@ class StaffController extends PropertyManagementController
 
         $staff = $property->staff()->with('user')->orderBy('created_at')->get();
 
-        return view('property-management::properties.staff', [
-            'property' => $property,
-            'staff' => $staff,
+        return \Inertia\Inertia::render('Properties/Staff', [
+            'property' => ['name' => $property->name],
+            'tabs' => $this->tabs($property, 'staff'),
+            'staff' => $staff->map(fn (PropertyStaff $m) => [
+                'id' => $m->id,
+                'name' => $m->user?->name ?? '—',
+                'email' => $m->user?->email,
+                'role' => $m->role,
+                'since' => $m->created_at?->format('M j, Y'),
+                'update' => route('properties.staff.update', [$property, $m]),
+                'destroy' => route('properties.staff.destroy', [$property, $m]),
+            ]),
             'roles' => PropertyStaff::roles(),
-            'title' => 'Staff — '.$property->name,
+            'urls' => ['store' => route('properties.staff.store', $property)],
         ]);
     }
 

@@ -39,6 +39,25 @@ export function Panel({ title, aside, children, className, pad }) {
     );
 }
 
+/** Sub-navigation between the screens of one record: [{ label, href, active }]. */
+export function Tabs({ tabs }) {
+    if (!tabs?.length) return null;
+    return (
+        <nav className="-mt-2 flex gap-1 overflow-x-auto border-b border-line" aria-label="Sections">
+            {tabs.map((t) => (
+                <Link
+                    key={t.href}
+                    href={t.href}
+                    aria-current={t.active ? 'page' : undefined}
+                    className={cx('-mb-px whitespace-nowrap border-b-2 px-3 py-2.5 text-[13px]', t.active ? 'border-brand font-medium text-fg' : 'border-transparent text-fg-3 hover:text-fg')}
+                >
+                    {t.label}
+                </Link>
+            ))}
+        </nav>
+    );
+}
+
 /** Two columns on wide screens: main content + a narrower side column. */
 export const Split = ({ children, side = '360px' }) => (
     <div className="grid items-start gap-8 xl:grid-cols-[minmax(0,1fr)_var(--side)]" style={{ '--side': side }}>{children}</div>

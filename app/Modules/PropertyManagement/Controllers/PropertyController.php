@@ -11,6 +11,9 @@ use App\Modules\Marketplace\Models\PropertyType;
 use App\Support\AuditLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Support\MediaUploads;
+use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 /**
  * Host-side property management (Phase 04): profile CRUD, publish
@@ -34,9 +37,18 @@ class PropertyController extends PropertyManagementController
             ->paginate(15)
             ->withQueryString();
 
-        return view('property-management::properties.index', [
-            'properties' => $properties,
-            'title' => 'Properties',
+        return Inertia::render('Properties/Index', [
+            'properties' => $properties->through(fn (Property $p) => [
+                'name' => $p->name,
+                'where' => $p->locationLabel() ?: null,
+                'type' => $p->propertyType?->name,
+                'status' => $p->status,
+                'from' => $p->priceLabel(),
+                'rooms' => $p->rooms_count,
+                'urls' => ['show' => route('properties.show', $p), 'inventory' => route('properties.inventory', $p), 'staff' => route('properties.staff.index', $p)],
+            ]),
+            'can' => ['create' => $request->user()->can('create', Property::class)],
+            'urls' => ['create' => route('properties.create')],
         ]);
     }
 
@@ -44,10 +56,10 @@ class PropertyController extends PropertyManagementController
     {
         $this->authorize('create', Property::class);
 
-        return view('property-management::properties.create', [
-            'locations' => Location::query()->orderBy('name')->get(),
-            'propertyTypes' => PropertyType::query()->orderBy('name')->get(),
-            'title' => 'New property',
+        return Inertia::render('Properties/Form', [
+            'property' => null,
+            'options' => $this->formOptions(),
+            'urls' => ['submit' => route('properties.store'), 'back' => route('properties.index')],
         ]);
     }
 
@@ -79,9 +91,38 @@ class PropertyController extends PropertyManagementController
         $property->load(['location', 'propertyType', 'media']);
         $property->loadCount(['roomTypes', 'rooms', 'staff']);
 
-        return view('property-management::properties.show', [
-            'property' => $property,
-            'title' => $property->name,
+        $user = $request->user();
+        $cover = $property->coverMedia();
+
+        return Inertia::render('Properties/Show', [
+            'property' => [
+                'name' => $property->name,
+                'summary' => ($property->propertyType?->name ?? 'Property').' · '.($property->locationLabel() ?: 'No destination set'),
+                'featured' => (bool) $property->is_featured,
+                'status' => $property->status,
+                'published' => $property->status === Property::STATUS_PUBLISHED,
+                'tagline' => $property->tagline,
+                'description' => $property->description,
+                'facts' => [
+                    ['From', $property->priceLabel().' / night · cleaning '.$property->currency.' '.number_format((float) $property->cleaning_fee, 0)],
+                    ['Capacity', 'up to '.$property->max_guests.' guests · '.$property->bedrooms.' bedroom(s) · '.$property->beds.' bed(s) · '.$property->bathrooms.' bath(s)'],
+                    ['Check-in / out', $property->check_in_time.' / '.$property->check_out_time],
+                    $property->amenities->isNotEmpty() ? ['Amenities', $property->amenities->pluck('name')->implode(', ')] : null,
+                ],
+                'policies' => collect($property->policies ?? [])->map(fn ($v, $k) => [Str::headline($k), (string) $v])->values(),
+                'counts' => ['types' => $property->room_types_count, 'rooms' => $property->rooms_count, 'staff' => $property->staff_count],
+                'cover' => $cover?->url(),
+                'photos' => $property->media->where('kind', 'image')->count(),
+                'videos' => $property->media->where('kind', 'video')->count(),
+                'public' => route('marketplace.properties.show', $property->slug),
+            ],
+            'tabs' => $this->tabs($property, 'show'),
+            'can' => ['publish' => $user->can('publish', $property), 'delete' => $user->can('delete', $property)],
+            'urls' => [
+                'publish' => route('properties.publish', $property),
+                'unpublish' => route('properties.unpublish', $property),
+                'destroy' => route('properties.destroy', $property),
+            ],
         ]);
     }
 
@@ -93,14 +134,21 @@ class PropertyController extends PropertyManagementController
 
         $property->load('media');
 
-        return view('property-management::properties.edit', [
-            'property' => $property,
-            'locations' => Location::query()->orderBy('name')->get(),
-            'propertyTypes' => PropertyType::query()->orderBy('name')->get(),
-            'amenities' => Amenity::query()->orderBy('name')->get(),
-            'photos' => $property->media()->where('kind', 'image')->ordered()->get(),
-            'videos' => $property->media()->where('kind', 'video')->ordered()->get(),
-            'title' => 'Edit — '.$property->name,
+        $policies = $property->policies ?? [];
+
+        return Inertia::render('Properties/Form', [
+            'property' => $property->only(array_keys($this->profileRules())) + [
+                'amenities' => $property->amenities()->pluck('amenities.id'),
+                'policy_free_cancellation_days' => $policies['free_cancellation_days'] ?? '',
+            ] + collect(['cancellation', 'children', 'pets', 'noise', 'smoking'])->mapWithKeys(fn ($k) => ['policy_'.$k => $policies[$k] ?? ''])->all(),
+            'title' => $property->name,
+            'options' => $this->formOptions() + ['amenities' => Amenity::query()->orderBy('name')->get(['id', 'name'])->map(fn ($a) => [$a->id, $a->name])],
+            'media' => MediaUploads::payload($property, fn ($m) => [
+                'make_cover' => route('properties.media.cover', [$property, $m]),
+                'destroy' => route('properties.media.destroy', [$property, $m]),
+            ]) + ['store' => route('properties.media.store', $property), 'areas' => MediaUploads::AREAS['property']],
+            'tabs' => $this->tabs($property, 'edit'),
+            'urls' => ['submit' => route('properties.update', $property), 'back' => route('properties.show', $property)],
         ]);
     }
 
@@ -226,6 +274,14 @@ class PropertyController extends PropertyManagementController
     // ------------------------------------------------------------------
     // Internals
     // ------------------------------------------------------------------
+
+    private function formOptions(): array
+    {
+        return [
+            'types' => PropertyType::query()->orderBy('name')->get(['id', 'name'])->map(fn ($t) => [$t->id, $t->name]),
+            'locations' => Location::query()->orderBy('name')->get(['id', 'name'])->map(fn ($l) => [$l->id, $l->name]),
+        ];
+    }
 
     private function profileRules(): array
     {

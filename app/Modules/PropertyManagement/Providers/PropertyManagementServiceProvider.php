@@ -10,7 +10,7 @@ use Illuminate\Support\ServiceProvider;
  * self-contained module owning its migrations, views, routes and policies).
  *
  * Host-side only in Phase 04: it manages the tenant-owned rows that the
- * Marketplace module publishes. Views are namespaced `property-management::`;
+ * Marketplace module publishes. Screens are React (Inertia) pages;
  * routes are declared in routes.php and loaded inside the `web` group.
  */
 class PropertyManagementServiceProvider extends ServiceProvider
@@ -18,7 +18,6 @@ class PropertyManagementServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadMigrationsFrom(__DIR__.'/../Migrations');
-        $this->loadViewsFrom(__DIR__.'/../Views', 'property-management');
 
         Route::middleware('web')->group(__DIR__.'/../routes.php');
     }

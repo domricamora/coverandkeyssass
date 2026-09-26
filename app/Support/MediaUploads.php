@@ -23,6 +23,22 @@ class MediaUploads
         'restaurant' => ['Dining room', 'Dishes', 'Bar', 'Kitchen', 'Terrace', 'Private dining', 'Exterior'],
     ];
 
+    /**
+     * Photos + videos of a listing for the React media manager; $urls maps a
+     * media row to its per-item action URLs (make_cover, destroy).
+     *
+     * @return array{photos: list<array<string, mixed>>, videos: list<array<string, mixed>>}
+     */
+    public static function payload(Model $listing, callable $urls): array
+    {
+        $row = fn ($m) => ['id' => $m->id, 'url' => $m->url(), 'alt' => $m->alt, 'caption' => $m->caption, 'cover' => (bool) $m->is_cover] + $urls($m);
+
+        return [
+            'photos' => $listing->media()->where('kind', 'image')->ordered()->get()->map($row)->all(),
+            'videos' => $listing->media()->where('kind', 'video')->ordered()->get()->map($row)->all(),
+        ];
+    }
+
     /** @return int number of media rows created */
     public static function store(Request $request, Model $listing, string $folder, bool $allowVideo = true): int
     {

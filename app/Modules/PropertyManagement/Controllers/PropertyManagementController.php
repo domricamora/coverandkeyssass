@@ -41,6 +41,19 @@ abstract class PropertyManagementController extends Controller
         return $property;
     }
 
+    /** Sub-navigation shared by the property screens (React). */
+    protected function tabs(Property $property, string $active): array
+    {
+        $user = request()->user();
+
+        return collect([
+            ['show', 'Overview', route('properties.show', $property), true],
+            ['edit', 'Profile & photos', route('properties.edit', $property), $user->can('update', $property)],
+            ['inventory', 'Rooms & rates', route('properties.inventory', $property), true],
+            ['staff', 'Staff', route('properties.staff.index', $property), $user->hasPermissionTo('properties.staff.manage')],
+        ])->filter(fn ($t) => $t[3])->map(fn ($t) => ['label' => $t[1], 'href' => $t[2], 'active' => $t[0] === $active])->values()->all();
+    }
+
     /** 404 unless the actor holds the permission inside the active tenant. */
     protected function authorizeProperty(Request $request, Property $property, string $permission): void
     {
