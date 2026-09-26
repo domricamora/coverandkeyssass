@@ -564,13 +564,17 @@ class MarketplaceDemoSeeder extends Seeder
                 foreach (array_slice($guests, 0, 4) as $offset => $guest) {
                     [$rating, $title, $comment] = self::REVIEW_SAMPLES[($listing->id + $offset) % count(self::REVIEW_SAMPLES)];
 
+                    // Category scores around the overall score (Booking.com / Airbnb style breakdown).
+                    $categories = $listing instanceof Restaurant ? ['food', 'service', 'value'] : ['cleanliness', 'location', 'service', 'value', 'amenities'];
+                    $scores = collect($categories)->mapWithKeys(fn ($c, $i) => ['rating_'.$c => max(1, min(5, $rating + [0, 1, 0, -1, 0][($listing->id + $offset + $i) % 5]))])->all();
+
                     Review::query()->updateOrCreate(
                         [
                             'user_id' => $guest->id,
                             'reviewable_type' => $listing->getMorphClass(),
                             'reviewable_id' => $listing->getKey(),
                         ],
-                        [
+                        $scores + [
                             'rating' => $rating,
                             'title' => $title,
                             'comment' => $comment,

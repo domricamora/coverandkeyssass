@@ -96,7 +96,7 @@
     @endif
 
     {{-- Stays --}}
-    <section class="{{ $pad }} pt-20">
+    <section class="{{ $pad }} mt-20 border-t border-line pt-16">
         <div class="flex flex-wrap items-end justify-between gap-4">
             <div>
                 <p class="text-[13px] font-semibold uppercase tracking-[0.14em] text-coral-deep">Stays</p>
@@ -148,7 +148,7 @@
 
     {{-- Restaurants --}}
     @if ($restaurants->isNotEmpty())
-        <section class="{{ $pad }} pt-24">
+        <section class="{{ $pad }} mt-20 border-t border-line pt-16">
             <div class="flex flex-wrap items-end justify-between gap-4">
                 <div>
                     <p class="text-[13px] font-semibold uppercase tracking-[0.14em] text-coral-deep">Eat well</p>
@@ -174,7 +174,7 @@
     @endif
 
     {{-- Why book here --}}
-    <section class="{{ $pad }} pt-24">
+    <section class="{{ $pad }} mt-20 border-t border-line pt-16">
         <div class="grid gap-px border border-line bg-line sm:grid-cols-2 xl:grid-cols-4">
             @foreach ([
                 ['Book direct', 'Your booking goes straight to the property’s own front desk. No reseller in between, no surprise mark-up.', 'M3 12l9-8 9 8M5 10v10h14V10'],
@@ -229,7 +229,7 @@
     </section>
 
     {{-- Questions (also FAQPage structured data) --}}
-    <section class="{{ $pad }} pt-24">
+    <section class="{{ $pad }} mt-20 border-t border-line pt-16">
         <div class="grid gap-10 lg:grid-cols-[1fr_2fr]">
             <div>
                 <p class="text-[13px] font-semibold uppercase tracking-[0.14em] text-coral-deep">Good to know</p>
@@ -251,7 +251,7 @@
 
     {{-- Pricing teaser --}}
     @if ($modules->isNotEmpty())
-        <section class="{{ $pad }} pt-24">
+        <section class="{{ $pad }} mt-20 border-t border-line pt-16">
             <div class="grid gap-10 lg:grid-cols-[1fr_2fr]">
                 <div>
                     <p class="text-[13px] font-semibold uppercase tracking-[0.14em] text-coral-deep">Simple pricing</p>

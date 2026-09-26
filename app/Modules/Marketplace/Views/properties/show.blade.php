@@ -103,7 +103,7 @@
                     <p class="muted">Check-in from {{ $p->check_in_time }} &middot; check-out by {{ $p->check_out_time }}.</p>
                     @if (! empty($p->policies))
                         <ul class="amenities">
-                            @foreach ((array) $p->policies as $key => $value)
+                            @foreach (\Illuminate\Support\Arr::except((array) $p->policies, ['free_cancellation_days']) as $key => $value)
                                 <li>
                                     <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8h.01M11 12h1v4h1"/></svg>
                                     <span><strong>{{ Str::headline($key) }}:</strong> {{ is_bool($value) ? ($value ? 'Yes' : 'No') : $value }}</span>
@@ -197,7 +197,7 @@
 
                     {{-- Check availability: reloads the page with a live quote for the dates. --}}
                     <form method="GET" action="{{ route('marketplace.properties.show', $p->slug) }}" style="margin-top:14px;display:grid;gap:8px;">
-                        <div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:8px;">
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;">
                             <label>Check-in <input class="form-input" type="date" name="check_in" value="{{ $stayDates['check_in'] ?? '' }}" min="{{ today()->toDateString() }}" required></label>
                             <label>Check-out <input class="form-input" type="date" name="check_out" value="{{ $stayDates['check_out'] ?? '' }}" min="{{ today()->addDay()->toDateString() }}" required></label>
                             <label>Guests <input class="form-input" type="number" name="guests" min="1" max="50" value="{{ $stayDates['guests'] ?? 2 }}"></label>

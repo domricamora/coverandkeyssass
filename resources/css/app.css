@@ -1665,6 +1665,7 @@ body.public-body,
     --border: #dde7e4;
     --hairline: #dde7e4;
     --input-border: #c3d1cd;
+    --border-strong: #c3d1cd;
     --input-bg: #ffffff;
     --text: #10252a;
     --text-2: #3b5157;
@@ -1709,7 +1710,7 @@ body.admin-body {
 
 /* Tailwind's border reset for the public pages (they don't load preflight):
    `border` utilities need a solid style; legacy rules use the shorthand. */
-.public-body *, .public-body ::before, .public-body ::after { border-width: 0; border-style: solid; border-color: var(--border); }
+:where(.public-body) *, :where(.public-body) ::before, :where(.public-body) ::after { border-width: 0; border-style: solid; border-color: var(--border); }
 .public-body ol, .public-body ul { margin: 0; padding: 0; }
 .public-body, .dash-body, .admin-body { color-scheme: light; }
 .public-body .form-input, .public-body .card, .public-body .filter-rail { border-width: 1px; }
@@ -1723,3 +1724,36 @@ body.admin-body {
 .side-nav__badge { background: var(--coral) !important; color: #fff !important; }
 .listing-card__perk { margin-top: 4px; font-size: .82rem; font-weight: 600; color: var(--primary); }
 .listing-card__scarce { margin-top: 2px; font-size: .8rem; font-weight: 600; color: var(--coral-deep); }
+
+/* Section divisions on the public site (owner: sections need a thin, subtle border). */
+.public-body .filter-bar { background: transparent; border: 0; padding-top: 20px; padding-bottom: 8px; }
+.public-body .filter-bar__divider { display: none; }
+.public-body .filter-bar__input, .public-body .filter-bar__field { border: 0 !important; box-shadow: none !important; background: transparent; }
+.public-body .filter-bar__form { border: 1px solid var(--input-border); background: #fff; }
+.public-body .filter-chips { border-bottom: 1px solid var(--border); padding-top: 12px; padding-bottom: 12px; }
+.public-body .results__head { border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 24px; }
+.public-body .tour { border-top: 1px solid var(--border); padding-top: 36px; }
+.public-body .listing-body { border-top: 1px solid var(--border); padding-top: 36px; }
+.public-body .booking-widget { border: 1px solid var(--border); }
+
+/* One gutter scale for the whole public site (matches header/footer px-5 / lg:px-10 / 2xl:px-16). */
+.public-body .container,
+.public-body .filter-bar { max-width: none; margin-left: 0; margin-right: 0; padding-left: 20px; padding-right: 20px; }
+@media (min-width: 1024px) { .public-body .container, .public-body .filter-bar { padding-left: 40px; padding-right: 40px; } }
+@media (min-width: 1536px) { .public-body .container, .public-body .filter-bar { padding-left: 64px; padding-right: 64px; } }
+.public-body .filter-bar__form { max-width: none; width: 100%; margin: 0; }
+/* Public search reuses .dash__side for its filter column: keep it visible on phones (the rail has its own toggle). */
+.public-body .dash__side { display: block !important; position: static; transform: none; width: auto; height: auto; }
+.tour, .tour__chips { min-width: 0; max-width: 100%; }
+/* Owner: only the filter bar itself carries borders; nothing inside the search area. */
+.public-body .filter-bar { background: #fff; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding-top: 14px; padding-bottom: 14px; }
+.public-body .filter-bar__form { border: 0 !important; background: transparent; box-shadow: none; }
+.tour { contain: inline-size; }
+.booking-widget input, .booking-widget select { min-width: 0; }
+/* Search area: first field starts on the page gutter; breathing room under the bar on phones. */
+.public-body .filter-bar__field:first-of-type { padding-left: 0; }
+.public-body .filter-bar__form > input[type="hidden"] + .filter-bar__field { padding-left: 0; }
+@media (max-width: 900px) { .public-body .results { padding-top: 16px; } }
+.public-body .filter-bar__form { padding: 0 !important; }
+.public-body .filter-bar__field:first-of-type .filter-bar__input,
+.public-body .filter-bar__field:first-of-type .filter-bar__label { padding-left: 0 !important; margin-left: 0 !important; }

@@ -61,7 +61,6 @@
                             <span class="text-[10px] font-semibold uppercase tracking-[0.1em] text-fg-3">Where</span>
                             <input type="search" name="q" value="{{ request('q') }}" placeholder="Boracay, El Nido, Baguio…" class="w-44 border-0 bg-transparent p-0 text-[13px] text-fg placeholder:text-fg-4 focus:ring-0">
                         </label>
-                        <span class="my-2 w-px bg-line" aria-hidden="true"></span>
                         <label class="flex flex-col justify-center px-4">
                             <span class="text-[10px] font-semibold uppercase tracking-[0.1em] text-fg-3">Guests</span>
                             <input type="number" name="guests" min="1" max="50" value="{{ request('guests') }}" placeholder="2" class="w-14 border-0 bg-transparent p-0 text-[13px] text-fg placeholder:text-fg-4 focus:ring-0">
@@ -127,7 +126,7 @@
             @endif
             @include('layouts.partials.messages')
             @if ($breadcrumbs !== [])
-                <nav class="px-5 pt-5 lg:px-10 2xl:px-16" aria-label="Breadcrumb">
+                <nav class="px-5 py-4 lg:px-10 2xl:px-16" aria-label="Breadcrumb">
                     <ol class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-fg-3">
                         <li><a class="hover:text-brand" href="{{ route('home') }}">Home</a></li>
                         @foreach ($breadcrumbs as $label => $url)
