@@ -30,15 +30,17 @@
             </div>
         </div>
 
-        <div class="gallery">
+        <div class="gallery" x-data>
             @if ($gallery !== [])
-                <img class="gallery__main" src="{{ $gallery[0] }}" alt="{{ $r->name }}" decoding="async">
+                @include('marketplace::partials.mosaic', ['images' => $gallery, 'name' => $r->name])
             @else
                 <span class="gallery__main gallery__main--fallback">
                     @include('marketplace::partials.cover', ['listing' => $r, 'variant' => 'hero'])
                 </span>
             @endif
         </div>
+
+        @include('marketplace::partials.tour', ['listing' => $r])
 
         <div class="listing-body">
             <div>

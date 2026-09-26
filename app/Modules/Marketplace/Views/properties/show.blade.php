@@ -36,16 +36,9 @@
             </div>
         </div>
 
-        <div class="gallery">
+        <div class="gallery" x-data>
             @if ($gallery !== [])
-                <img class="gallery__main" src="{{ $gallery[0] }}" alt="{{ $p->name }}" decoding="async">
-                @if (count($gallery) > 1)
-                    <div class="thumb-row">
-                        @foreach (array_slice($gallery, 1, 5) as $image)
-                            <span class="thumb-row__item"><img src="{{ $image }}" alt="{{ $p->name }} photo" loading="lazy" decoding="async"></span>
-                        @endforeach
-                    </div>
-                @endif
+                @include('marketplace::partials.mosaic', ['images' => $gallery, 'name' => $p->name])
             @else
                 <span class="gallery__main gallery__main--fallback">
                     @include('marketplace::partials.cover', ['listing' => $p, 'variant' => 'hero'])
@@ -53,6 +46,8 @@
                 <p class="muted mt-2">The host has not uploaded photos yet — the listing renders a placeholder instead of a stock image.</p>
             @endif
         </div>
+
+        @include('marketplace::partials.tour', ['listing' => $p])
 
         <div class="listing-body">
             <div>

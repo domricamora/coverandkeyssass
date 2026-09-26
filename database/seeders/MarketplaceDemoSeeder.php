@@ -488,6 +488,7 @@ class MarketplaceDemoSeeder extends Seeder
         );
 
         $this->attachMedia($property, $index);
+        $this->attachTour($property, $index, 'property');
         $this->seedRooms($property);
     }
 
@@ -525,6 +526,7 @@ class MarketplaceDemoSeeder extends Seeder
         );
 
         $this->attachMedia($restaurant, $index + 1);
+        $this->attachTour($restaurant, $index, 'restaurant');
     }
 
     // ------------------------------------------------------------------
@@ -676,6 +678,45 @@ class MarketplaceDemoSeeder extends Seeder
                 'is_cover' => $slot === 0,
                 'sort_order' => $slot,
             ]);
+        }
+    }
+
+    /** Tour areas → how many photos per listing, from public/img/demo/tour/{area}-*.jpg. */
+    private const TOUR = [
+        'property' => ['Rooms' => ['room', 2], 'Bathrooms' => ['bath', 1], 'Lobby' => ['lobby', 1], 'Pool' => ['pool', 2], 'Breakfast' => ['breakfast', 1], 'Spa' => ['spa', 1]],
+        'restaurant' => ['Dining room' => ['dining', 2], 'Dishes' => ['dish', 3], 'Bar' => ['bar', 1], 'Kitchen' => ['kitchen', 1], 'Terrace' => ['terrace', 1]],
+    ];
+
+    /**
+     * Guest photo tour: tag the listing's own photos "Highlights" and add
+     * area photos (caption = area), rotated by listing index so neighbouring
+     * listings differ. Idempotent: skipped once tour photos exist.
+     */
+    private function attachTour(Model $listing, int $index, string $kind): void
+    {
+        $listing->media()->whereNull('caption')->where('path', 'like', 'img/demo/%')->update(['caption' => 'Highlights']);
+
+        if ($listing->media()->where('path', 'like', 'img/demo/tour/%')->exists()) {
+            return;
+        }
+
+        $order = (int) $listing->media()->max('sort_order');
+
+        foreach (self::TOUR[$kind] as $area => [$prefix, $count]) {
+            $files = glob(public_path('img/demo/tour/'.$prefix.'-*.jpg')) ?: [];
+            sort($files);
+
+            for ($i = 0; $i < min($count, count($files)); $i++) {
+                $file = $files[($index * $count + $i) % count($files)];
+                $listing->media()->create([
+                    'disk' => 'public',
+                    'path' => 'img/demo/tour/'.basename($file),
+                    'alt' => $listing->name.' · '.$area,
+                    'caption' => $area,
+                    'is_cover' => false,
+                    'sort_order' => ++$order,
+                ]);
+            }
         }
     }
 
