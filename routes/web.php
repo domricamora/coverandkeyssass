@@ -22,6 +22,15 @@ Route::get('/robots.txt', [SeoController::class, 'robots'])->name('seo.robots');
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');
 Route::get('/llms.txt', [SeoController::class, 'llms'])->name('seo.llms');
 
+// Sign-in return for guest flows: signed-out guests are sent to log in or
+// register and come back to the booking / cart / table step they left.
+// Only same-site relative paths are followed.
+Route::get('/continue', function (\Illuminate\Http\Request $request) {
+    $to = (string) $request->query('to');
+
+    return redirect(preg_match('#^/(?![/\\\\])#', $to) ? $to : '/');
+})->middleware('auth')->name('continue');
+
 // ---------------------------------------------------------------------
 // Tenant (host) area
 // ---------------------------------------------------------------------

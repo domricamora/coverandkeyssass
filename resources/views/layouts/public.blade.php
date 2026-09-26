@@ -32,6 +32,7 @@
             <meta name="twitter:image" content="{{ $seoImage }}">
         @endif
         @if ($seoJsonLd)<script type="application/ld+json">{!! $seoJsonLd !!}</script>@endif
+        @stack('widgets')
     </head>
     <body class="public-body" x-data="{ nav: false }" @keydown.escape.window="nav = false">
         <a class="skip-link" href="#main">Skip to content</a>

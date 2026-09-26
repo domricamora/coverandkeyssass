@@ -49,6 +49,7 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('tenants.index', absolute: false));
+        // Guests who signed up mid-booking go back to the step they left (see /continue).
+        return redirect()->intended(route('tenants.index', absolute: false));
     }
 }
