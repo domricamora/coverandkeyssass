@@ -1,4 +1,4 @@
-<x-public-layout :title="$title" description="Restaurants listed on Cover & Keys. Filter by destination, cuisine and price level." :canonical="route('marketplace.restaurants.index')" :breadcrumbs="['Restaurants' => null]" :noindex="collect(request()->except('page'))->filter(fn ($v) => filled($v))->isNotEmpty()">
+<x-public-layout :title="$title" description="Find restaurants in Boracay, El Nido, Cebu and across the Philippines. Reserve a table or order online for pickup, delivery or room service, and filter by cuisine and price." :canonical="route('marketplace.restaurants.index')" :breadcrumbs="['Restaurants' => null]" :noindex="collect(request()->except('page'))->filter(fn ($v) => filled($v))->isNotEmpty()">
     <div class="results-page">
         <div class="filter-bar">
             <form class="filter-bar__form" method="GET" action="{{ route('marketplace.restaurants.index') }}">

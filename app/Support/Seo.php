@@ -53,7 +53,45 @@ class Seo
             '@id' => url('/').'#organization',
             'name' => config('app.name'),
             'url' => url('/'),
-            'logo' => asset('favicon.ico'),
+            'logo' => asset('img/favicon.svg'),
+            'description' => 'Cover & Keys is a hospitality platform for the Philippines: a marketplace where guests book hotels, resorts and restaurants direct, and the property management system, booking engine and restaurant POS that hosts run their business on.',
+            'areaServed' => ['@type' => 'Country', 'name' => 'Philippines'],
+            'knowsAbout' => ['Hotel property management system', 'Hotel booking engine', 'Restaurant point of sale', 'Housekeeping management', 'Hotel accounting'],
+        ];
+    }
+
+    /** The platform itself as software (hosts' side), with its price range. */
+    public static function software(iterable $modules): array
+    {
+        $prices = collect($modules)->pluck('monthly_price_cents')->map(fn ($c) => $c / 100);
+
+        return [
+            '@type' => 'SoftwareApplication',
+            '@id' => url('/').'#software',
+            'name' => config('app.name'),
+            'applicationCategory' => 'BusinessApplication',
+            'applicationSubCategory' => 'Hotel property management system, booking engine and restaurant POS',
+            'operatingSystem' => 'Web browser (desktop, tablet and phone)',
+            'url' => route('marketing.features'),
+            'publisher' => ['@id' => url('/').'#organization'],
+            'featureList' => ['Front desk and room chart', 'Online booking engine and marketplace', 'Housekeeping and maintenance', 'Restaurant POS, kitchen tickets and table reservations', 'Guest folio and payments (card, GCash, Maya)', 'Double-entry accounting', 'Staff rota, attendance and leave', 'Guest CRM, loyalty and marketing'],
+            'offers' => [
+                '@type' => 'AggregateOffer',
+                'priceCurrency' => 'PHP',
+                'lowPrice' => number_format((float) ($prices->min() ?? 0), 2, '.', ''),
+                'highPrice' => number_format((float) ($prices->max() ?? 0), 2, '.', ''),
+                'offerCount' => $prices->count(),
+            ],
+        ];
+    }
+
+    /** Ordered list of listing URLs (featured stays on the home page). */
+    public static function itemList(string $name, iterable $urls): array
+    {
+        return [
+            '@type' => 'ItemList',
+            'name' => $name,
+            'itemListElement' => collect($urls)->values()->map(fn ($url, $i) => ['@type' => 'ListItem', 'position' => $i + 1, 'url' => $url])->all(),
         ];
     }
 

@@ -34,7 +34,7 @@ class PropertySearchController extends Controller
             'options' => $this->search->filterOptions(),
             'destination' => null,
             'favoriteIds' => $this->favoriteIds($request->user(), $properties->getCollection()),
-            'title' => 'Stays',
+            'title' => 'Hotels, Resorts & Villas in the Philippines',
         ]);
     }
 
@@ -52,7 +52,7 @@ class PropertySearchController extends Controller
             'options' => $this->search->filterOptions(),
             'destination' => $destination,
             'favoriteIds' => $this->favoriteIds($request->user(), $properties->getCollection()),
-            'title' => 'Stays in '.$destination->name,
+            'title' => 'Hotels & Resorts in '.$destination->name.': Book Direct',
         ]);
     }
 

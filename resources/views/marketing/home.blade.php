@@ -1,4 +1,10 @@
-<x-public-layout :title="$title" description="Book beach resorts, villas, city lofts and restaurants across the Philippines, direct with the people who run them. Hosts run their whole operation on Cover & Keys." :schema="[\App\Support\Seo::website()]" :show-search="false">
+<x-public-layout :title="$title" description="Book beach resorts, villas, B&Bs and city hotels in Boracay, El Nido, Siargao, Cebu and Baguio direct with the hosts, and reserve restaurant tables. Pay by card, GCash or Maya."
+    :schema="[
+        \App\Support\Seo::organization(),
+        \App\Support\Seo::website(),
+        \App\Support\Seo::itemList('Featured stays in the Philippines', $featured->map(fn ($p) => route('marketplace.properties.show', $p->slug))),
+        \App\Support\Seo::faq($faqs),
+    ]" :show-search="false">
     @php
         $pad = 'px-5 lg:px-10 2xl:px-16';
     @endphp
@@ -67,7 +73,7 @@
             <div class="flex flex-wrap items-end justify-between gap-4">
                 <div>
                     <p class="text-[13px] font-semibold uppercase tracking-[0.14em] text-coral-deep">Where to next</p>
-                    <h2 class="mt-2 font-display text-[clamp(1.8rem,3vw,2.6rem)] font-medium tracking-[-0.015em] text-fg">Islands, mountains and cities worth the trip</h2>
+                    <h2 class="mt-2 font-display text-[clamp(1.8rem,3vw,2.6rem)] font-medium tracking-[-0.015em] text-fg">Popular destinations in the Philippines</h2>
                 </div>
                 <a href="{{ route('marketplace.hotels') }}" class="text-[15px] font-medium text-brand hover:text-brand-deep">All destinations &rarr;</a>
             </div>
@@ -93,7 +99,7 @@
         <div class="flex flex-wrap items-end justify-between gap-4">
             <div>
                 <p class="text-[13px] font-semibold uppercase tracking-[0.14em] text-coral-deep">Stays</p>
-                <h2 class="mt-2 font-display text-[clamp(1.8rem,3vw,2.6rem)] font-medium tracking-[-0.015em] text-fg">Places guests keep coming back to</h2>
+                <h2 class="mt-2 font-display text-[clamp(1.8rem,3vw,2.6rem)] font-medium tracking-[-0.015em] text-fg">Top-rated hotels, resorts and villas</h2>
             </div>
             <a href="{{ route('marketplace.hotels') }}" class="text-[15px] font-medium text-brand hover:text-brand-deep">Browse all stays &rarr;</a>
         </div>
@@ -145,7 +151,7 @@
             <div class="flex flex-wrap items-end justify-between gap-4">
                 <div>
                     <p class="text-[13px] font-semibold uppercase tracking-[0.14em] text-coral-deep">Eat well</p>
-                    <h2 class="mt-2 font-display text-[clamp(1.8rem,3vw,2.6rem)] font-medium tracking-[-0.015em] text-fg">Book a table, or order to your door</h2>
+                    <h2 class="mt-2 font-display text-[clamp(1.8rem,3vw,2.6rem)] font-medium tracking-[-0.015em] text-fg">Restaurants: reserve a table or order online</h2>
                 </div>
                 <a href="{{ route('marketplace.restaurants.index') }}" class="text-[15px] font-medium text-brand hover:text-brand-deep">All restaurants &rarr;</a>
             </div>
@@ -193,7 +199,7 @@
         </div>
         <div class="px-6 py-16 text-white sm:px-12 lg:px-16 lg:py-24">
             <p class="text-[13px] font-semibold uppercase tracking-[0.14em] text-[#9fe3db]">For hotels, resorts and restaurants</p>
-            <h2 class="mt-3 max-w-xl font-display text-[clamp(1.9rem,3.2vw,2.9rem)] font-medium leading-[1.08] tracking-[-0.015em]">Run the whole place from the same system guests book on.</h2>
+            <h2 class="mt-3 max-w-xl font-display text-[clamp(1.9rem,3.2vw,2.9rem)] font-medium leading-[1.08] tracking-[-0.015em]">Hotel and restaurant management software, built into the marketplace guests book on.</h2>
             <ul class="mt-8 grid max-w-xl gap-4 text-[15px] leading-relaxed text-white/90 sm:grid-cols-2">
                 @foreach ([
                     'Front desk with a drag-and-drop room chart',
@@ -218,6 +224,27 @@
                 <div><dt class="text-[13px] text-white/75">Restaurants</dt><dd class="mt-1 font-display text-[28px] font-medium">{{ number_format($stats['restaurants']) }}</dd></div>
                 <div><dt class="text-[13px] text-white/75">Destinations</dt><dd class="mt-1 font-display text-[28px] font-medium">{{ number_format($stats['destinations']) }}</dd></div>
             </dl>
+        </div>
+    </section>
+
+    {{-- Questions (also FAQPage structured data) --}}
+    <section class="{{ $pad }} pt-24">
+        <div class="grid gap-10 lg:grid-cols-[1fr_2fr]">
+            <div>
+                <p class="text-[13px] font-semibold uppercase tracking-[0.14em] text-coral-deep">Good to know</p>
+                <h2 class="mt-2 font-display text-[clamp(1.8rem,3vw,2.6rem)] font-medium tracking-[-0.015em] text-fg">Booking and hosting, answered</h2>
+            </div>
+            <div class="divide-y divide-line border-y border-line">
+                @foreach ($faqs as $question => $answer)
+                    <details class="group py-5" @if ($loop->first) open @endif>
+                        <summary class="flex cursor-pointer list-none items-center justify-between gap-6 text-[17px] font-medium text-fg [&::-webkit-details-marker]:hidden">
+                            <h3>{{ $question }}</h3>
+                            <span class="flex h-8 w-8 shrink-0 items-center justify-center border border-line text-brand transition-transform duration-200 group-open:rotate-45" aria-hidden="true">+</span>
+                        </summary>
+                        <p class="mt-3 max-w-3xl text-[15px] leading-relaxed text-fg-2">{{ $answer }}</p>
+                    </details>
+                @endforeach
+            </div>
         </div>
     </section>
 

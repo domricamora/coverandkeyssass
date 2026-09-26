@@ -22,7 +22,7 @@ class HomeController extends Controller
             'types' => $this->search->propertyTypes(),
             'restaurants' => $this->search->featuredRestaurants(3),
             'stats' => $this->search->stats(),
-            'title' => 'Stays and tables',
+            'title' => 'Stays and Restaurants in the Philippines',
         ]);
     }
 }

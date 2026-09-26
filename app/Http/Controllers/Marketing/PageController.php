@@ -29,12 +29,23 @@ class PageController extends Controller
         'Which payment methods do guests have?' => 'Guests pay online by card, GCash or Maya through PayMongo. Restaurants can also accept cash on pickup and delivery orders.',
     ];
 
+    /** Home page Q&A for guests and hosts; also emitted as FAQPage structured data. */
+    public const HOME_FAQ = [
+        'What is Cover & Keys?' => 'Cover & Keys is a Philippine hospitality platform. Guests use it to book hotels, resorts, villas, B&Bs and restaurant tables directly with the people who run them. Hotels and restaurants use the same platform to run their business: front desk, room chart, housekeeping, restaurant POS, payments and accounting.',
+        'Where can I book a stay with Cover & Keys?' => 'Stays are listed across the Philippines, including Boracay, El Nido, Siargao, Cebu City and Baguio. Search by destination, stay type and number of guests, then book directly with the property.',
+        'How do I pay for a booking?' => 'You can pay online by credit or debit card, GCash or Maya through PayMongo. Your bill is itemised night by night, and anything added during your stay, such as room service, is settled at the front desk.',
+        'Is booking direct cheaper than an online travel agency?' => 'Booking direct means your reservation goes straight to the property’s own front desk with no reseller in between, so there is no extra reseller mark-up on the price you see.',
+        'Can I reserve a restaurant table or order food online?' => 'Yes. Restaurants on Cover & Keys take table reservations and online orders for pickup, delivery or room service from the same menu their kitchen uses.',
+        'What does Cover & Keys cost for a hotel or restaurant?' => 'The foundation, including your marketplace listing, team accounts and roles, is free. Operational modules such as property management, the booking engine, restaurant and point of sale are priced per month with a free trial, and a commission applies only to paid online bookings.',
+    ];
+
     public function __construct(private readonly MarketplaceSearchService $marketplace) {}
 
     public function home(): View
     {
         return view('marketing.home', [
-            'title' => null,
+            'title' => 'Book Hotels, Resorts & Restaurants in the Philippines Direct',
+            'faqs' => self::HOME_FAQ,
             'stats' => $this->marketplace->stats(),
             'featured' => $this->marketplace->featuredProperties(6),
             'restaurants' => $this->marketplace->featuredRestaurants(3),
@@ -52,7 +63,7 @@ class PageController extends Controller
     public function features(): View
     {
         return view('marketing.features', [
-            'title' => 'Features',
+            'title' => 'Hotel & Restaurant Management Software: PMS, Booking Engine and POS',
             'modules' => $this->modules(),
             'grouped' => $this->modules()->groupBy('category'),
             'roadmap' => self::roadmap(),
@@ -66,7 +77,7 @@ class PageController extends Controller
         $stack = ['property', 'booking', 'restaurant'];
 
         return view('marketing.pricing', [
-            'title' => 'Pricing',
+            'title' => 'Pricing: Hotel PMS, Booking Engine and Restaurant POS from ₱0',
             'modules' => $modules,
             'grouped' => $modules->groupBy('category'),
             'sampleStack' => $modules->whereIn('slug', $stack),
@@ -82,7 +93,7 @@ class PageController extends Controller
     public function contact(): View
     {
         return view('marketing.contact', [
-            'title' => 'Contact',
+            'title' => 'Contact Sales and Support',
             'contact' => config('marketing.contact'),
         ]);
     }

@@ -1,5 +1,5 @@
 <x-public-layout :title="$title" description="Cover & Keys pricing: a free foundation, then pay monthly only for the modules your property runs, with free trials. No listing fees." :show-search="false"
-    :breadcrumbs="['Pricing' => null]" :schema="[...\App\Support\Seo::productOffers($modules->where('monthly_price_cents', '>', 0)), \App\Support\Seo::faq($faqs)]">
+    :breadcrumbs="['Pricing' => null]" :schema="[\App\Support\Seo::software($modules), ...\App\Support\Seo::productOffers($modules->where('monthly_price_cents', '>', 0)), \App\Support\Seo::faq($faqs)]">
     @php
         $pad = 'px-5 lg:px-10 2xl:px-16';
         $tick = '<svg width="18" height="18" fill="none" stroke="var(--primary)" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.5 4.5L19 7.5"/></svg>';

@@ -30,7 +30,7 @@ class RestaurantController extends Controller
             'filters' => $filters,
             'options' => $this->search->filterOptions(),
             'favoriteIds' => $this->favoriteIds($request->user(), $restaurants->getCollection()),
-            'title' => 'Restaurants',
+            'title' => 'Restaurants in the Philippines: Reserve a Table or Order Online',
         ]);
     }
 

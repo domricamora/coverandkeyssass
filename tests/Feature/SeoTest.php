@@ -104,3 +104,20 @@ it('blocks crawlers outside production and fences private areas in production', 
         ->assertSee('Disallow: /account')
         ->assertSee('Sitemap: '.route('seo.sitemap'));
 });
+
+it('gives answer engines FAQ, featured-stay and software structured data plus a live llms.txt', function () {
+    [$property] = MarketplaceFixtures::stay(['name' => 'Harbour View', 'base_price' => 4200]);
+    MarketplaceFixtures::asTenant(null);
+
+    $types = collect(jsonLd($this->get(route('home'))->assertOk()->assertSee('What is Cover &amp; Keys?', false)->getContent()))->pluck('@type');
+    expect($types)->toContain('Organization', 'WebSite', 'ItemList', 'FAQPage');
+
+    $software = collect(jsonLd($this->get(route('marketing.features'))->getContent()))->firstWhere('@type', 'SoftwareApplication');
+    expect($software['offers']['priceCurrency'])->toBe('PHP');
+
+    $this->get('/llms.txt')->assertOk()
+        ->assertHeader('Content-Type', 'text/plain; charset=UTF-8')
+        ->assertSee('# '.config('app.name'), false)
+        ->assertSee('[Harbour View]('.route('marketplace.properties.show', $property->slug).')', false)
+        ->assertSee('## Module prices');
+});

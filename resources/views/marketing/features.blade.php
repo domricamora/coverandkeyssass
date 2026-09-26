@@ -1,4 +1,5 @@
-<x-public-layout :title="$title" description="Front desk, housekeeping, restaurant register, accounting and your own booking marketplace: everything a hotel, resort or restaurant runs on, in one system." :show-search="false" :breadcrumbs="['For hosts' => null]">
+<x-public-layout :title="$title" description="Cloud hotel PMS, booking engine and restaurant POS for Philippine hotels, resorts, B&Bs and restaurants: front desk, room chart, housekeeping, payments by GCash, Maya or card, accounting and staff rota in one system."
+    :show-search="false" :breadcrumbs="['For hosts' => null]" :schema="[\App\Support\Seo::organization(), \App\Support\Seo::software($modules)]">
     @php
         $pad = 'px-5 lg:px-10 2xl:px-16';
     @endphp
@@ -11,7 +12,7 @@
                 <h1 class="mt-3 font-display text-[clamp(2.3rem,4.6vw,4rem)] font-medium leading-[1.04] tracking-[-0.02em] text-fg">Everything your place runs on, in one calm screen.</h1>
             </div>
             <div class="lg:pb-2">
-                <p class="max-w-xl text-[17px] leading-relaxed text-fg-2">Guests book on the marketplace, the room lands on your front desk, housekeeping sees the check-out, the restaurant charges to the room and the books balance themselves. No channel manager to reconcile, no spreadsheets at midnight.</p>
+                <p class="max-w-xl text-[17px] leading-relaxed text-fg-2"><strong class="font-semibold text-fg">Cover &amp; Keys is a cloud property management system (PMS), booking engine and restaurant POS</strong> for hotels, resorts, B&amp;Bs and restaurants in the Philippines. Guests book on the marketplace, the room lands on your front desk, housekeeping sees the check-out, the restaurant charges to the room and the books balance themselves.</p>
                 <div class="mt-7 flex flex-wrap gap-3">
                     <a href="{{ route('register') }}" class="inline-flex h-12 items-center bg-brand px-6 text-[15px] font-semibold text-white transition-colors hover:bg-brand-deep">Start free</a>
                     <a href="{{ route('marketing.pricing') }}" class="inline-flex h-12 items-center border border-line-strong bg-white px-6 text-[15px] font-medium text-fg transition-colors hover:border-brand hover:text-brand">See pricing</a>

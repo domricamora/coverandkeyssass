@@ -20,6 +20,7 @@ Route::get('/pricing', [MarketingPageController::class, 'pricing'])->name('marke
 Route::get('/contact', [MarketingPageController::class, 'contact'])->name('marketing.contact');
 Route::get('/robots.txt', [SeoController::class, 'robots'])->name('seo.robots');
 Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('seo.sitemap');
+Route::get('/llms.txt', [SeoController::class, 'llms'])->name('seo.llms');
 
 // ---------------------------------------------------------------------
 // Tenant (host) area
