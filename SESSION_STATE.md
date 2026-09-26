@@ -27,7 +27,15 @@
 
 ## Next actions
 
-## HAND-OFF (2026-09-26, guest booking flows) — start here
+## HAND-OFF (2026-09-26, checkout without registration + PayPal) — start here
+
+**Done:** checkout without registration (plan `docs/superpowers/plans/2026-09-26-frictionless-checkout.md`), PayPal Orders v2 beside PayMongo, the pay-now / pay-at-property choice, React staff & rota (`Staff/*`, `MyWork/Index`). Full suite: 341 passing.
+
+**Needs the owner:** real sandbox keys. No `PAYMONGO_*` or `PAYPAL_*` values are set in `.env`, so locally only "Pay at the property" shows. Steps are in `docs/modules/payments.md` → "Sandbox run". The dev DB holds one QA guest booking (BKPSGMGO96, user `qa.guest.…@example.test`) created by the browser test.
+
+**Next Blade → React screens:** Accounting, Wallet, Billing, Notifications, Messages, Team, Business settings, Switch business. Then OTA ideas (map view, recently viewed, price-drop alerts) and the FINAL_AUDIT items.
+
+## HAND-OFF (2026-09-26, guest booking flows) — superseded
 
 **Guest booking flows in React: DONE** (plan `docs/superpowers/plans/2026-09-26-guest-booking-flows.md`, tasks 1–9). Stay panel → `/stay/{slug}/review`; menu widget + cart JSON → React `/cart` checkout; table booking widget; `/continue?to=` sign-in return. Widgets mount over the Blade forms (the no-JS fallback) via `resources/js/widgets.jsx`. QA at 390/1440 done (scratchpad `flow.mjs` = `qa.mjs` plus `js:<expr>` steps; run with `MSYS_NO_PATHCONV=1` or Git Bash mangles `/paths`). Gotcha: `@tailwindcss/forms` colours radios and checkboxes with `text-*`, so add `text-brand`. Harmless local noise: modulepreload hints 404 under `/ck/public` (the imports themselves resolve).
 

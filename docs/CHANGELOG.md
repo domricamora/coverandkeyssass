@@ -1,5 +1,13 @@
 # CHANGELOG.md
 
+## 2026-09-26 — Checkout without registration, PayPal, React staff & rota
+
+- **Guest checkout (Booking.com / Agoda style):** the stay review page, food checkout and table booking ask only for name, email and phone. A new email gets an account quietly and stays signed in. An existing email must use its password, or a 30-minute sign-in link sent by email that returns to the same step. We never sign in on an email alone. Code: `GuestCheckoutController`, `useGuest` in `widgets/ui.jsx`.
+- **Pay now or at the property:** the stay review step offers each configured online provider plus "Pay at the property". Paying now goes straight to the provider after the booking is created, and the booking is confirmed when the payment clears.
+- **PayPal (Orders v2)** next to PayMongo. The server captures on the return URL, the payment is recorded only for the exact amount and currency, and refunds go through PayPal. Config: `PAYPAL_CLIENT_ID`, `PAYPAL_SECRET`, `PAYPAL_MODE`. Sandbox steps for both providers are in `docs/modules/payments.md`. Billing invoices stay on PayMongo.
+- **React staff & rota:** employees, profile, weekly schedule, attendance, leave approvals and My work. The Blade views were removed.
+- Owner overview tests for staff without money access and the group portfolio.
+
 ## 2026-09-26 — Guest booking flows in React (stay, food order, table)
 
 - **Stay booking:** the property page panel (`widgets/StayPanel.jsx`) quotes every room type live for the chosen dates, guests and number of rooms. It shows free rooms, the full-stay price and the free-cancellation deadline. "Reserve" opens the Inertia review step `/stay/{property}/review` (`Stay/Review`), where the guest adds details and a promo code (re-quoted), then requests the booking.

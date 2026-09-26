@@ -9,9 +9,9 @@
 
 ## Tasks
 
-- [ ] 1. `POST /guest/identify` (JSON, throttled): `{name, email, phone}` → `{status: 'signed_in'}` (new account, now signed in) or `{status: 'existing'}`. `POST /guest/password` (JSON): email + password → sign in. `POST /login-link` (JSON): email + `to` → mails a signed link. `GET /login-link/{user}` (signed) → signs in, redirects to `to` (same-site path only). Tests.
-- [ ] 2. React `GuestDetails` (widgets/ui): name, email, phone, then "continue" handles both paths (password field or "email me a link"). Used by the stay review page, checkout and table booking.
-- [ ] 3. The stay review page and `/cart` checkout open signed out. The stay panel and table booking skip `/continue`.
-- [ ] 4. PayPal gateway (`services.paypal`: client_id, secret, mode) using Orders v2: create (intent CAPTURE, PHP) → approve URL; return → capture and verify the amount → `markPaid`. `Payment.provider` = `paypal`. `PaymentService::checkout(…, provider)`. Tests with `Http::fake`.
-- [ ] 5. Review step: payment choice (pay at property / PayMongo / PayPal, only providers with keys). Reserve with `pay=paymongo|paypal` goes straight to the provider. The order checkout gets PayPal too.
-- [ ] 6. QA 390/1440, full suite, docs (`docs/modules/payments.md` sandbox steps), changelog, session state.
+- [x] 1. `POST /guest/identify` (JSON, throttled): `{name, email, phone}` → `{status: 'signed_in'}` (new account, now signed in) or `{status: 'existing'}`. `POST /guest/password` (JSON): email + password → sign in. `POST /login-link` (JSON): email + `to` → mails a signed link. `GET /login-link/{user}` (signed) → signs in, redirects to `to` (same-site path only). Tests.
+- [x] 2. React `GuestDetails` (widgets/ui): name, email, phone, then "continue" handles both paths (password field or "email me a link"). Used by the stay review page, checkout and table booking.
+- [x] 3. The stay review page and `/cart` checkout open signed out. The stay panel and table booking skip `/continue`.
+- [x] 4. PayPal gateway (`services.paypal`: client_id, secret, mode) using Orders v2: create (intent CAPTURE, PHP) → approve URL; return → capture and verify the amount → `markPaid`. `Payment.provider` = `paypal`. `PaymentService::checkout(…, provider)`. Tests with `Http::fake`.
+- [x] 5. Review step: payment choice (pay at property / PayMongo / PayPal, only providers with keys). Reserve with `pay=paymongo|paypal` goes straight to the provider. The order checkout gets PayPal too.
+- [x] 6. QA 390/1440, full suite, docs (`docs/modules/payments.md` sandbox steps), changelog, session state.

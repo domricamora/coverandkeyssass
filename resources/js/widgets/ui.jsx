@@ -137,7 +137,7 @@ export function useGuest({ user, urls, returnTo, phone: initialPhone = '', stack
                     <input autoComplete="name" required className={FIELD} value={name} onChange={(e) => setName(e.target.value)} disabled={mode !== 'details'} />
                 </label>
                 <label className="block">
-                    <span className={LABEL}>Email <span className="font-normal text-fg-3">(confirmation goes here)</span></span>
+                    <span className={LABEL}>Email</span>
                     <input type="email" autoComplete="email" required className={FIELD} value={email} onChange={(e) => { setEmail(e.target.value); setMode('details'); }} />
                 </label>
                 <label className={cx('block', !stacked && 'sm:col-span-2')}>

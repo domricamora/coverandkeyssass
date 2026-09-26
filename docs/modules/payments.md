@@ -54,6 +54,22 @@ curl -u sk_test_xxx: https://api.paymongo.com/v1/webhooks -H "Content-Type: appl
   -d '{"data":{"attributes":{"url":"https://<host>/webhooks/paymongo","events":["checkout_session.payment.paid","payment.paid","payment.failed"]}}}'
 ```
 
+## PayPal (Orders v2)
+
+`PayPalGateway` sits next to PayMongo; `PaymentService::providers()` lists the configured ones, and the guest picks one (`provider` on pay / checkout, `pay` on the stay reserve). Flow: create an order (intent CAPTURE, PHP) → PayPal approval page → the return URL (`…/payment-return?token=…&PayerID=…`) calls `sync()`, which **captures server-side** and records the payment only for a COMPLETED capture of the exact amount and currency. PayPal does not move money without our capture call, so no webhook is needed. Refunds go through `/v2/payments/captures/{id}/refund`. Payment rows carry `provider = paypal`, and `provider_payment_id` is the capture id.
+
+Config: `PAYPAL_CLIENT_ID`, `PAYPAL_SECRET`, `PAYPAL_MODE` (`sandbox` → api-m.sandbox.paypal.com, `live` → api-m.paypal.com). Billing invoices still pay through PayMongo only.
+
+## Sandbox run (both providers)
+
+1. **PayMongo:** in dashboard.paymongo.com (test mode), copy `sk_test_…` into `PAYMONGO_SECRET_KEY` and register the webhook with the curl above (you need a public URL, e.g. an ngrok tunnel to `http://localhost/ck/public`). Put the returned `whsk_…` into `PAYMONGO_WEBHOOK_SECRET`. Without the webhook, the return URL still confirms the payment.
+2. **PayPal:** at developer.paypal.com, go to Apps & Credentials (Sandbox) and create an app. Put its Client ID and Secret into `PAYPAL_CLIENT_ID` / `PAYPAL_SECRET` with `PAYPAL_MODE=sandbox`. Pay with the generated sandbox *personal* account (Testing Tools → Sandbox Accounts).
+3. Run `php artisan config:clear`. Book a stay signed out: on the review step, choose PayMongo or PayPal. The booking turns **confirmed** after the return. Order food with "Pay now" the same way. Then refund one booking from the host side (cancel → refunded).
+
+## Guest checkout (no registration)
+
+The stay review page, food checkout and table booking collect name, email and phone. `POST /guest/identify` creates an account for a new email and signs the guest in. An existing email must use its password (`POST /guest/password`) or a signed 30-minute sign-in link (`POST /login-link` → `GET /login-link/{user}`). See `GuestCheckoutController` and `tests/Feature/GuestCheckoutTest.php`.
+
 ## Transaction history
 
 Guest: `/account/payments` (own payments across businesses via `Payment::forCustomer`) plus a payment panel on each trip. Host: a payment panel on the booking page (view composer; Booking and Customer modules do not depend on Payments).
