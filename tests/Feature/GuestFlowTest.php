@@ -76,3 +76,43 @@ it('only follows same-site paths', function () {
         $this->get('/continue?to='.urlencode($to))->assertRedirect('/');
     }
 });
+
+/** Published restaurant taking orders, with one burger (+ cheese add-on). */
+function menuKitchen(string $name): array
+{
+    [$owner, $tenant] = MarketplaceFixtures::business($name);
+    app(App\Support\ModuleService::class)->enableForTenant(App\Models\Module::query()->where('slug', 'restaurant')->firstOrFail(), $tenant);
+    $restaurant = MarketplaceFixtures::restaurant($tenant, $owner, ['status' => App\Modules\Marketplace\Models\Restaurant::STATUS_PUBLISHED, 'ordering_enabled' => true, 'tax_rate' => 12, 'tax_inclusive' => true]);
+    MarketplaceFixtures::asListing($restaurant);
+    $category = App\Modules\RestaurantManagement\Models\MenuCategory::create(['restaurant_id' => $restaurant->id, 'name' => 'Burgers']);
+    $burger = App\Modules\RestaurantManagement\Models\MenuItem::create(['restaurant_id' => $restaurant->id, 'menu_category_id' => $category->id, 'name' => 'Burger', 'price' => 250]);
+    $cheese = $burger->modifierGroups()->create(['name' => 'Add-ons'])->options()->create(['name' => 'Cheese', 'price' => 30])->id;
+    MarketplaceFixtures::asTenant(null);
+
+    return [$restaurant->refresh(), $burger, $cheese];
+}
+
+it('runs the cart as JSON for the menu widget', function () {
+    Tests\Support\PropertyManagementFixtures::bootstrap();
+    [$a, $burger, $cheese] = menuKitchen('Kitchen A');
+    [$b, $other] = menuKitchen('Kitchen B');
+    auth()->logout();
+
+    $this->getJson(route('cart.summary'))->assertOk()->assertJsonPath('count', 0)->assertJsonPath('restaurant', null);
+
+    $this->postJson(route('cart.add', $a->slug), ['item_id' => $burger->id, 'options' => [$cheese], 'quantity' => 2])->assertOk()
+        ->assertJsonPath('count', 2)
+        ->assertJsonPath('subtotal', 560)
+        ->assertJsonPath('lines.0.mods', 'Cheese')
+        ->assertJsonPath('replaced', false);
+
+    $this->postJson(route('cart.add', $b->slug), ['item_id' => $other->id, 'quantity' => 1])->assertOk()
+        ->assertJsonPath('replaced', true)
+        ->assertJsonPath('restaurant.slug', $b->slug)
+        ->assertJsonPath('count', 1);
+
+    $key = $this->getJson(route('cart.summary'))->json('lines.0.key');
+    $this->patchJson(route('cart.update', $key), ['quantity' => 0])->assertOk()->assertJsonPath('count', 0)->assertJsonPath('lines', []);
+
+    $this->postJson(route('cart.add', $a->slug), ['item_id' => $burger->id, 'options' => [999999], 'quantity' => 1])->assertStatus(422);
+});

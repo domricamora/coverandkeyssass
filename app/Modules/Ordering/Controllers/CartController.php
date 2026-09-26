@@ -53,7 +53,17 @@ class CartController extends Controller
             CartChanged::dispatch($request->user(), $listing, array_values($this->cart->get()['lines']));
         }
 
+        if ($request->wantsJson()) {
+            return response()->json($this->summaryData() + ['replaced' => $replaced]);
+        }
+
         return back()->with('success', $replaced ? 'Your previous cart was replaced — carts hold one restaurant at a time.' : 'Added to your cart.');
+    }
+
+    /** Cart for the menu widget: priced lines, count and subtotal. */
+    public function summary()
+    {
+        return response()->json($this->summaryData() + ['replaced' => false]);
     }
 
     public function show(Request $request)
@@ -90,7 +100,38 @@ class CartController extends Controller
     {
         $this->cart->update($key, (int) $request->validate(['quantity' => ['required', 'integer', 'min:0', 'max:'.OrderService::MAX_QUANTITY]])['quantity']);
 
-        return back();
+        return $request->wantsJson() ? response()->json($this->summaryData() + ['replaced' => false]) : back();
+    }
+
+    /** @return array{restaurant: ?array, lines: list<array>, count: int, subtotal: float, currency: string, error: ?string} */
+    private function summaryData(): array
+    {
+        $cart = $this->cart->get();
+        $listing = $cart['restaurant_id'] ? Restaurant::publicQuery()->find($cart['restaurant_id']) : null;
+        $data = ['restaurant' => $listing ? ['name' => $listing->name, 'slug' => $listing->slug] : null, 'lines' => [], 'count' => 0, 'subtotal' => 0.0, 'currency' => 'PHP', 'error' => null];
+
+        if (! $listing || $cart['lines'] === []) {
+            return $data;
+        }
+
+        try {
+            $quote = $this->context->runAs($listing, fn () => $this->orders->quote($listing, array_values($cart['lines'])));
+        } catch (ValidationException $e) {
+            return ['error' => collect($e->errors())->flatten()->first()] + $data;
+        }
+
+        $data['lines'] = array_map(fn (string $key, array $line) => [
+            'key' => $key,
+            'name' => $line['name'],
+            'mods' => collect($line['modifiers'])->pluck('name')->implode(', '),
+            'notes' => $line['notes'],
+            'qty' => $line['quantity'],
+            'total' => $line['line_total'],
+        ], array_keys($cart['lines']), $quote['lines']);
+        $data['count'] = array_sum(array_column($quote['lines'], 'quantity'));
+        $data['subtotal'] = $quote['subtotal'];
+
+        return $data;
     }
 
     public function checkout(Request $request)

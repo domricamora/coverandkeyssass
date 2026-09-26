@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/restaurant/{restaurant}/cart', [CartController::class, 'add'])->middleware('throttle:60,1')->name('cart.add');
 Route::get('/cart', [CartController::class, 'show'])->name('cart.show');
+Route::get('/cart/summary', [CartController::class, 'summary'])->name('cart.summary');
 Route::patch('/cart/{key}', [CartController::class, 'update'])->name('cart.update');
 
 Route::middleware('auth')->group(function (): void {
