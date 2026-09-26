@@ -1,7 +1,5 @@
 <?php
 
-use App\Http\Livewire\TeamManager;
-use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Support\TenantContext;
@@ -22,7 +20,7 @@ function teamFixture(): array
     $tenant = Tenant::create(['name' => 'Hotel A', 'business_type' => 'hotel', 'status' => 'active']);
 
     // Same provisioning path as TenantController@store.
-    \Database\Seeders\RoleSeeder::ensureTenantRoles($tenant->id);
+    RoleSeeder::ensureTenantRoles($tenant->id);
 
     $tenant->users()->attach($owner->id, ['status' => 'active', 'joined_at' => now()]);
     $owner->assignTenantRole($tenant, $tenant->roles()->where('slug', 'owner')->firstOrFail());
@@ -30,84 +28,74 @@ function teamFixture(): array
     return [$owner, $tenant];
 }
 
-it('adds a team member and assigns a role', function () {
-    [$owner, $tenant] = teamFixture();
+function teamMember(Tenant $tenant, string $role = 'staff'): User
+{
+    $member = User::factory()->create();
+    $tenant->users()->attach($member->id, ['status' => 'active', 'joined_at' => now()]);
+    $member->assignTenantRole($tenant, $tenant->roles()->where('slug', $role)->firstOrFail());
 
-    $this->actingAs($owner);
+    return $member;
+}
+
+function actAsOwnerOf(User $owner, Tenant $tenant): void
+{
+    test()->actingAs($owner)->withSession(['tenant_id' => $tenant->id]);
     app(TenantContext::class)->set($tenant);
+}
 
-    \Livewire\Livewire::test(TeamManager::class)
-        ->set('name', 'Pedro Cruz')
-        ->set('email', 'pedro@example.com')
-        ->set('roleSlug', 'staff')
-        ->call('addMember');
+it('lists the team and adds a member with a role', function () {
+    [$owner, $tenant] = teamFixture();
+    actAsOwnerOf($owner, $tenant);
+
+    $this->get(route('team'))->assertOk()->assertInertia(fn ($p) => $p->component('Team/Index')->has('members', 1)->where('members.0.role', 'owner'));
+
+    $this->post(route('team.store'), ['name' => 'Pedro Cruz', 'email' => 'Pedro@example.com', 'role' => 'staff'])->assertSessionHasNoErrors();
 
     $member = User::query()->where('email', 'pedro@example.com')->firstOrFail();
-
     expect($member->belongsToTenant($tenant))->toBeTrue()
         ->and($member->tenantRole($tenant)?->slug)->toBe('staff');
 });
 
 it('rejects adding a member who is already on the team', function () {
     [$owner, $tenant] = teamFixture();
+    actAsOwnerOf($owner, $tenant);
 
-    $this->actingAs($owner);
-    app(TenantContext::class)->set($tenant);
-
-    \Livewire\Livewire::test(TeamManager::class)
-        ->set('name', 'Pedro Cruz')
-        ->set('email', 'pedro@example.com')
-        ->set('roleSlug', 'staff')
-        ->call('addMember')
-        ->set('name', 'Pedro Again')
-        ->set('email', 'pedro@example.com')
-        ->call('addMember')
-        ->assertHasErrors(['email']);
+    $this->post(route('team.store'), ['name' => 'Pedro Cruz', 'email' => 'pedro@example.com', 'role' => 'staff'])->assertSessionHasNoErrors();
+    $this->post(route('team.store'), ['name' => 'Pedro Again', 'email' => 'pedro@example.com', 'role' => 'staff'])->assertSessionHasErrors('email');
 });
 
-it('changes a member role', function () {
+it('changes a member role and keeps a single owner', function () {
     [$owner, $tenant] = teamFixture();
+    $member = teamMember($tenant);
+    actAsOwnerOf($owner, $tenant);
 
-    $member = User::factory()->create();
-    $tenant->users()->attach($member->id, ['status' => 'active', 'joined_at' => now()]);
-    $member->assignTenantRole($tenant, $tenant->roles()->where('slug', 'staff')->firstOrFail());
+    $this->patch(route('team.role', $member->id), ['role' => 'manager'])->assertSessionHasNoErrors();
+    expect($member->fresh()->tenantRole($tenant)->slug)->toBe('manager');
 
-    $this->actingAs($owner);
-    app(TenantContext::class)->set($tenant);
-
-    \Livewire\Livewire::test(TeamManager::class)
-        ->call('changeRole', $member->id, 'manager');
-
+    $this->patch(route('team.role', $member->id), ['role' => 'owner'])->assertSessionHasErrors('role');
     expect($member->fresh()->tenantRole($tenant)->slug)->toBe('manager');
 });
 
 it('removes a member and revokes their role', function () {
     [$owner, $tenant] = teamFixture();
+    $member = teamMember($tenant);
+    actAsOwnerOf($owner, $tenant);
 
-    $member = User::factory()->create();
-    $tenant->users()->attach($member->id, ['status' => 'active', 'joined_at' => now()]);
-    $member->assignTenantRole($tenant, $tenant->roles()->where('slug', 'staff')->firstOrFail());
-
-    $this->actingAs($owner);
-    app(TenantContext::class)->set($tenant);
-
-    \Livewire\Livewire::test(TeamManager::class)
-        ->call('removeMember', $member->id);
+    $this->delete(route('team.remove', $member->id))->assertRedirect();
 
     expect($member->fresh()->belongsToTenant($tenant))->toBeFalse()
         ->and($member->fresh()->tenantRole($tenant))->toBeNull();
 });
 
-it('prevents staff from using the team manager', function () {
-    [$owner, $tenant] = teamFixture();
-
-    $staff = User::factory()->create();
-    $tenant->users()->attach($staff->id, ['status' => 'active', 'joined_at' => now()]);
-    $staff->assignTenantRole($tenant, $tenant->roles()->where('slug', 'staff')->firstOrFail());
+it('prevents staff from managing the team', function () {
+    [, $tenant] = teamFixture();
+    $staff = teamMember($tenant);
+    $other = teamMember($tenant);
 
     $this->actingAs($staff);
     session(['tenant_id' => $tenant->id]);
 
-    // Full-page Livewire component must refuse non-managers.
     $this->get(route('team'))->assertForbidden();
+    $this->post(route('team.store'), ['name' => 'X', 'email' => 'x@example.com', 'role' => 'staff'])->assertForbidden();
+    $this->delete(route('team.remove', $other->id))->assertForbidden();
 });

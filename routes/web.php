@@ -54,7 +54,10 @@ Route::post('/tenants/{tenant}/switch', [TenantController::class, 'switch'])
 
 Route::middleware(['auth', 'tenant.context'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::get('/dashboard/team', \App\Http\Livewire\TeamManager::class)->name('team');
+    Route::get('/dashboard/team', [\App\Http\Controllers\TeamController::class, 'index'])->name('team');
+    Route::post('/dashboard/team', [\App\Http\Controllers\TeamController::class, 'store'])->name('team.store');
+    Route::patch('/dashboard/team/{user}', [\App\Http\Controllers\TeamController::class, 'role'])->whereNumber('user')->name('team.role');
+    Route::delete('/dashboard/team/{user}', [\App\Http\Controllers\TeamController::class, 'destroy'])->whereNumber('user')->name('team.remove');
     Route::get('/dashboard/settings', [DashboardController::class, 'settings'])->name('tenants.settings');
     Route::patch('/dashboard/settings', [DashboardController::class, 'update'])->name('tenants.update');
 });

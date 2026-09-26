@@ -81,8 +81,12 @@ class DashboardController extends Controller
     {
         $this->authorize('update', app(TenantContext::class)->tenant());
 
-        return view('tenants.settings', [
-            'tenant' => app(TenantContext::class)->tenant(),
+        $tenant = app(TenantContext::class)->tenant();
+
+        return \Inertia\Inertia::render('Settings/Index', [
+            'company' => ['name' => $tenant->name, 'slug' => $tenant->slug, 'type' => \Illuminate\Support\Str::headline((string) $tenant->business_type), 'status' => $tenant->status],
+            'shortcuts' => ['team' => route('team'), 'billing' => route('billing.index'), 'notifications' => route('account.notification-settings'), 'profile' => route('profile.edit')],
+            'urls' => ['update' => route('tenants.update')],
         ]);
     }
 
