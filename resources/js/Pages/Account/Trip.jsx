@@ -26,6 +26,19 @@ export default function Trip({ trip, payments, providers, can, tabs, urls }) {
 
             <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_380px]">
                 <div className="space-y-8">
+                    <section className="border border-line bg-surface">
+                        <h2 className="border-b border-line px-5 py-3 text-[16px] font-semibold">Your stay</h2>
+                        <dl className="grid gap-4 px-5 py-4 text-[14px] sm:grid-cols-2">
+                            <div><dt className="text-[12px] text-fg-3">Dates</dt><dd className="text-fg">{trip.dates}</dd></div>
+                            <div><dt className="text-[12px] text-fg-3">Guests</dt><dd className="text-fg">{trip.guests}</dd></div>
+                            {p?.times && <div><dt className="text-[12px] text-fg-3">Check-in and check-out</dt><dd className="text-fg">{p.times}</dd></div>}
+                            <div><dt className="text-[12px] text-fg-3">Booking reference</dt><dd className="font-mono text-fg">{trip.reference}</dd></div>
+                        </dl>
+                        {['confirmed', 'checked_in'].includes(trip.status) && (
+                            <p className="border-t border-line px-5 py-3 text-[14px] text-fg-2">You're all set. Show the reference at check-in, and <a href={urls.message} className="text-brand hover:underline">message the property</a> for arrival times or special requests.</p>
+                        )}
+                    </section>
+
                     {['pending', 'held'].includes(trip.status) && (
                         <section className="border-l-2 border-warn bg-warn-bg px-4 py-3 text-[14px] text-fg-2">
                             <p className="font-medium text-fg">Not confirmed yet</p>
