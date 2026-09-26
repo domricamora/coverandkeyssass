@@ -6,7 +6,7 @@
             <h1>Stays and tables, booked straight from the property.</h1>
             <p>
                 Independent hotels, resorts, guesthouses and restaurants publish their own
-                inventory here — the same data their front desk works from, priced by them.
+                inventory here, from the same system their front desk uses and at their own prices.
             </p>
 
             <form class="hero-search" method="GET" action="{{ route('marketplace.hotels') }}">

@@ -37,7 +37,7 @@
     <body class="public-body" x-data="{ nav: false }" @keydown.escape.window="nav = false">
         <a class="skip-link" href="#main">Skip to content</a>
 
-        <header class="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/85">
+        <header style="z-index:70" class="sticky top-0 border-b border-line bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/85">
             <div class="flex h-[68px] items-center gap-6 px-5 lg:px-10 2xl:px-16">
                 <a class="flex shrink-0 items-center gap-2.5 text-fg" href="{{ route('home') }}" aria-label="{{ config('app.name') }} home">
                     <svg viewBox="0 0 32 32" width="26" height="26" fill="none" aria-hidden="true" class="text-brand">
