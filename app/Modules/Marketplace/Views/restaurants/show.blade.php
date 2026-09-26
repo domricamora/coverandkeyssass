@@ -201,6 +201,23 @@
                     </div>
 
                     @if (\App\Modules\RestaurantManagement\Controllers\GuestReservationController::acceptsReservations($r, app(\App\Support\ModuleService::class)))
+                        @php
+                            $tableBooking = [
+                                'slotsUrl' => route('marketplace.restaurants.slots', $r->slug),
+                                'reserveUrl' => route('marketplace.restaurants.reserve', $r->slug),
+                                'pageUrl' => route('marketplace.restaurants.show', $r->slug),
+                                'root' => url('/'),
+                                'signedIn' => auth()->check(),
+                                'today' => today()->toDateString(),
+                                'prefill' => [
+                                    'date' => old('date', request('date')), 'time' => old('time', request('time')), 'party' => old('party_size', request('party')),
+                                    'phone' => old('guest_phone'), 'requests' => old('special_requests'),
+                                ],
+                                'error' => collect(['date', 'time', 'party_size', 'guest_phone', 'special_requests'])->map(fn ($f) => $errors->first($f))->filter()->first(),
+                            ];
+                        @endphp
+                        @push('widgets') @vite('resources/js/widgets.jsx') @endpush
+                        <div data-widget="TableBooking" data-props="{{ json_encode($tableBooking) }}" style="margin-top:14px;">
                         @auth
                             <form method="POST" action="{{ route('marketplace.restaurants.reserve', $r->slug) }}" style="margin-top:14px;display:grid;gap:8px;"
                                   x-data="{ slots: [], load(d) { fetch('{{ route('marketplace.restaurants.slots', $r->slug) }}?date=' + d).then(r => r.json()).then(j => this.slots = j.slots) } }"
@@ -223,6 +240,7 @@
                         @else
                             <a class="btn btn-primary btn-block" style="margin-top:14px;" href="{{ route('login') }}">Sign in to book a table</a>
                         @endauth
+                        </div>
                     @endif
 
                     <div style="margin-top:14px;display:grid;gap:8px;">

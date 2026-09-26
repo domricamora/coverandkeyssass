@@ -127,3 +127,15 @@ it('mounts the React menu with modifier rules', function () {
         ->assertSee('&quot;name&quot;:&quot;Cheese&quot;', false)
         ->assertSee('Add to order'); // no-JS fallback
 });
+
+it('mounts the table booking widget with the prefill a guest returns with', function () {
+    Tests\Support\PropertyManagementFixtures::bootstrap();
+    [$restaurant] = menuKitchen('Kitchen A');
+    $restaurant->forceFill(['reservations_enabled' => true])->save();
+    auth()->logout();
+
+    $this->get(route('marketplace.restaurants.show', $restaurant->slug).'?date=2030-06-04&time=19:00&party=4')->assertOk()
+        ->assertSee('data-widget="TableBooking"', false)
+        ->assertSee('&quot;time&quot;:&quot;19:00&quot;,&quot;party&quot;:&quot;4&quot;', false)
+        ->assertSee('Sign in to book a table'); // no-JS fallback
+});
