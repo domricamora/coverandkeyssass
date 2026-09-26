@@ -27,19 +27,8 @@ class PosController extends RestaurantManagementController
         $this->authorizeTo($request, 'pos.use');
         $restaurant = $this->resolveRestaurant($restaurant);
 
-        $open = Order::query()->where('restaurant_id', $restaurant->id)->where('channel', Order::CHANNEL_POS)
-            ->whereIn('status', [Order::ACCEPTED, Order::PREPARING, Order::READY])->with('table')->oldest()->get();
-
-        return view('pos::register', [
-            'restaurant' => $restaurant,
-            'session' => $this->pos->currentSession($restaurant),
-            'tables' => $restaurant->tables()->active()->get(),
-            'open' => $open,
-            'busyTables' => $open->pluck('restaurant_table_id')->filter()->all(),
-            'menu' => $restaurant->menuItems()->where('is_available', true)->with('modifierGroups.options')->orderBy('name')->get(),
-            'sessions' => PosSession::query()->where('restaurant_id', $restaurant->id)->whereNotNull('closed_at')->latest('closed_at')->limit(5)->get(),
-            'title' => 'POS — '.$restaurant->name,
-        ]);
+        // The register lives on the React restaurant floor.
+        return redirect()->route('floor.index', ['restaurant' => $restaurant->slug]);
     }
 
     public function openSession(Request $request, string $restaurant)
@@ -67,7 +56,19 @@ class PosController extends RestaurantManagementController
         $restaurant = $this->resolveRestaurant($restaurant);
         $session = PosSession::query()->where('restaurant_id', $restaurant->id)->with(['opener', 'closer'])->findOrFail($session);
 
-        return view('pos::session', ['restaurant' => $restaurant, 'session' => $session, 'report' => $this->pos->report($session), 'title' => 'Z-report']);
+        return \Inertia\Inertia::render('RestaurantFloor/ZReport', [
+            'restaurant' => $restaurant->name,
+            'session' => [
+                'opened' => $session->opened_at->format('M j, g:i A').' by '.($session->opener?->name ?? '—'),
+                'closed' => $session->closed_at ? $session->closed_at->format('M j, g:i A').' by '.($session->closer?->name ?? '—') : null,
+                'float' => (float) $session->opening_float,
+                'counted' => $session->closed_at ? (float) $session->counted_cash : null,
+                'variance' => $session->closed_at ? (float) $session->variance : null,
+                'notes' => $session->notes,
+            ],
+            'report' => $this->pos->report($session),
+            'urls' => ['floor' => route('floor.index', ['restaurant' => $restaurant->slug])],
+        ]);
     }
 
     public function storeTicket(Request $request, string $restaurant)
@@ -89,18 +90,9 @@ class PosController extends RestaurantManagementController
     {
         $this->authorizeTo($request, 'pos.use');
         $restaurant = $this->resolveRestaurant($restaurant);
-        $order = $this->ticket($restaurant, $ticket)->load(['items', 'table']);
+        $order = $this->ticket($restaurant, $ticket);
 
-        return view('pos::ticket', [
-            'restaurant' => $restaurant,
-            'order' => $order,
-            'payments' => PosPayment::query()->where('order_id', $order->id)->with('user')->oldest('id')->get(),
-            'due' => $this->pos->balanceDue($order),
-            'session' => $this->pos->currentSession($restaurant),
-            'menu' => $restaurant->menuItems()->where('is_available', true)->with('modifierGroups.options')->orderBy('name')->get(),
-            'stays' => Booking::query()->where('status', Booking::CHECKED_IN)->with('rooms.room')->orderBy('guest_name')->get(),
-            'title' => 'Ticket '.$order->reference,
-        ]);
+        return redirect()->route('floor.index', ['restaurant' => $restaurant->slug, 'ticket' => $order->reference]);
     }
 
     public function addLine(Request $request, string $restaurant, string $ticket)
@@ -156,7 +148,7 @@ class PosController extends RestaurantManagementController
         $restaurant = $this->resolveRestaurant($restaurant);
         $this->pos->close($this->ticket($restaurant, $ticket));
 
-        return redirect()->route('pos.register', $restaurant)->with('success', 'Ticket closed.');
+        return redirect()->route('floor.index', ['restaurant' => $restaurant->slug])->with('success', 'Ticket closed.');
     }
 
     public function cancel(Request $request, string $restaurant, string $ticket)
@@ -171,7 +163,7 @@ class PosController extends RestaurantManagementController
 
         $this->orders->transition($order, Order::CANCELLED, $request->input('reason') ?: 'Voided at the register');
 
-        return redirect()->route('pos.register', $restaurant)->with('success', 'Ticket voided.');
+        return redirect()->route('floor.index', ['restaurant' => $restaurant->slug])->with('success', 'Ticket voided.');
     }
 
     public function refund(Request $request, string $restaurant, string $ticket)
@@ -203,12 +195,8 @@ class PosController extends RestaurantManagementController
         $this->authorizeTo($request, 'pos.use');
         $restaurant = $this->resolveRestaurant($restaurant);
 
-        return view('pos::kitchen', [
-            'restaurant' => $restaurant,
-            'orders' => Order::query()->where('restaurant_id', $restaurant->id)->whereIn('status', [Order::ACCEPTED, Order::PREPARING])
-                ->with(['items', 'table'])->orderByRaw('COALESCE(scheduled_for, accepted_at, created_at)')->get(),
-            'title' => 'Kitchen — '.$restaurant->name,
-        ]);
+        // The kitchen rail is part of the restaurant floor.
+        return redirect()->route('floor.index', ['restaurant' => $restaurant->slug]);
     }
 
     /** Kitchen display bump: accepted → preparing → ready (any channel). */

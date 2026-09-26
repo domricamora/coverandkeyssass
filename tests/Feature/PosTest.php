@@ -16,6 +16,7 @@ use App\Modules\RestaurantManagement\Models\RestaurantTable;
 use App\Support\ModuleService;
 use Carbon\CarbonImmutable;
 use Illuminate\Validation\ValidationException;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\Support\BookingFixtures;
 use Tests\Support\MarketplaceFixtures;
 use Tests\Support\PropertyManagementFixtures;
@@ -152,18 +153,27 @@ it('runs the register, tickets, kitchen display and Z-report over HTTP with perm
     $this->post(route('pos.tickets.store', $this->restaurant), ['restaurant_table_id' => $this->table->id, 'item_id' => $this->burger->id, 'options' => [$this->cheese->id], 'quantity' => 1])->assertRedirect();
     $order = Order::query()->where('channel', 'pos')->firstOrFail();
 
-    $this->get(route('pos.register', $this->restaurant))->assertOk()->assertSee('T1')->assertSee($order->reference);
-    $this->get(route('pos.kitchen', $this->restaurant))->assertOk()->assertSee('Table T1')->assertSee('Cheese');
+    // Register, ticket and kitchen screens live on the React restaurant floor.
+    $floor = route('floor.index', ['restaurant' => $this->restaurant->slug]);
+    $this->get(route('pos.register', $this->restaurant))->assertRedirect($floor);
+    $this->get(route('pos.kitchen', $this->restaurant))->assertRedirect($floor);
+    $this->get(route('pos.tickets.show', [$this->restaurant, $order->reference]))->assertRedirect(route('floor.index', ['restaurant' => $this->restaurant->slug, 'ticket' => $order->reference]));
+    $this->get(route('floor.index', ['restaurant' => $this->restaurant->slug, 'ticket' => $order->reference]))->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('kitchen.0.where', 'Table T1')->where('kitchen.0.items.0.mods', 'Cheese')
+            ->where('ticket.reference', $order->reference)->where('ticket.voidable', true)->where('ticket.refundable', false)
+            ->where('can.manage', true));
     $this->post(route('pos.kitchen.bump', [$this->restaurant, $order->reference]))->assertRedirect();
     expect($order->refresh()->status)->toBe(Order::PREPARING);
 
     $this->post(route('pos.tickets.pay', [$this->restaurant, $order->reference]), ['method' => 'cash', 'tendered' => 300])->assertSessionHasNoErrors();
-    $this->post(route('pos.tickets.close', [$this->restaurant, $order->reference]))->assertRedirect(route('pos.register', $this->restaurant));
+    $this->post(route('pos.tickets.close', [$this->restaurant, $order->reference]))->assertRedirect($floor);
     $this->get(route('pos.tickets.receipt', [$this->restaurant, $order->reference]))->assertOk()->assertSee('TOTAL')->assertSee('280.00')->assertSee('20.00');
 
     $session = PosSession::query()->firstOrFail();
     $this->post(route('pos.sessions.close', [$this->restaurant, $session->id]), ['counted_cash' => 780])->assertRedirect();
-    $this->get(route('pos.sessions.show', [$this->restaurant, $session->id]))->assertOk()->assertSee('₱780.00');
+    $this->get(route('pos.sessions.show', [$this->restaurant, $session->id]))->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->component('RestaurantFloor/ZReport')->where('session.counted', 780)->where('report.cash_expected', 780));
 
     // Front desk can ring up but not discount or close the day; staff cannot use the POS.
     PropertyManagementFixtures::login($desk = MarketplaceFixtures::member($this->tenant, 'front_desk'), $this->tenant);

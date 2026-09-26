@@ -6,7 +6,9 @@ use App\Modules\Marketplace\Models\Restaurant;
 use App\Modules\Ordering\Models\Order;
 use App\Modules\Ordering\Models\OrderItem;
 use App\Modules\Ordering\Services\OrderService;
+use App\Modules\Booking\Models\Booking;
 use App\Modules\Pos\Models\PosPayment;
+use App\Modules\Pos\Models\PosSession;
 use App\Modules\Pos\Services\PosService;
 use App\Modules\RestaurantManagement\Controllers\RestaurantManagementController;
 use App\Modules\RestaurantManagement\Models\RestaurantTable;
@@ -55,7 +57,17 @@ class FloorController extends RestaurantManagementController
         return Inertia::render('RestaurantFloor/Index', [
             'restaurants' => $restaurants->map(fn ($r) => ['slug' => $r->slug, 'name' => $r->name]),
             'restaurant' => ['slug' => $restaurant->slug, 'name' => $restaurant->name, 'currency' => 'PHP'],
-            'session' => ($s = $this->pos->currentSession($restaurant)) ? ['id' => $s->id, 'opened_at' => $s->opened_at->format('g:i A')] : null,
+            'session' => ($s = $this->pos->currentSession($restaurant)) ? [
+                'id' => $s->id,
+                'opened_at' => $s->opened_at->format('g:i A'),
+                'expected' => $s->cashInDrawer(),
+                'close' => route('pos.sessions.close', [$restaurant->slug, $s->id]),
+                'report' => route('pos.sessions.show', [$restaurant->slug, $s->id]),
+            ] : null,
+            'closings' => $request->user()->hasPermissionTo('pos.manage')
+                ? PosSession::query()->where('restaurant_id', $restaurant->id)->whereNotNull('closed_at')->latest('closed_at')->limit(5)->get()
+                    ->map(fn (PosSession $p) => ['id' => $p->id, 'at' => $p->closed_at->format('M j, g:i A'), 'variance' => (float) $p->variance, 'href' => route('pos.sessions.show', [$restaurant->slug, $p->id])])
+                : [],
             'areas' => $tables->groupBy(fn ($t) => $t->area?->name ?? 'Floor')->map(fn ($group, $name) => [
                 'name' => $name,
                 'tables' => $group->map(fn (RestaurantTable $t) => [
@@ -118,7 +130,12 @@ class FloorController extends RestaurantManagementController
                 'session' => route('pos.sessions.open', $restaurant->slug),
                 'register' => route('pos.register', $restaurant->slug),
             ],
-            'can' => ['discount' => $request->user()->hasPermissionTo('pos.discount'), 'book' => $request->user()->hasPermissionTo('reservations.manage')],
+            'can' => [
+                'discount' => $request->user()->hasPermissionTo('pos.discount'),
+                'book' => $request->user()->hasPermissionTo('reservations.manage'),
+                'manage' => $request->user()->hasPermissionTo('pos.manage'),
+                'refund' => $request->user()->hasPermissionTo('pos.refund'),
+            ],
             'methods' => array_values(array_diff(PosPayment::METHODS, ['gift_card'])),
             'ticket' => fn () => $request->filled('ticket') ? $this->ticketDetail($restaurant, (string) $request->query('ticket')) : null,
         ]);
@@ -169,9 +186,19 @@ class FloorController extends RestaurantManagementController
     {
         $order = Order::query()->where('restaurant_id', $restaurant->id)->where('channel', Order::CHANNEL_POS)->where('reference', $reference)->with(['items', 'table:id,label'])->firstOrFail();
 
+        $payments = PosPayment::query()->where('order_id', $order->id)->oldest('id')->get();
+
         return [
             'reference' => $order->reference,
             'status' => $order->status,
+            // Room charge needs an unpaid ticket; void needs no payments; refund needs a paid, closable ticket.
+            'stays' => $payments->isEmpty() && $order->payment_status === Order::UNPAID
+                ? Booking::query()->where('status', Booking::CHECKED_IN)->with('rooms.room:id,room_number')->orderBy('guest_name')->get()
+                    ->flatMap(fn (Booking $b) => $b->rooms->map(fn ($br) => ['value' => $b->id.':'.$br->room_id, 'label' => 'Room '.$br->room?->room_number.' · '.$b->guest_name]))->values()
+                : [],
+            'voidable' => $payments->isEmpty() && $order->payment_status === Order::UNPAID && ! in_array($order->status, [Order::COMPLETED, Order::CANCELLED], true),
+            'refundable' => $order->canTransitionTo(Order::REFUNDED),
+            'refund_methods' => PosPayment::REFUND_METHODS,
             'where' => $order->table?->label ? 'Table '.$order->table->label : ($order->customer_name ?: 'Counter'),
             'items' => $order->items->map(fn (OrderItem $i) => ['id' => $i->id, 'qty' => $i->quantity, 'name' => $i->name, 'mods' => collect($i->modifiers)->pluck('name')->join(', '), 'notes' => $i->notes, 'total' => (float) $i->line_total]),
             'subtotal' => (float) $order->subtotal,
@@ -180,13 +207,16 @@ class FloorController extends RestaurantManagementController
             'total' => (float) $order->total,
             'due' => $this->pos->balanceDue($order),
             'paid' => $order->payment_status === Order::PAID,
-            'payments' => PosPayment::query()->where('order_id', $order->id)->oldest('id')->get()->map(fn (PosPayment $p) => ['method' => $p->method, 'amount' => (float) $p->amount, 'change' => (float) $p->change_given]),
+            'payments' => $payments->map(fn (PosPayment $p) => ['method' => $p->method, 'amount' => (float) $p->amount, 'change' => (float) $p->change_given]),
             'urls' => [
                 'lines' => route('pos.tickets.lines', [$restaurant->slug, $order->reference]),
                 'pay' => route('pos.tickets.pay', [$restaurant->slug, $order->reference]),
                 'discount' => route('pos.tickets.discount', [$restaurant->slug, $order->reference]),
                 'close' => route('floor.tickets.close', [$restaurant->slug, $order->reference]),
                 'receipt' => route('pos.tickets.receipt', [$restaurant->slug, $order->reference]),
+                'room' => route('pos.tickets.room', [$restaurant->slug, $order->reference]),
+                'cancel' => route('pos.tickets.cancel', [$restaurant->slug, $order->reference]),
+                'refund' => route('pos.tickets.refund', [$restaurant->slug, $order->reference]),
             ],
         ];
     }

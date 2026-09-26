@@ -8,7 +8,7 @@ import { Drawer, cx, label, money } from '../../react/ui';
  * for ordering (fast menu with modifiers), paying and closing a ticket.
  */
 export default function RestaurantFloor(props) {
-    const { restaurants, restaurant, session, areas, counter, kitchen, book, menu, stats, urls, can, methods, ticket } = props;
+    const { restaurants, restaurant, session, closings, areas, counter, kitchen, book, menu, stats, urls, can, methods, ticket } = props;
     const [draft, setDraft] = useState(null); // { tableId, where, lines: [] } for a new ticket
 
     if (!restaurant) {
@@ -44,7 +44,20 @@ export default function RestaurantFloor(props) {
                     </label>
                 )}
                 {session ? (
-                    <span className="pill h-9 bg-ok-bg px-3 text-[13px] text-ok">Register open since {session.opened_at}</span>
+                    <>
+                        <span className="pill h-9 bg-ok-bg px-3 text-[13px] text-ok">Register open since {session.opened_at}</span>
+                        {can.manage && (
+                            <button
+                                className="btn-ghost"
+                                onClick={() => {
+                                    const counted = window.prompt(`Count the drawer. Expected ${money(session.expected, currency)}. Counted cash (₱):`);
+                                    if (counted !== null && counted !== '') post(session.close, { counted_cash: counted });
+                                }}
+                            >
+                                Close day
+                            </button>
+                        )}
+                    </>
                 ) : (
                     <button className="btn-coral" onClick={() => post(urls.session, { opening_float: window.prompt('Opening cash float (₱)', '3000') || 0 })}>Open register</button>
                 )}
@@ -57,6 +70,14 @@ export default function RestaurantFloor(props) {
                 <Stat term="Covers seated" value={stats.covers} />
                 <Stat term="Bookings to come" value={stats.booked} />
             </dl>
+            {closings?.length > 0 && (
+                <p className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[12px] text-fg-3">
+                    Past closings:
+                    {closings.map((c) => (
+                        <a key={c.id} href={c.href} className="hover:text-fg">{c.at} <span className={cx('tabular-nums', c.variance < 0 && 'text-bad')}>({money(c.variance, currency)})</span></a>
+                    ))}
+                </p>
+            )}
 
             <div className="mt-8 grid gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">
                 <div className="min-w-0 space-y-8">
@@ -411,6 +432,35 @@ function TicketPanel({ ticket: t, menu, currency, session, can, methods, post, o
                         <p className="border border-dashed border-coral bg-coral-soft px-4 py-3 text-[13px] text-coral-deep">Open the register to take payments.</p>
                     )
                 )}
+
+                {session && t.stays.length > 0 && (
+                    <form
+                        className="flex flex-wrap items-end gap-3 border border-line p-4"
+                        onSubmit={(e) => { e.preventDefault(); post(t.urls.room, { room_stay: e.currentTarget.room_stay.value }); }}
+                    >
+                        <label className="min-w-48 flex-1"><span className="label">Charge to room</span>
+                            <select name="room_stay" className="field">{t.stays.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}</select>
+                        </label>
+                        <button className="btn-ghost">Post to folio</button>
+                    </form>
+                )}
+
+                {session && can.refund && t.refundable && (
+                    <form
+                        className="flex flex-wrap items-end gap-3 border border-line p-4"
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            const f = e.currentTarget;
+                            if (window.confirm(`Refund ${money(t.total, currency)}?`)) post(t.urls.refund, { method: f.method.value, reason: f.reason.value });
+                        }}
+                    >
+                        <label><span className="label">Refund via</span>
+                            <select name="method" className="field">{t.refund_methods.map((m) => <option key={m} value={m}>{label(m)}</option>)}</select>
+                        </label>
+                        <label className="min-w-40 flex-1"><span className="label">Reason</span><input name="reason" required className="field" /></label>
+                        <button className="btn-danger">Refund</button>
+                    </form>
+                )}
             </div>
             <div className="flex flex-wrap gap-2 border-t border-line px-6 py-3">
                 {t.paid && <button className="btn-primary" onClick={() => post(t.urls.close)}>Close ticket & free table</button>}
@@ -418,6 +468,9 @@ function TicketPanel({ ticket: t, menu, currency, session, can, methods, post, o
                     <button className="btn-ghost btn-sm" onClick={() => { const v = window.prompt('Discount in % (e.g. 10)'); if (v) post(t.urls.discount, { type: 'percent', value: v, reason: 'Floor discount' }); }}>Discount</button>
                 )}
                 <a className="btn-ghost btn-sm" href={t.urls.receipt} target="_blank" rel="noreferrer">Receipt</a>
+                {t.voidable && (
+                    <button className="btn-danger btn-sm ml-auto" onClick={() => window.confirm('Void this ticket?') && post(t.urls.cancel)}>Void ticket</button>
+                )}
             </div>
         </>
     );
