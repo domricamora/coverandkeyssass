@@ -11,6 +11,8 @@ export default defineConfig({
                 // React + Inertia dashboard (2026-09-26 rebuild)
                 'resources/css/react.css',
                 'resources/js/react/app.jsx',
+                // React islands on the public listing pages (guest booking flows)
+                'resources/js/widgets.jsx',
             ],
             refresh: true,
         }),
