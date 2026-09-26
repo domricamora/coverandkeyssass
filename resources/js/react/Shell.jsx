@@ -7,7 +7,7 @@ import { Icon, cx } from './ui';
  * top bar, and a main area that uses the whole viewport width.
  */
 export default function Shell({ children }) {
-    const { props, url } = usePage();
+    const { props, url, component } = usePage();
     const [nav, setNav] = useState(false);
 
     useEffect(() => setNav(false), [url]);
@@ -63,7 +63,8 @@ export default function Shell({ children }) {
                 </header>
 
                 <main id="main" className="min-h-0 flex-1 overflow-y-auto">
-                    {children}
+                    {/* Keyed on the page component: a new screen fades in; filters and pagination on the same screen do not replay it. */}
+                    <div key={component} className="page-in">{children}</div>
                 </main>
             </div>
 

@@ -11,10 +11,10 @@ export default function AccountHome({ name, upcoming, past, counts, tabs, urls }
             <h1 className="mb-6 font-display text-[30px] font-medium tracking-tight">{name}</h1>
             <AccountTabs tabs={tabs} />
 
-            <div className="mb-10 grid gap-3 sm:grid-cols-3">
+            <div className="mb-10 grid grid-cols-3 gap-2 sm:gap-3">
                 {counts.map(([label, value, href]) => (
-                    <a key={label} href={href} className="border border-line bg-surface px-5 py-4 hover:border-line-strong">
-                        <span className="block text-[13px] text-fg-3">{label}</span>
+                    <a key={label} href={href} className="border border-line bg-surface px-3 py-3 transition-colors duration-150 hover:border-line-strong sm:px-5 sm:py-4">
+                        <span className="block text-[12px] leading-tight text-fg-3 sm:text-[13px]">{label}</span>
                         <span className="block font-display text-[26px] font-medium tabular-nums">{value}</span>
                     </a>
                 ))}
