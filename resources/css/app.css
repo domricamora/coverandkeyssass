@@ -1261,7 +1261,7 @@ form[action*="/report"] {
 /* Native controls follow the theme: dark public site, light dashboards.
    Without this, <option> lists render light text on a white system popup. */
 body.public-body {
-    color-scheme: dark;
+    color-scheme: light;
 }
 
 body.dash-body,
@@ -1696,3 +1696,28 @@ body.admin-body {
 
 /* Public site is full width (owner: "not boxed, i want it full width"). */
 .public-body .container { max-width: none; padding-left: clamp(20px, 4vw, 64px); padding-right: clamp(20px, 4vw, 64px); }
+
+/* Legacy marketplace pieces under the light palette. */
+.public-body ol, .public-body ul { list-style: none; }
+.listing-card__flag, .listing-card__kind { background: #fff !important; color: var(--text) !important; }
+.public-body .check input[type="checkbox"],
+.public-body input[type="checkbox"] { appearance: auto; accent-color: var(--primary); background: #fff; width: 16px; height: 16px; }
+.filter-bar__form { gap: 8px; }
+.filter-bar__field--sm { min-width: 120px; }
+.filter-bar__field--sm select { padding-right: 28px; }
+.filter-bar__search { flex: none; }
+
+/* Tailwind's border reset for the public pages (they don't load preflight):
+   `border` utilities need a solid style; legacy rules use the shorthand. */
+.public-body *, .public-body ::before, .public-body ::after { border-width: 0; border-style: solid; border-color: var(--border); }
+.public-body ol, .public-body ul { margin: 0; padding: 0; }
+.public-body, .dash-body, .admin-body { color-scheme: light; }
+.public-body .form-input, .public-body .card, .public-body .filter-rail { border-width: 1px; }
+.public-body input[type="checkbox"], .public-body input[type="radio"] { -webkit-appearance: auto !important; appearance: auto !important; background: none !important; border: 0 !important; box-shadow: none !important; }
+
+/* Blade dashboard under Lagoon & Coral: no black leftovers from the ink theme. */
+.dash-body .side-nav a.is-active,
+.admin-body .side-nav a.is-active { background: var(--primary-soft) !important; color: var(--primary-deep) !important; box-shadow: inset 2px 0 0 var(--primary); }
+.dash-body .side-nav a.is-active .side-nav__icon { color: var(--primary) !important; }
+.dash-body .avatar, .admin-body .avatar, .public-body .avatar { background: var(--primary) !important; color: #fff !important; }
+.side-nav__badge { background: var(--coral) !important; color: #fff !important; }

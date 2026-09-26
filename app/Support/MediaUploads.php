@@ -75,6 +75,11 @@ class MediaUploads
      */
     public static function storeAsWebp(UploadedFile $file, string $dir): string
     {
+        // A decoded 24 MP phone photo is ~96 MB in GD; give image work room without raising it app-wide.
+        if (self::bytes((string) ini_get('memory_limit')) < 512 * 1024 * 1024) {
+            @ini_set('memory_limit', '512M');
+        }
+
         $image = @imagecreatefromstring((string) file_get_contents($file->getRealPath()));
 
         if ($image === false || ! function_exists('imagewebp')) {
@@ -95,7 +100,9 @@ class MediaUploads
         $scale = min(1, 2000 / max($w, $h));
 
         if ($scale < 1) {
-            $image = imagescale($image, (int) round($w * $scale), (int) round($h * $scale), IMG_BICUBIC);
+            $scaled = imagescale($image, (int) round($w * $scale), (int) round($h * $scale), IMG_BICUBIC);
+            unset($image); // free the full-size bitmap before encoding
+            $image = $scaled;
         }
 
         imagepalettetotruecolor($image);
@@ -106,9 +113,27 @@ class MediaUploads
         imagewebp($image, null, 82);
         $bytes = (string) ob_get_clean();
 
+        unset($image);
         $path = $dir.'/'.Str::random(40).'.webp';
         Storage::disk('public')->put($path, $bytes);
 
         return $path;
+    }
+
+    /** php.ini size ("128M", "-1") → bytes; -1 means unlimited. */
+    private static function bytes(string $value): int
+    {
+        if ($value === '-1') {
+            return PHP_INT_MAX;
+        }
+
+        $number = (int) $value;
+
+        return match (strtoupper(substr($value, -1))) {
+            'G' => $number * 1024 ** 3,
+            'M' => $number * 1024 ** 2,
+            'K' => $number * 1024,
+            default => $number,
+        };
     }
 }
