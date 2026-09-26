@@ -37,7 +37,7 @@ it('sends the guest to a PayMongo checkout for the booking total and reuses it',
 
     $this->actingAs($guest)
         ->get(route('account.bookings.show', $booking->reference))
-        ->assertSee('with PayMongo');
+        ->assertSee('Card, GCash or Maya');
 
     $this->post(route('account.payments.pay', $booking->reference))
         ->assertRedirect('https://checkout.paymongo.test/cs_test_1');
@@ -60,7 +60,7 @@ it('offers no online payment when PayMongo is not configured', function () {
     $guest = User::factory()->create();
     $booking = BookingFixtures::reserve($property, $type, [], Booking::SOURCE_MARKETPLACE, $guest);
 
-    $this->actingAs($guest)->get(route('account.bookings.show', $booking->reference))->assertDontSee('with PayMongo');
+    $this->actingAs($guest)->get(route('account.bookings.show', $booking->reference))->assertDontSee('Card, GCash or Maya');
     $this->post(route('account.payments.pay', $booking->reference))->assertNotFound();
 });
 

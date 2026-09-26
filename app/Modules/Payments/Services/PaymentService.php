@@ -31,20 +31,43 @@ use Illuminate\Validation\ValidationException;
  */
 class PaymentService
 {
+    public const PAYMONGO = 'paymongo';
+
+    public const PAYPAL = 'paypal';
+
     public function __construct(
         private readonly PayMongoGateway $gateway,
+        private readonly PayPalGateway $paypal,
         private readonly BookingService $bookings,
         private readonly OrderService $orders,
         private readonly AuditLogger $audit,
     ) {}
 
+    /** Any online provider configured. */
     public static function enabled(): bool
     {
-        return filled(config('services.paymongo.secret_key'));
+        return self::providers() !== [];
     }
 
-    /** Start (or resume) a PayMongo checkout. Runs inside the booking's tenant. */
-    public function checkout(Booking $booking, User $user): Payment
+    /** @return list<array{0: string, 1: string, 2: string}> [key, label, hint] of the configured providers */
+    public static function providers(): array
+    {
+        return array_values(array_filter([
+            filled(config('services.paymongo.secret_key')) ? [self::PAYMONGO, 'Card, GCash or Maya', 'Secure checkout by PayMongo'] : null,
+            PayPalGateway::enabled() ? [self::PAYPAL, 'PayPal', 'Pay with your PayPal account or card'] : null,
+        ]));
+    }
+
+    /** The requested provider when configured, else the first configured one. */
+    public static function provider(?string $wanted): string
+    {
+        $keys = array_column(self::providers(), 0);
+
+        return in_array($wanted, $keys, true) ? $wanted : ($keys[0] ?? self::PAYMONGO);
+    }
+
+    /** Start (or resume) an online checkout. Runs inside the booking's tenant. */
+    public function checkout(Booking $booking, User $user, ?string $provider = null): Payment
     {
         if (! in_array($booking->status, [Booking::PENDING, Booking::HELD], true)) {
             $this->fail('This booking does not need a payment.');
@@ -52,7 +75,7 @@ class PaymentService
 
         $booking->loadMissing('property');
 
-        return $this->openCheckout(['booking_id' => $booking->id], $user, (float) $booking->total, $booking->currency, $booking->reference, [
+        return $this->openCheckout(['booking_id' => $booking->id], $user, (float) $booking->total, $booking->currency, $booking->reference, self::provider($provider), [
             'name' => 'Stay at '.$booking->property->name,
             'description' => $booking->check_in->format('M j').' – '.$booking->check_out->format('M j, Y').' · '.$booking->nights().' night(s)',
             'label' => 'Booking',
@@ -61,14 +84,14 @@ class PaymentService
         ]);
     }
 
-    /** Start (or resume) a PayMongo checkout for a food order (Phase 11). Runs inside the order's tenant. */
-    public function checkoutOrder(Order $order, User $user): Payment
+    /** Start (or resume) an online checkout for a food order (Phase 11). Runs inside the order's tenant. */
+    public function checkoutOrder(Order $order, User $user, ?string $provider = null): Payment
     {
         if (! $order->needsPayment()) {
             $this->fail('This order does not need an online payment.');
         }
 
-        return $this->openCheckout(['order_id' => $order->id], $user, (float) $order->total, $order->currency, $order->reference, [
+        return $this->openCheckout(['order_id' => $order->id], $user, (float) $order->total, $order->currency, $order->reference, self::provider($provider), [
             'name' => 'Order from '.$order->restaurant->name,
             'description' => $order->items()->sum('quantity').' item(s) · '.$order->fulfillmentLabel(),
             'label' => 'Order',
@@ -81,7 +104,7 @@ class PaymentService
      * @param  array{booking_id: int}|array{order_id: int}  $payable
      * @param  array{name: string, description: string, label: string, success_url: string, cancel_url: string}  $display
      */
-    private function openCheckout(array $payable, User $user, float $total, string $currency, string $reference, array $display): Payment
+    private function openCheckout(array $payable, User $user, float $total, string $currency, string $reference, string $provider, array $display): Payment
     {
         [$column, $id] = [array_key_first($payable), reset($payable)];
 
@@ -90,13 +113,36 @@ class PaymentService
         }
 
         // Reuse an open checkout so a double click never opens two sessions.
-        $open = Payment::query()->where($column, $id)->where('status', Payment::PENDING)->whereNotNull('checkout_url')->latest('id')->first();
+        $open = Payment::query()->where($column, $id)->where('provider', $provider)->where('status', Payment::PENDING)->whereNotNull('checkout_url')->latest('id')->first();
 
         if ($open) {
             return $open;
         }
 
         $amount = (int) round($total * 100);
+
+        if ($provider === self::PAYPAL) {
+            try {
+                $order = $this->paypal->createOrder($reference, $display['name'].' · '.$display['description'], $amount / 100, $currency, $display['success_url'], $display['cancel_url']);
+            } catch (RequestException $e) {
+                report($e);
+                $this->fail('PayPal is unavailable right now. Please try again in a moment.');
+            }
+
+            $payment = Payment::create($payable + [
+                'user_id' => $user->id,
+                'provider' => self::PAYPAL,
+                'checkout_session_id' => $order['id'],
+                'checkout_url' => $order['approve_url'],
+                'amount' => $amount / 100,
+                'currency' => $currency,
+                'status' => Payment::PENDING,
+            ]);
+
+            $this->audit->log('payment.checkout_started', $payment, null, [strtolower($display['label']) => $reference, 'amount' => $payment->amount, 'provider' => self::PAYPAL]);
+
+            return $payment;
+        }
 
         try {
             $session = $this->gateway->createCheckoutSession([
@@ -147,6 +193,10 @@ class PaymentService
             return $payment;
         }
 
+        if ($payment->provider === self::PAYPAL) {
+            return $this->syncPayPal($payment);
+        }
+
         $session = $this->gateway->retrieveCheckoutSession($payment->checkout_session_id);
 
         $paid = collect(data_get($session, 'attributes.payments', []))
@@ -167,6 +217,31 @@ class PaymentService
         }
 
         return $this->markPaid($payment, (string) data_get($paid, 'id'), data_get($session, 'attributes.payment_method_used') ?? data_get($paid, 'attributes.source.type'));
+    }
+
+    /** PayPal: capture the approved order, then trust only a COMPLETED capture for the exact amount. */
+    private function syncPayPal(Payment $payment): Payment
+    {
+        $order = $this->paypal->capture($payment->checkout_session_id);
+        $capture = collect(data_get($order, 'purchase_units.0.payments.captures', []))->first(fn ($c) => ($c['status'] ?? null) === 'COMPLETED');
+
+        if (! $capture) {
+            if (in_array($order['status'] ?? null, ['VOIDED'], true) || data_get($order, 'purchase_units.0.payments.captures.0.status') === 'DECLINED') {
+                $this->markFailed($payment, 'PayPal declined the payment');
+            }
+
+            return $payment;
+        }
+
+        $cents = (int) round(((float) data_get($capture, 'amount.value')) * 100);
+
+        if ($cents !== $payment->amountInCentavos() || strtoupper((string) data_get($capture, 'amount.currency_code')) !== strtoupper($payment->currency)) {
+            $this->audit->log('payment.amount_mismatch', $payment, null, ['expected' => $payment->amountInCentavos(), 'received' => $cents], $payment->tenant_id);
+
+            return $payment;
+        }
+
+        return $this->markPaid($payment, (string) $capture['id'], 'paypal');
     }
 
     /** Record a declined payment. The booking stays pending so the guest can retry. */
@@ -207,10 +282,13 @@ class PaymentService
         }
 
         try {
-            $refund = $this->gateway->createRefund($payment->provider_payment_id, $payment->amountInCentavos(), 'requested_by_customer', $label);
+            $refund = $payment->provider === self::PAYPAL
+                ? $this->paypal->refund($payment->provider_payment_id, (float) $payment->amount, $payment->currency, $label)
+                : $this->gateway->createRefund($payment->provider_payment_id, $payment->amountInCentavos(), 'requested_by_customer', $label);
         } catch (RequestException $e) {
             report($e);
-            $this->fail('PayMongo did not accept the refund: '.(data_get($e->response->json(), 'errors.0.detail') ?? 'provider error').'.');
+            $detail = data_get($e->response->json(), 'errors.0.detail') ?? data_get($e->response->json(), 'details.0.description') ?? 'provider error';
+            $this->fail(($payment->provider === self::PAYPAL ? 'PayPal' : 'PayMongo').' did not accept the refund: '.$detail.'.');
         }
 
         $payment->forceFill([

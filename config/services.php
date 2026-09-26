@@ -40,6 +40,13 @@ return [
         'tolerance' => (int) env('PAYMONGO_WEBHOOK_TOLERANCE', 300),
     ],
 
+    // PayPal Orders v2 (guest checkout). mode: sandbox | live.
+    'paypal' => [
+        'client_id' => env('PAYPAL_CLIENT_ID'),
+        'secret' => env('PAYPAL_SECRET'),
+        'mode' => env('PAYPAL_MODE', 'sandbox'),
+    ],
+
     // Platform commission (Phase 08) until the Super Admin saves a global rate.
     'commission' => [
         'default_rate' => (float) env('COMMISSION_DEFAULT_RATE', 10),

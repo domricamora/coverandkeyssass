@@ -8,8 +8,10 @@ use App\Models\Tenant;
 use App\Modules\Booking\Models\Booking;
 use App\Modules\Booking\Services\BookingService;
 use App\Modules\Marketplace\Models\Property;
+use App\Modules\Payments\Services\PaymentService;
 use App\Support\ModuleService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Marketplace reservation request (POST /property/{slug}/reserve).
@@ -42,6 +44,7 @@ class ReservationController extends Controller
             'guest_phone' => ['nullable', 'string', 'max:40'],
             'special_requests' => ['nullable', 'string', 'max:2000'],
             'promo_code' => ['nullable', 'string', 'max:40'],
+            'pay' => ['nullable', 'string', 'in:later,paymongo,paypal'], // review step: pay now online, or at the property
         ]);
 
         $user = $request->user();
@@ -57,6 +60,18 @@ class ReservationController extends Controller
             customer: $user,
             actor: $user,
         ));
+
+        // Pay now: straight to the provider. A provider outage keeps the booking and says so.
+        if (in_array($validated['pay'] ?? 'later', array_column(PaymentService::providers(), 0), true)) {
+            try {
+                $payment = $this->bookings->asTenantOf($booking, fn () => app(PaymentService::class)->checkout($booking, $user, $validated['pay']));
+
+                return redirect()->away($payment->checkout_url);
+            } catch (ValidationException $e) {
+                return redirect()->route('account.bookings.show', $booking->reference)
+                    ->with('warning', 'Reservation '.$booking->reference.' saved, but '.collect($e->errors())->flatten()->first().' You can pay from this page.');
+            }
+        }
 
         return redirect()->route('account.bookings.show', $booking->reference)
             ->with('success', 'Reservation '.$booking->reference.' sent — the host will confirm it shortly.');

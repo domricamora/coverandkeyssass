@@ -7,10 +7,12 @@
 @endphp
 
 @if ($canPay)
-    <form method="POST" action="{{ route('account.payments.pay', $booking->reference) }}" style="margin-bottom:16px;">
+    <form method="POST" action="{{ route('account.payments.pay', $booking->reference) }}" style="margin-bottom:16px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
         @csrf
-        <button class="btn btn-primary" type="submit">Pay {{ $booking->money($booking->total) }} with PayMongo</button>
-        <span class="muted" style="margin-left:8px;">Card, GCash or Maya. Your booking is confirmed as soon as the payment clears.</span>
+        @foreach (\App\Modules\Payments\Services\PaymentService::providers() as [$key, $label])
+            <button class="btn {{ $loop->first ? 'btn-primary' : 'btn-outline' }}" type="submit" name="provider" value="{{ $key }}">Pay {{ $booking->money($booking->total) }} · {{ $label }}</button>
+        @endforeach
+        <span class="muted">Your booking is confirmed as soon as the payment clears.</span>
     </form>
 @endif
 

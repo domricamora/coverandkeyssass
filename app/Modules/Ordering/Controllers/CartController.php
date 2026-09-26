@@ -114,7 +114,7 @@ class CartController extends Controller
             ] : null,
             'error' => $error,
             'promoCode' => (string) $request->query('promo_code', ''),
-            'onlinePayments' => PaymentService::enabled(),
+            'providers' => PaymentService::providers(),
             'zones' => $zones->map(fn ($z) => ['id' => $z->id, 'name' => $z->name, 'terms' => $z->termsLabel(), 'fee' => (float) $z->fee, 'free_over' => $z->free_over !== null ? (float) $z->free_over : null, 'radius' => $z->radius_km !== null])->values(),
             'stays' => $stays->flatMap(fn ($stay) => $stay->rooms->map(fn ($r) => [
                 'value' => $stay->id.':'.$r->room_id,
@@ -190,6 +190,7 @@ class CartController extends Controller
             'scheduled_for' => ['nullable', 'date'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'promo_code' => ['nullable', 'string', 'max:40'],
+            'provider' => ['nullable', 'string', 'in:paymongo,paypal'],
         ]);
 
         $user = $request->user();
@@ -208,7 +209,7 @@ class CartController extends Controller
         CartChanged::dispatch($user, $listing, []);
 
         if ($order->needsPayment()) {
-            $payment = $this->context->runAs($order, fn () => $this->payments->checkoutOrder($order, $user));
+            $payment = $this->context->runAs($order, fn () => $this->payments->checkoutOrder($order, $user, $validated['provider'] ?? null));
 
             return redirect()->away($payment->checkout_url);
         }

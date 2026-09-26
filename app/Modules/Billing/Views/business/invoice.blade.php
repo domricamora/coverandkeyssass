@@ -49,7 +49,7 @@
         </p>
 
         @if ($invoice->status === 'open' && auth()->user()->hasPermissionTo('billing.manage'))
-            @if (\App\Modules\Payments\Services\PaymentService::enabled())
+            @if (filled(config('services.paymongo.secret_key'))) {{-- billing invoices pay through PayMongo --}}
                 <form method="POST" action="{{ route('billing.invoices.pay', $invoice->number) }}" class="mt-4">
                     @csrf
                     <button class="btn btn-primary" type="submit">Pay {{ $money($invoice->total_cents) }} with PayMongo</button>

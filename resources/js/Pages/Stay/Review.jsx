@@ -1,12 +1,14 @@
 import { Head, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import PublicShell from '../../react/PublicShell';
-import { BTN, FIELD, LABEL, Stepper, json, money, postForm, useGuest } from '../../widgets/ui';
+import { BTN, FIELD, LABEL, Stepper, cx, json, money, postForm, useGuest } from '../../widgets/ui';
 
 /** Stay booking, step 2 of 2: review the stay, add details and a promo code, request the booking. */
-export default function StayReview({ property, stay, option, cancellation, guest, urls }) {
+export default function StayReview({ property, stay, option, cancellation, guest, providers = [], urls }) {
     const { errors, guestUrls } = usePage().props;
     const who = useGuest({ user: guest, urls: guestUrls, returnTo: urls.here });
+    const payOptions = [...providers, ['later', 'Pay at the property', 'No payment now; the host confirms first']];
+    const [pay, setPay] = useState(payOptions[0][0]);
     const [adults, setAdults] = useState(Math.max(1, stay.guests));
     const [children, setChildren] = useState(0);
     const [requests, setRequests] = useState('');
@@ -36,7 +38,7 @@ export default function StayReview({ property, stay, option, cancellation, guest
         if (!(await who.ensure())) { setSending(false); return; }
         postForm(urls.reserve, {
             check_in: stay.check_in, check_out: stay.check_out, room_type_id: stay.room_type_id, quantity: stay.quantity,
-            adults, children, guest_phone: who.phone, special_requests: requests, promo_code: promo?.code,
+            adults, children, guest_phone: who.phone, special_requests: requests, promo_code: promo?.code, pay,
         });
     };
 
@@ -82,9 +84,27 @@ export default function StayReview({ property, stay, option, cancellation, guest
                         </p>
                     </section>
 
+                    <section className="space-y-3">
+                        <h2 className="text-[16px] font-semibold">How do you want to pay?</h2>
+                        <div className="grid gap-2 sm:grid-cols-2">
+                            {payOptions.map(([v, label, hint]) => (
+                                <label key={v} className={cx('flex cursor-pointer items-start gap-3 border px-4 py-3', pay === v ? 'border-brand bg-brand-soft' : 'border-line hover:border-line-strong')}>
+                                    <input type="radio" name="pay" className="mt-1 accent-[var(--primary)] text-brand" checked={pay === v} onChange={() => setPay(v)} />
+                                    <span><span className="block text-[14px] font-medium">{label}</span><span className="block text-[12px] text-fg-3">{hint}</span></span>
+                                </label>
+                            ))}
+                        </div>
+                        {errors?.payment && <p className="text-[13px] text-bad">{errors.payment}</p>}
+                    </section>
+
                     <section className="border-l-2 border-brand bg-brand-soft px-4 py-3 text-[14px] text-fg-2">
                         <p className="font-medium text-fg">What happens next</p>
-                        <p className="mt-1">The host confirms your request, usually within a few hours. You won't be charged until then{cancellation ? `. ${cancellation}.` : '.'}</p>
+                        <p className="mt-1">
+                            {pay === 'later'
+                                ? "The host confirms your request, usually within a few hours. You pay at the property"
+                                : 'Your booking is confirmed as soon as the payment clears'}
+                            {cancellation ? `. ${cancellation}.` : '.'}
+                        </p>
                     </section>
                 </div>
 
@@ -105,7 +125,9 @@ export default function StayReview({ property, stay, option, cancellation, guest
                             {discount > 0 && <div className="flex justify-between text-ok"><dt>Promo {promo.code}</dt><dd>−{money(discount, option.currency)}</dd></div>}
                             <div className="flex justify-between border-t border-line pt-2 text-[16px] font-semibold"><dt>Total</dt><dd aria-live="polite">{money(total, option.currency)}</dd></div>
                         </dl>
-                        <button type="submit" className={BTN} disabled={sending}>{sending ? 'Sending request…' : 'Request booking'}</button>
+                        <button type="submit" className={BTN} disabled={sending}>
+                            {sending ? 'One moment…' : pay === 'later' ? 'Request booking' : `Book and pay ${money(total, option.currency)}`}
+                        </button>
                         <a href={urls.back} className="block text-center text-[13px] text-fg-3 hover:text-fg">Change dates or room</a>
                     </div>
                 </aside>

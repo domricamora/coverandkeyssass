@@ -27,7 +27,7 @@ class PaymentController extends Controller
 
         $booking = $this->findBooking($request, $booking);
 
-        $payment = $this->bookings->asTenantOf($booking, fn () => $this->payments->checkout($booking, $request->user()));
+        $payment = $this->bookings->asTenantOf($booking, fn () => $this->payments->checkout($booking, $request->user(), $request->input('provider')));
 
         return redirect()->away($payment->checkout_url);
     }

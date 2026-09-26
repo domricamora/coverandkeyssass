@@ -80,6 +80,7 @@ class StayReviewController extends Controller
             ],
             'stay' => $stay + ['nights' => $nights, 'from' => $in->format('D, M j, Y'), 'to' => $out->format('D, M j, Y')],
             'option' => $option,
+            'providers' => \App\Modules\Payments\Services\PaymentService::providers(),
             'cancellation' => $cancelBy && $cancelBy->isFuture() ? 'Free cancellation until '.$cancelBy->format('M j, Y') : ($days === null ? 'Non-refundable once the host confirms' : null),
             'guest' => $user ? ['name' => $user->name, 'email' => $user->email] : null,
             'urls' => [

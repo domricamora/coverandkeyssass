@@ -84,7 +84,7 @@ class CustomerOrderController extends Controller
 
         $order = $this->find($request, $order);
 
-        $payment = $this->context->runAs($order, fn () => $this->payments->checkoutOrder($order, $request->user()));
+        $payment = $this->context->runAs($order, fn () => $this->payments->checkoutOrder($order, $request->user(), $request->input('provider')));
 
         return redirect()->away($payment->checkout_url);
     }

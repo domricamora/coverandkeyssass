@@ -9,7 +9,7 @@ import { BTN, FIELD, LABEL, Stepper, cx, json, money, postForm, useGuest } from 
  * come from the server quote; the delivery fee preview mirrors
  * DeliveryZone::feeFor and is charged from the server again on submit.
  */
-export default function Checkout({ restaurant, lines, quote, error, promoCode, onlinePayments, zones, stays, minSchedule, old, guest, urls }) {
+export default function Checkout({ restaurant, lines, quote, error, promoCode, providers, zones, stays, minSchedule, old, guest, urls }) {
     const { errors } = usePage().props;
     const [mode, setMode] = useState(old.fulfillment ?? 'pickup');
     const [zoneId, setZoneId] = useState(Number(old.delivery_zone_id) || zones[0]?.id || null);
@@ -23,7 +23,7 @@ export default function Checkout({ restaurant, lines, quote, error, promoCode, o
     const who = useGuest({ user: guest, urls: guestUrls, returnTo: '/cart', phone: old.customer_phone ?? '' });
     const [notes, setNotes] = useState(old.notes ?? '');
     const [code, setCode] = useState(promoCode);
-    const [pay, setPay] = useState(old.payment_method ?? (onlinePayments ? 'online' : 'cash'));
+    const [pay, setPay] = useState(old.payment_method === 'online' ? `online:${old.provider ?? providers[0]?.[0]}` : (old.payment_method ?? (providers.length ? `online:${providers[0][0]}` : 'cash')));
     const [busy, setBusy] = useState(false);
 
     const setQty = async (key, qty) => {
@@ -56,19 +56,21 @@ export default function Checkout({ restaurant, lines, quote, error, promoCode, o
     const fee = zone ? (zone.free_over !== null && taxable >= zone.free_over ? 0 : zone.fee) : 0;
     const total = quote.total + fee;
     const room = mode === 'room_service';
+    // "online:paypal" → payment_method online + provider paypal.
     const paymentOptions = [
-        onlinePayments && ['online', 'Pay now', 'Card, GCash or Maya'],
+        ...providers.map(([key, label, hint]) => [`online:${key}`, label, hint]),
         ['cash', 'Cash', mode === 'delivery' ? 'Pay the rider' : room ? 'Pay when it arrives' : 'Pay at pickup'],
         room && ['room_charge', 'Charge to my room', 'Settle at check-out'],
     ].filter(Boolean);
     const payment = paymentOptions.some(([v]) => v === pay) ? pay : paymentOptions[0][0];
+    const [method, provider] = payment.split(':');
 
     const submit = async (e) => {
         e.preventDefault();
         setBusy(true);
         if (!(await who.ensure())) { setBusy(false); return; }
         postForm(urls.checkout, {
-            fulfillment: mode, payment_method: payment, customer_phone: who.phone, notes, promo_code: quote.promo?.code,
+            fulfillment: mode, payment_method: method, provider, customer_phone: who.phone, notes, promo_code: quote.promo?.code,
             scheduled_for: when === 'later' ? scheduled : '',
             ...(mode === 'delivery' ? { delivery_zone_id: zoneId, delivery_address: address, delivery_lat: coords?.lat, delivery_lng: coords?.lng } : {}),
             ...(room ? { room_stay: stay } : {}),
