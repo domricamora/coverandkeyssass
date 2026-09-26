@@ -1,5 +1,22 @@
 # CHANGELOG.md
 
+## 2026-09-26 — React dashboard phases 2–4: restaurant floor, housekeeping & ops, owner overview
+
+- **Restaurant floor** (`/dashboard/restaurant-floor`):
+  - Live table plan: free, seated, food ready, paid, or booked soon.
+  - Kitchen rail with start/ready bumps, and today's reservation book (seat or no-show).
+  - Ticket drawer with a fast menu (modifiers, kitchen notes), payments with change, discount, and close-and-free-table.
+- **Housekeeping & ops** (`/dashboard/housekeeping`, mobile-first):
+  - Room board by cleaning status, with set status and report issue.
+  - Task queue with start / complete / inspect / assign / cancel.
+  - Maintenance tickets with quick transitions, and who's on duty today.
+- **Owner overview** (`/dashboard`):
+  - Today's pulse.
+  - 7/30/90-day KPIs with change vs the previous period: revenue, occupancy, ADR, RevPAR, F&B, average ticket, cancellations, labour.
+  - Daily revenue and occupancy charts, booking channels, best-selling dishes.
+  - A portfolio table across all of the owner's businesses (`App\Support\OwnerInsights`).
+- **Demo seed fixes:** `DemoHistorySeeder` no longer drifts the calendar during clock travel, and it settles register tickets and signs off past cleans. Both have regression coverage in `DemoSeedTest`. A live service (seated tables, kitchen) is seeded for today.
+
 ## 2026-09-26 — Photo tours, full demo history, marketing redesign, SEO/AI, OTA features
 
 (verified: 321 tests / 2110 assertions; public pages QA-passed at 390 and 1440 px)

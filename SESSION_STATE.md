@@ -27,7 +27,25 @@
 
 ## Next actions
 
-**RESUME HERE (saved 2026-09-26, last commit 4433b87, 321 tests passing):** owner said "when tasks queue is cleared proceed with the rest of the phases till session limit".
+## HAND-OFF (2026-09-26, last commit 435ba2b) — start here
+
+**React dashboard rebuild: all 4 phases DONE.** (1) Front desk `/dashboard/front-desk` (12f407e); (2) Restaurant floor `/dashboard/restaurant-floor` (8d27b8d; `App\Modules\Pos\Controllers\FloorController`); (3) Housekeeping & ops `/dashboard/housekeeping` (035967f; the Blade board was replaced by `Housekeeping/Index`); (4) Owner overview `/dashboard` (435ba2b; `App\Support\OwnerInsights`, portfolio across all businesses). The React routes are listed in `DashboardNav::SPA`.
+
+**Tests:** every touched file passes in isolation (26 tests: Workforce, TenantIsolation, Housekeeping, RestaurantFloor, FrontDesk). The last full run hit "table already exists" collisions in `hospitality_os_testing`: **another session appeared to be running tests and editing `resources/js/Pages/Overview/Index.jsx` at the same time** (the committed Overview is that version). Re-run the full suite alone first: `cmd.exe //c "_ai\run.bat php artisan test"`. Before this session it was 321 passing, plus new RestaurantFloor (3) and updated Housekeeping / DemoSeed tests.
+
+**Dev database was rebuilt** (migrate:fresh + demo seed) after fixing a calendar-drift bug in `DemoHistorySeeder`. The pre-rebuild backup is `storage/app/backups/ck-20260926-023914.zip`. Logins: Super Admin `admin@coverandkeys.test` / `CoverKeys2026`; owners `owner@aplaya.example.test` (also kalyecoffee, nidocove) / `password`; group owner `group@coverandkeys.example.test` / `password`; staff e.g. `andrea.aquino@aplaya-beach-resort.example.test` / `password`.
+
+**Task list for the next conversation (in order):**
+1. Run the full test suite alone and fix anything real (the earlier collisions were not code failures).
+2. Owner overview polish: verify the concurrently-edited `Overview/Index.jsx` at 390/768/1440 (`qa.mjs group@coverandkeys.example.test sp 1440 1 /dashboard`); add a small `OverviewTest` (Inertia props: `kpis.occupancy`, `portfolio` count for the group owner, `money=false` for staff without `accounting.view`).
+3. Remaining OTA ideas: pay at property / reserve now pay later, map view of stay results, recently viewed stays (localStorage), price-drop alerts on wish-listed stays.
+4. Move more Blade screens to React in the same pattern: Bookings list, Guests (CRM), Staff & rota, Accounting reports.
+5. INCOMPLETE items in `docs/FINAL_AUDIT.md` (need owner credentials or a server): PayMongo sandbox, production deploy + smoke test, SMTP, off-site backups (BACKUP_OFFSITE_DISK / BACKUP_PASSWORD), push worker (FCM/APNs), and the owner's `git push -u origin master:main` (agent pushes are blocked).
+6. Update `docs/modules/*` for the phases 2–4 screens (the changelog is current).
+
+---
+
+**Earlier resume note (superseded by the hand-off above), saved at 4433b87:** owner said "when tasks queue is cleared proceed with the rest of the phases till session limit".
 
 Owner queue (a–d) is DONE:
 - a. Guest photo tour: WebP multi-upload with tour areas; `marketplace::partials.mosaic` + `partials.tour` (fullscreen viewer); 8 captioned Unsplash tour photos per demo listing (e33c774). `public/storage` is linked locally.
