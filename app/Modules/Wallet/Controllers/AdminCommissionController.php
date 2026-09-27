@@ -28,13 +28,26 @@ class AdminCommissionController extends Controller
             ->selectRaw('COALESCE(SUM(gross),0) gross, COALESCE(SUM(platform_fee),0) fee, COALESCE(SUM(host_amount),0) host')
             ->first();
 
-        return view('wallet::admin.commissions', [
-            'global' => CommissionRate::query()->where('kind', CommissionRate::GLOBAL)->latest('id')->first(),
-            'defaultRate' => CommissionRate::defaultRate(),
+        $global = CommissionRate::query()->where('kind', CommissionRate::GLOBAL)->latest('id')->first();
+        $m = fn ($v) => \App\Support\Currency::format($v);
+
+        return \Inertia\Inertia::render('Admin/Commissions', [
+            'totals' => [['Gross online sales', $m($totals->gross)], ['Platform revenue', $m($totals->fee)], ['Host earnings', $m($totals->host)]],
+            'globalRate' => (float) ($global?->rate ?? CommissionRate::defaultRate()),
+            'globalSet' => (bool) $global,
+            'defaultRate' => (float) CommissionRate::defaultRate(),
             'rates' => CommissionRate::query()->where('kind', '!=', CommissionRate::GLOBAL)
                 ->with(['rateable' => fn ($q) => $q->withoutGlobalScopes()])
-                ->latest('id')->get(),
-            'totals' => $totals,
+                ->latest('id')->get()->map(fn (CommissionRate $r) => [
+                    'id' => $r->id,
+                    'kind' => $r->kind,
+                    'name' => $r->name,
+                    'appliesTo' => $r->rateable ? ucfirst(class_basename((string) $r->rateable_type)).': '.$r->rateable->name : 'All listings',
+                    'rate' => (float) $r->rate.'%',
+                    'window' => ($r->starts_on?->format('M j, Y') ?? '—').' – '.($r->ends_on?->format('M j, Y') ?? '—'),
+                    'destroy' => route('admin.commissions.destroy', $r->id),
+                ]),
+            'urls' => ['store' => route('admin.commissions.store'), 'payouts' => route('admin.payouts.index')],
         ]);
     }
 

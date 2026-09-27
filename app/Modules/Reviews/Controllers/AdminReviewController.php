@@ -16,13 +16,25 @@ class AdminReviewController extends Controller
     {
         $status = in_array($request->query('status'), [Review::STATUS_PUBLISHED, Review::STATUS_REJECTED, Review::STATUS_PENDING], true) ? $request->query('status') : null;
 
-        return view('reviews::admin', [
+        return \Inertia\Inertia::render('Admin/Reviews', [
             'reviews' => Review::query()->with(['user', 'reviewable' => fn ($q) => $q->withoutGlobalScope('tenant')])
                 ->when($request->boolean('flagged'), fn ($q) => $q->whereNotNull('flagged_at'))
                 ->when($status, fn ($q) => $q->where('status', $status))
-                ->orderByRaw('flagged_at IS NULL')->latest()->paginate(30)->withQueryString(),
+                ->orderByRaw('flagged_at IS NULL')->latest()->paginate(30)->withQueryString()
+                ->through(fn (Review $r) => [
+                    'id' => $r->id,
+                    'author' => $r->user?->name,
+                    'rating' => (int) $r->rating,
+                    'date' => $r->created_at->format('M j, Y'),
+                    'comment' => \Illuminate\Support\Str::limit((string) $r->comment, 400),
+                    'listing' => $r->reviewable?->name,
+                    'status' => $r->status,
+                    'flag' => $r->flagged_at ? $r->flag_reason : null,
+                    'note' => $r->moderation_note,
+                    'moderate' => route('admin.reviews.moderate', $r->id),
+                ]),
             'flagged' => Review::query()->whereNotNull('flagged_at')->count(),
-            'title' => 'Review moderation',
+            'filter' => $request->boolean('flagged') ? 'flagged' : ($status ?? ''),
         ]);
     }
 

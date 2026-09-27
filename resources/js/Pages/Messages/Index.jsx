@@ -4,13 +4,13 @@ import { Action, Badge, Input, Page, Pager, Panel, Status, TextArea } from '../.
 import { cx } from '../../react/ui';
 
 /** Business inbox: guest conversations and staff threads, list + open conversation side by side. */
-export default function Messages({ threads, status, members, thread, urls }) {
+export default function Messages({ threads, status, members, thread, urls, title = 'Messages', subtitle = 'Guests writing about your stays, restaurants, orders and tables, plus staff conversations' }) {
     const [composing, setComposing] = useState(false);
 
     return (
         <Page
-            title="Messages"
-            subtitle="Guests writing about your stays, restaurants, orders and tables, plus staff conversations"
+            title={title}
+            subtitle={subtitle}
             actions={
                 <>
                     <nav className="flex border border-line" aria-label="Filter">

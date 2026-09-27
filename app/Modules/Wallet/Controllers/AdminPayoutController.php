@@ -15,12 +15,23 @@ class AdminPayoutController extends Controller
 
     public function index()
     {
-        return view('wallet::admin.payouts', [
+        return \Inertia\Inertia::render('Admin/Payouts', [
             'payouts' => Payout::query()->withoutGlobalScope('tenant')
-                ->with('tenant:id,name')
+                ->with('tenant:id,name,settings')
                 ->orderByRaw("status = 'requested' desc")
                 ->latest('id')
-                ->paginate(25),
+                ->paginate(25)
+                ->through(fn (Payout $p) => [
+                    'id' => $p->id,
+                    'date' => $p->created_at->format('M j, Y'),
+                    'business' => $p->tenant?->name,
+                    'amount' => \App\Support\Currency::format($p->amount, $p->tenant),
+                    'destination' => ucfirst((string) $p->method).' · '.$p->account_name.' · '.$p->account_number,
+                    'status' => $p->status,
+                    'reference' => $p->reference,
+                    'update' => $p->status === Payout::REQUESTED ? route('admin.payouts.update', $p->id) : null,
+                ]),
+            'urls' => ['commissions' => route('admin.commissions.index')],
         ]);
     }
 

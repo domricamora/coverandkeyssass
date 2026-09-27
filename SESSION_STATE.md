@@ -33,7 +33,16 @@
 
 **Already done (do not redo):** every guest account tab is React (incl. notification settings + profile, 421e777); cPanel deploy path hardened (119f601). Invoices, folio print, POS receipt and public `/pages/{slug}` stay **Blade on purpose** (print / public documents).
 
-**Now: platform admin (`/admin/*`) → React.** Progress: step 1 (nav) DONE; React DONE for Dashboard, Users, Tenants index/create/show/modules, Modules index/form (`resources/views/admin` deleted; 19 related tests pass). PlatformAdmin module screens DONE too (Listings + placement, Bookings, Orders, Payments/refund, Pricing, Settings, CMS Pages index/form, Reports, Logs, Taxonomy, Moderation; `Chips` filter added to kit.jsx; PlatformAdminTest + MarketplaceAdminTest pass). NEXT: billing admin, reviews admin, commissions, payouts, support index/show (then delete `billing::admin`, `reviews::admin`, `wallet::admin`, `messaging::admin` views). Plan (all research done):
+**Platform admin (`/admin/*`) → React: DONE (2026-09-27).** All 26 screens are Inertia pages in `resources/js/Pages/Admin/*` (support reuses `Messages/Index` with title props); every admin Blade view deleted; full suite 344 passing. `App\Support\Currency` added (symbol helper, used by commissions/payouts). Owner's local Super Admin: nick.weconnect@gmail.com (password given by the owner in chat; not stored in the repo).
+
+**Owner queue (in order), added 2026-09-27:**
+1. Logo not showing on admin/dashboard shell (check the `logo.svg` import URL when built without ASSET_URL).
+2. Logo as a "plate": dark teal circle behind the gold ring + spoon/key mark, overlapping like a plate.
+3. Better page transition + section entrance animation on all pages (respect reduced motion).
+4. Currency symbol: platform default in admin Settings (`Setting::KEYS.currency_symbol`), per-business override in Business settings (`tenants.settings.currency_symbol`); show the symbol (₱), never "PHP" — sweep React `money()` (share the symbol as an Inertia prop) and PHP `money()` helpers + Blade.
+5. Then deploy (below).
+
+(Old plan, done:)
 
 1. `DashboardNav::for()`: if the route name starts with `admin.`, return a new `DashboardNav::admin($route)` (groups: Overview · People & businesses [Users, Businesses, Modules] · Marketplace [Properties, Restaurants, Reported content, Reviews, Categories & locations] · Activity [Bookings, Orders, Payments & refunds, Support] · Money [Subscriptions=admin.billing.index, Pricing, Commissions, Payouts] · Site [CMS pages, Settings, Reports, Logs]), all `spa: true`. The shell + Blade sidebar both read it.
 2. Convert each controller's `view(...)` to `Inertia::render('Admin/<Name>', props)`, pages in `resources/js/Pages/Admin/`, using `react/kit.jsx` (Page, Panel, Table, Td, Main, Pager, Stats, Status, Filter, Search, Action, Form, Input, Select, TextArea, Row). Screens (24): Dashboard; Users; Tenants index/create/show/modules; Modules index/create/edit; Listings (+placement form, `admin.listings.placement`); Bookings; Orders; Payments (refund w/ reason); Pricing (plans keyed by id: `{price, is_active}`); Settings (`Setting::KEYS`); Pages index/form; Reports (GET CSV download links — plain form, not Inertia); Logs; Taxonomy; Moderation; Billing admin (invoices mark-paid/void, subscriptions, coupons); Reviews admin; Commissions; Payouts; Support index/show (reuse the two-pane pattern from `Pages/Messages`).

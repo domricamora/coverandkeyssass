@@ -20,7 +20,6 @@ class WalletServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadMigrationsFrom(__DIR__.'/../Migrations');
-        $this->loadViewsFrom(__DIR__.'/../Views', 'wallet');
 
         Route::middleware('web')->group(__DIR__.'/../routes.php');
 

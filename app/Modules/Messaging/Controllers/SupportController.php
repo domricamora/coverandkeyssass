@@ -17,12 +17,7 @@ class SupportController extends Controller
 
     public function index(Request $request)
     {
-        return view('messaging::admin.index', [
-            'threads' => Thread::query()->where('kind', Thread::SUPPORT)->with(['guest', 'participants'])
-                ->when($request->query('status', 'open') !== 'all', fn ($q) => $q->where('status', $request->query('status', 'open')))
-                ->latest('last_message_at')->paginate(25)->withQueryString(),
-            'title' => 'Support',
-        ]);
+        return $this->inbox($request);
     }
 
     public function show(Request $request, string $thread)
@@ -30,17 +25,58 @@ class SupportController extends Controller
         $thread = Thread::query()->where('kind', Thread::SUPPORT)->findOrFail($thread);
         $this->messaging->markRead($thread, $request->user());
 
-        return view('messaging::admin.show', [
-            'thread' => $thread->load(['messages.author', 'messages.attachments', 'guest']),
-            'canReply' => $this->messaging->canReply($request->user(), $thread),
-            'title' => $thread->subject,
+        return $this->inbox($request, $thread->load(['messages.author', 'messages.attachments', 'guest']));
+    }
+
+    /** Same two-pane inbox as the business side (Messages/Index): list + open conversation. */
+    private function inbox(Request $request, ?Thread $open = null)
+    {
+        $user = $request->user();
+        $status = in_array($request->query('status'), ['open', 'closed', 'all'], true) ? $request->query('status') : 'open';
+
+        return \Inertia\Inertia::render('Messages/Index', [
+            'title' => 'Support',
+            'subtitle' => 'Guests and hosts writing to the platform.',
+            'threads' => Thread::query()->where('kind', Thread::SUPPORT)->with(['guest', 'participants'])
+                ->when($status !== 'all', fn ($q) => $q->where('status', $status))
+                ->latest('last_message_at')->paginate(25)->withQueryString()
+                ->through(fn (Thread $t) => [
+                    'id' => $t->id,
+                    'subject' => $t->subject,
+                    'who' => $t->guest?->name ?? 'Guest',
+                    'when' => $t->last_message_at?->diffForHumans(),
+                    'unread' => $t->unreadFor($user),
+                    'href' => route('admin.support.show', ['thread' => $t->id, 'status' => $status]),
+                    'active' => $open?->id === $t->id,
+                ]),
+            'status' => $status,
+            'members' => [],
+            'thread' => $open ? [
+                'id' => $open->id,
+                'subject' => $open->subject,
+                'meta' => ($open->guest?->name ?? '—').($open->guest?->email ? ' · '.$open->guest->email : ''),
+                'status' => $open->status,
+                'messages' => $open->messages->map(fn ($m) => [
+                    'id' => $m->id,
+                    'author' => $m->author?->name ?? 'Deleted user',
+                    'side' => $m->side,
+                    'when' => $m->created_at->format('M j, g:i A'),
+                    'body' => $m->body,
+                    'mine' => (int) $m->user_id === (int) $user->id,
+                    'files' => $m->attachments->map(fn ($f) => ['id' => $f->id, 'name' => $f->alt ?? 'Attachment', 'url' => route('messages.attachment', [$open->id, $f->id])]),
+                ]),
+                'canReply' => $this->messaging->canReply($user, $open),
+                'urls' => ['reply' => route('admin.support.reply', $open->id), 'status' => route('admin.support.status', $open->id)],
+            ] : null,
+            'urls' => ['self' => route('admin.support.index'), 'staff' => null],
         ]);
     }
 
     public function reply(Request $request, string $thread)
     {
         $thread = Thread::query()->where('kind', Thread::SUPPORT)->findOrFail($thread);
-        $this->messaging->post($thread, $request->user(), $request->validate(['body' => ['required', 'string', 'max:5000']])['body']);
+        $validated = $request->validate(['body' => ['required', 'string', 'max:5000'], 'files' => ['nullable', 'array', 'max:3'], 'files.*' => ['file', 'max:5120', 'mimes:jpg,jpeg,png,webp,pdf']]);
+        $this->messaging->post($thread, $request->user(), $validated['body'], $request->file('files', []));
 
         return back();
     }
@@ -49,7 +85,7 @@ class SupportController extends Controller
     {
         $this->messaging->setStatus(Thread::query()->where('kind', Thread::SUPPORT)->findOrFail($thread), $request->user(), $request->boolean('open'));
 
-        return back();
+        return back()->with('success', $request->boolean('open') ? 'Reopened.' : 'Closed.');
     }
 
     /** Anyone who can read the thread can download its files. */
