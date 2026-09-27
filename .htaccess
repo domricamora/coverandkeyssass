@@ -5,6 +5,13 @@
 
 Options -Indexes
 
+# On shared hosting this app can sit inside another site's folder (e.g. public_html/ck.deskpulse.click),
+# whose .htaccess sets its own Content-Security-Policy. Drop the inherited one: the app sends its own
+# (App\Http\Middleware\SecurityHeaders), which allows Google Fonts and Alpine.
+<IfModule mod_headers.c>
+    Header always unset Content-Security-Policy
+</IfModule>
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
