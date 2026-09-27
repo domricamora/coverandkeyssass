@@ -5,7 +5,8 @@
         @php
             $seoDescription = $description ?: 'Cover & Keys runs the whole property: stays, restaurants, housekeeping and guests in one hospitality operating system.';
             $seoCanonical = $canonical ?? url()->current();
-            $seoImage = $image ? url($image) : null;
+            $seoImage = url($image ?: 'img/og/share.jpg');
+            $seoCardImage = str_starts_with($seoImage, asset('img/og/')); // branded 1200x630 share cards
             $seoJsonLd = $jsonLd();
             $navLinks = [
                 ['Stays', route('marketplace.hotels'), request()->routeIs('marketplace.hotels', 'marketplace.search', 'marketplace.locations.show', 'marketplace.properties.show', 'marketplace.home')],
@@ -23,14 +24,14 @@
         <meta property="og:title" content="{{ $title ?? config('app.name') }}">
         <meta property="og:description" content="{{ $seoDescription }}">
         <meta property="og:url" content="{{ $seoCanonical }}">
-        <meta property="og:locale" content="{{ str_replace('-', '_', app()->getLocale()) }}">
-        <meta name="twitter:card" content="{{ $seoImage ? 'summary_large_image' : 'summary' }}">
+        <meta property="og:locale" content="{{ str_contains($locale = str_replace('-', '_', app()->getLocale()), '_') ? $locale : $locale.'_US' }}">
+        <meta name="twitter:card" content="summary_large_image">
         <meta name="twitter:title" content="{{ $title ?? config('app.name') }}">
         <meta name="twitter:description" content="{{ $seoDescription }}">
-        @if ($seoImage)
-            <meta property="og:image" content="{{ $seoImage }}">
-            <meta name="twitter:image" content="{{ $seoImage }}">
-        @endif
+        <meta property="og:image" content="{{ $seoImage }}">
+        <meta property="og:image:alt" content="{{ $title ?? config('app.name') }}">
+        @if ($seoCardImage)<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">@endif
+        <meta name="twitter:image" content="{{ $seoImage }}">
         @if ($seoJsonLd)<script type="application/ld+json">{!! $seoJsonLd !!}</script>@endif
         @stack('widgets')
     </head>

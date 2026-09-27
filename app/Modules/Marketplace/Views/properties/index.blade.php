@@ -7,6 +7,7 @@
 <x-public-layout :title="$title"
     :description="$destination ? Str::limit($destination->description ?: 'Hotels, resorts and B&Bs in '.$destination->name.' with live availability and verified guest reviews.', 155) : 'Browse published stays with live filters for destination, property type, guests, price and amenities.'"
     :canonical="$destination ? route('marketplace.locations.show', $destination->slug) : route('marketplace.hotels')"
+    :image="$destination ? ($properties->first()?->galleryUrls()[0] ?? null) : null"
     :breadcrumbs="$crumbs" :noindex="$filtered">
     <div class="results-page">
         <div class="filter-bar">

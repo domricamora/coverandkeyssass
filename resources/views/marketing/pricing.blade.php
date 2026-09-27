@@ -1,4 +1,4 @@
-<x-public-layout :title="$title" description="Cover & Keys pricing: a free foundation, then pay monthly only for the modules your property runs, with free trials. No listing fees." :show-search="false"
+<x-public-layout :title="$title" description="Cover & Keys pricing: a free foundation, then pay monthly only for the modules your property runs, with free trials. No listing fees." :show-search="false" image="img/og/share-hosts.jpg"
     :breadcrumbs="['Pricing' => null]" :schema="[\App\Support\Seo::software($modules), ...\App\Support\Seo::productOffers($modules->where('monthly_price_cents', '>', 0)), \App\Support\Seo::faq($faqs)]">
     @php
         $pad = 'px-5 lg:px-10 2xl:px-16';

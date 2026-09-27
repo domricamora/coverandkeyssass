@@ -1,5 +1,5 @@
 <x-public-layout :title="$title" description="Cloud hotel PMS, booking engine and restaurant POS for Philippine hotels, resorts, B&Bs and restaurants: front desk, room chart, housekeeping, payments by GCash, Maya or card, accounting and staff rota in one system."
-    :show-search="false" :breadcrumbs="['For hosts' => null]" :schema="[\App\Support\Seo::organization(), \App\Support\Seo::software($modules)]">
+    :show-search="false" image="img/og/share-hosts.jpg" :breadcrumbs="['For hosts' => null]" :schema="[\App\Support\Seo::organization(), \App\Support\Seo::software($modules)]">
     @php
         $pad = 'px-5 lg:px-10 2xl:px-16';
     @endphp

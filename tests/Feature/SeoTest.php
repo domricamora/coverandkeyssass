@@ -121,3 +121,18 @@ it('gives answer engines FAQ, featured-stay and software structured data plus a 
         ->assertSee('[Harbour View]('.route('marketplace.properties.show', $property->slug).')', false)
         ->assertSee('## Module prices');
 });
+
+it('always gives Facebook / Messenger a share image: branded card, host card, or the listing photo', function () {
+    $this->get(route('home'))->assertOk()
+        ->assertSee('<meta property="og:image" content="'.asset('img/og/share.jpg').'">', false)
+        ->assertSee('<meta property="og:image:width" content="1200">', false)
+        ->assertSee('<meta name="twitter:card" content="summary_large_image">', false)
+        ->assertSee('<meta property="og:locale" content="en_US">', false);
+
+    $this->get(route('marketing.pricing'))->assertOk()
+        ->assertSee('<meta property="og:image" content="'.asset('img/og/share-hosts.jpg').'">', false);
+
+    foreach (['img/og/share.jpg', 'img/og/share-hosts.jpg'] as $card) {
+        expect(getimagesize(public_path($card)))->toMatchArray([0 => 1200, 1 => 630]);
+    }
+});
