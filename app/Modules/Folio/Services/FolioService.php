@@ -94,7 +94,7 @@ class FolioService
         $totals = $this->totals($booking);
 
         if ($amount > $totals['payments'] - $totals['refunds'] + 0.001) {
-            $this->fail('amount', 'You can refund at most ₱'.number_format($totals['payments'] - $totals['refunds'], 2).'.');
+            $this->fail('amount', 'You can refund at most '.\App\Support\Currency::symbol().number_format($totals['payments'] - $totals['refunds'], 2).'.');
         }
 
         return $this->postManual($booking, FolioEntry::REFUND, $method, 'Refund'.($reason ? ': '.$reason : ''), $amount, 1, $by);

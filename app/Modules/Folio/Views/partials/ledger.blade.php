@@ -1,5 +1,5 @@
 {{-- Folio lines + totals. $entries, $totals; $voidable = show void forms (host). --}}
-@php($money = fn ($v) => '₱'.number_format((float) $v, 2))
+@php($money = fn ($v) => \App\Support\Currency::symbol().number_format((float) $v, 2))
 <table class="table" style="width:100%;">
     <thead><tr><th>Date</th><th>Description</th><th>Category</th><th style="text-align:right;">Amount</th>@if ($voidable ?? false)<th></th>@endif</tr></thead>
     <tbody>

@@ -242,11 +242,11 @@ it('shows bookings on the list and the room calendar', function () {
     $this->get(route('bookings.index'))->assertOk()->assertInertia(fn (Assert $page) => $page
         ->component('Bookings/Index')->where('bookings.data.0.guest', 'Maria Clara'));
     $this->get(route('bookings.show', $booking->reference))->assertOk()->assertInertia(fn (Assert $page) => $page
-        ->where('booking.total', 'PHP 12,500.00')->where('booking.next', fn ($next) => collect($next)->contains('checked_in')));
+        ->where('booking.total', '₱12,500.00')->where('booking.next', fn ($next) => collect($next)->contains('checked_in')));
     $this->get(route('bookings.create', ['property' => $property->slug, 'check_in' => '2030-09-05', 'check_out' => '2030-09-08']))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('roomTypes.0.name', 'Deluxe Room')->where('roomTypes.0.rate', 'PHP 3,500')
+            ->where('roomTypes.0.name', 'Deluxe Room')->where('roomTypes.0.rate', '₱3,500')
             ->where('roomTypes.0.free', 1)); // 1 of 2 rooms free
     // The old room calendar is now the front desk tape chart.
     $this->get(route('bookings.calendar', ['property' => $property->slug, 'start' => '2030-09-04']))

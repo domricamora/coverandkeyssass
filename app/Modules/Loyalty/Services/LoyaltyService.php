@@ -138,7 +138,7 @@ class LoyaltyService
     private function earn(LoyaltyAccount $account, float $amount, string $description, string $key): ?LoyaltyTransaction
     {
         $points = $this->program()->pointsFor($amount);
-        $transaction = $this->post($account->id, 'earn', $points, $description.' (₱'.number_format($amount, 2).')', $key);
+        $transaction = $this->post($account->id, 'earn', $points, $description.' ('.\App\Support\Currency::symbol().number_format($amount, 2).')', $key);
 
         if ($account->referred_by_id) {
             $bonus = $this->program()->referral_points;

@@ -144,7 +144,7 @@ class OrderService
             $quote = $this->quote($restaurant, $lines, $data['promo_code'] ?? null, $zone);
 
             if ($zone?->min_order !== null && $quote['subtotal'] < (float) $zone->min_order) {
-                $this->fail('delivery_zone_id', 'Delivery to '.$zone->name.' needs an order of at least ₱'.number_format((float) $zone->min_order, 2).'.');
+                $this->fail('delivery_zone_id', 'Delivery to '.$zone->name.' needs an order of at least '.\App\Support\Currency::symbol().number_format((float) $zone->min_order, 2).'.');
             }
 
             $order = Order::create([

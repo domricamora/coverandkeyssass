@@ -32,6 +32,6 @@ class ModulePlan extends Model
         if ($this->price_cents === 0) {
             return 'Free';
         }
-        return '₱' . number_format($this->price_cents / 100, 2);
+        return \App\Support\Currency::symbol().number_format($this->price_cents / 100, 2);
     }
 }

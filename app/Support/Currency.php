@@ -27,10 +27,10 @@ class Currency
         return filled($tenant?->settings['currency_symbol'] ?? null) ? $tenant->settings['currency_symbol'] : self::platform();
     }
 
-    public static function format(float|int|string|null $amount, ?Tenant $tenant = null): string
+    public static function format(float|int|string|null $amount, ?Tenant $tenant = null, int $decimals = 2): string
     {
         $amount = (float) $amount;
 
-        return ($amount < 0 ? '-' : '').self::symbol($tenant).number_format(abs($amount), 2);
+        return ($amount < 0 ? '-' : '').self::symbol($tenant).number_format(abs($amount), $decimals);
     }
 }

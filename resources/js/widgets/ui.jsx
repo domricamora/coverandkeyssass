@@ -12,12 +12,11 @@ export const BTN_GHOST = 'inline-flex h-11 items-center justify-center gap-2 bor
 export const FIELD = 'block h-11 w-full border border-line-strong bg-surface px-3 text-base text-fg focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand sm:text-[14px]';
 export const LABEL = 'mb-1.5 block text-[12px] font-medium text-fg-2';
 
-export function money(amount, currency = 'PHP', digits = 0) {
-    try {
-        return new Intl.NumberFormat('en-PH', { style: 'currency', currency, maximumFractionDigits: digits, minimumFractionDigits: digits }).format(amount ?? 0);
-    } catch {
-        return `${currency} ${Number(amount ?? 0).toFixed(digits)}`;
-    }
+/** money(1250) → "₱1,250": the symbol from <meta name="currency-symbol"> (never an ISO code; the second argument is ignored). */
+export function money(amount, _currency, digits = 0) {
+    const symbol = document.querySelector('meta[name="currency-symbol"]')?.content || '₱';
+    const n = Number(amount ?? 0);
+    return `${n < 0 ? '-' : ''}${symbol}${Math.abs(n).toLocaleString('en-PH', { minimumFractionDigits: digits, maximumFractionDigits: digits })}`;
 }
 
 export const csrf = () => document.querySelector('meta[name="csrf-token"]')?.content ?? '';

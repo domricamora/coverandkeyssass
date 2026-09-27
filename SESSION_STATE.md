@@ -37,7 +37,7 @@
 
 **Owner queue (in order), added 2026-09-27:**
 1-3. DONE: logo fix + brand plate, motion (page enter, view transitions, section reveal), optimistic preloading (Inertia prefetch + Speculation Rules) and preloaders (top bar, button spinner). See CHANGELOG.
-4. Currency symbol: platform default in admin Settings (`Setting::KEYS.currency_symbol`), per-business override in Business settings (`tenants.settings.currency_symbol`); show the symbol (₱), never "PHP" — sweep React `money()` (share the symbol as an Inertia prop) and PHP `money()` helpers + Blade.
+4. DONE: currency symbol (platform default + per-business override, symbol everywhere; `CurrencyTest`). Full suite 346 passing.
 5. Then deploy (below).
 
 (Old plan, done:)

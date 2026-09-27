@@ -58,7 +58,7 @@ class GiftCardService
             }
 
             if ($amount <= 0 || $amount > (float) $card->balance + 0.004) {
-                $this->fail('amount', 'The card has ₱'.number_format((float) $card->balance, 2).' left.');
+                $this->fail('amount', 'The card has '.\App\Support\Currency::symbol().number_format((float) $card->balance, 2).' left.');
             }
 
             $card->forceFill(['balance' => round((float) $card->balance - $amount, 2)])->save();

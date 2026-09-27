@@ -24,7 +24,7 @@ class PriceDropped extends ChannelNotification
     {
         $now = (float) $this->property->base_price;
 
-        return $this->property->name.' dropped from '.$this->property->currency.' '.number_format($this->was, 0)
+        return $this->property->name.' dropped from '.\App\Support\Currency::format($this->was, $this->property->tenant, 0)
             .' to '.$this->property->priceLabel().' a night ('.round((1 - $now / $this->was) * 100).'% less).';
     }
 

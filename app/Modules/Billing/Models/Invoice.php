@@ -47,7 +47,7 @@ class Invoice extends Model
 
     public static function money(int $cents): string
     {
-        return '₱'.number_format($cents / 100, 2);
+        return \App\Support\Currency::platform().number_format($cents / 100, 2);
     }
 
     public function isOverdue(): bool

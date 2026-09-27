@@ -89,7 +89,7 @@ class AccountController extends Controller
                 'date' => ($p->paid_at ?? $p->created_at)->format('M j, Y H:i'),
                 'method' => $p->method ? Str::headline($p->method) : Str::headline($p->provider),
                 'status' => $p->status,
-                'amount' => $p->currency.' '.number_format((float) $p->amount, 2),
+                'amount' => \App\Support\Currency::format($p->amount),
                 'failure' => $p->failure_reason,
             ]),
             'providers' => ! $paid && in_array($booking->status, [Booking::PENDING, Booking::HELD], true) ? PaymentService::providers() : [],

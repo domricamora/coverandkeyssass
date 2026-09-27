@@ -24,6 +24,7 @@ class Setting extends Model
         'support_email' => ['Support email', ['nullable', 'email', 'max:120'], 'Shown in the site footer and on the contact page.'],
         'support_phone' => ['Support phone', ['nullable', 'string', 'max:40'], 'Shown in the site footer.'],
         'announcement' => ['Site announcement', ['nullable', 'string', 'max:240'], 'A banner across every public page; empty hides it.'],
+        'currency_symbol' => ['Currency symbol', ['nullable', 'string', 'max:4'], 'Shown before every amount, e.g. ₱ or $. Businesses can set their own in Business settings. Empty = ₱.'],
         'commission_default_rate' => ['Default commission (%)', ['nullable', 'numeric', 'between:0,50'], 'Used when no commission rule matches a listing. Empty = the .env default.'],
     ];
 

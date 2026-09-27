@@ -90,7 +90,7 @@ class SeoController extends Controller
 
         foreach ($modules as $m) {
             $cents = (int) ($m->activePlans->firstWhere('billing_interval', 'monthly')->price_cents ?? 0);
-            $lines[] = '- '.$m->name.': '.($cents === 0 ? 'free' : '₱'.number_format($cents / 100, 0)).($m->trial_days > 0 ? ', '.$m->trial_days.'-day free trial' : '').' — '.$m->description;
+            $lines[] = '- '.$m->name.': '.($cents === 0 ? 'free' : \App\Support\Currency::symbol().number_format($cents / 100, 0)).($m->trial_days > 0 ? ', '.$m->trial_days.'-day free trial' : '').' — '.$m->description;
         }
 
         return response(implode("\n", $lines)."\n", 200, ['Content-Type' => 'text/plain; charset=UTF-8']);

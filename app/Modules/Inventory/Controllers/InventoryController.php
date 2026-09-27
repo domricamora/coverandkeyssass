@@ -41,7 +41,7 @@ class InventoryController extends Controller
                     'on_hand' => $i->qty($total),
                     'low' => (float) $i->reorder_level > 0 && $total <= (float) $i->reorder_level,
                     'reorder' => (float) $i->reorder_level > 0 ? $i->qty($i->reorder_level) : null,
-                    'cost' => '₱'.number_format((float) $i->cost_per_unit, 2).'/'.$i->unit,
+                    'cost' => \App\Support\Currency::symbol().number_format((float) $i->cost_per_unit, 2).'/'.$i->unit,
                     'active' => (bool) $i->is_active,
                     'href' => route('inventory.items.show', $i->id),
                 ];
@@ -109,7 +109,7 @@ class InventoryController extends Controller
                 'name' => $item->name,
                 'sku' => $item->sku,
                 'unit' => $item->unit,
-                'summary' => $item->qty($item->totalStock()).' on hand · avg ₱'.number_format((float) $item->cost_per_unit, 2).'/'.$item->unit.' · reorder at '.$item->qty($item->reorder_level),
+                'summary' => $item->qty($item->totalStock()).' on hand · avg '.\App\Support\Currency::symbol().number_format((float) $item->cost_per_unit, 2).'/'.$item->unit.' · reorder at '.$item->qty($item->reorder_level),
                 'fields' => ['name' => $item->name, 'inventory_category_id' => $item->inventory_category_id ?? '', 'reorder_level' => (float) $item->reorder_level, 'is_active' => (bool) $item->is_active],
                 'levels' => $item->levels->map(fn ($l) => ['location' => $l->location?->name, 'qty' => $item->qty($l->quantity), 'negative' => (float) $l->quantity < 0]),
             ],

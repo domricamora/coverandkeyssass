@@ -28,6 +28,7 @@ class HandleInertiaRequests extends Middleware
                 'name' => $user->name,
                 'email' => $user->email,
             ] : null,
+            'moneySymbol' => fn () => \App\Support\Currency::symbol(),
             'business' => fn () => $tenant->has() ? $tenant->tenant()->name : null,
             'nav' => fn () => $user ? DashboardNav::for($user, (string) $request->route()?->getName()) : [],
             'flash' => fn () => array_filter([

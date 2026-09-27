@@ -50,7 +50,7 @@ class MenuItem extends Model
 
     public static function money(float $amount, string $currency = 'PHP'): string
     {
-        return ($currency === 'PHP' ? '₱' : $currency.' ').number_format($amount, 2);
+        return \App\Support\Currency::format($amount);
     }
 
     /**

@@ -98,6 +98,6 @@ class RoomType extends Model
 
     public function priceLabel(): string
     {
-        return $this->currency.' '.number_format((float) $this->base_price, 0);
+        return \App\Support\Currency::format($this->base_price, null, 0);
     }
 }

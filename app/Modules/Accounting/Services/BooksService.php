@@ -105,7 +105,7 @@ class BooksService
         }
 
         if ($amount <= 0 || $amount > $invoice->balance() + 0.004) {
-            $this->fail('amount', 'Enter up to the balance of ₱'.number_format($invoice->balance(), 2).'.');
+            $this->fail('amount', 'Enter up to the balance of '.\App\Support\Currency::symbol().number_format($invoice->balance(), 2).'.');
         }
 
         return DB::transaction(function () use ($invoice, $amount, $method, $paidOn, $reference) {
@@ -142,7 +142,7 @@ class BooksService
         $owed = (float) ($this->ledger->payablesBySupplier()[$supplier->id] ?? 0);
 
         if ($amount <= 0 || $amount > $owed + 0.004) {
-            $this->fail('amount', 'You owe '.$supplier->name.' ₱'.number_format($owed, 2).'.');
+            $this->fail('amount', 'You owe '.$supplier->name.' '.\App\Support\Currency::symbol().number_format($owed, 2).'.');
         }
 
         return DB::transaction(function () use ($supplier, $amount, $method, $paidOn, $by, $reference) {

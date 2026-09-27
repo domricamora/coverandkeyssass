@@ -71,7 +71,7 @@
         </div>
 
         <div class="filter-rail__group">
-            <p class="filter-rail__title">Price per night ({{ $options['max_price'] > 0 ? '₱' : 'PHP' }})</p>
+            <p class="filter-rail__title">Price per night ({{ $options['max_price'] > 0 ? \App\Support\Currency::symbol() : \App\Support\Currency::symbol() }})</p>
             <div class="form-grid-2" style="gap:8px;">
                 <input class="form-input" type="number" name="price_min" min="0" step="100" value="{{ $filters['price_min'] ?? '' }}" placeholder="Min">
                 <input class="form-input" type="number" name="price_max" min="0" step="100" value="{{ $filters['price_max'] ?? '' }}" placeholder="Max">
@@ -107,7 +107,7 @@
             <select class="form-input" name="price_level">
                 <option value="">Any</option>
                 @for ($level = 1; $level <= 4; $level++)
-                    <option value="{{ $level }}" @selected((int) ($filters['price_level'] ?? 0) === $level)>{{ str_repeat('₱', $level) }}</option>
+                    <option value="{{ $level }}" @selected((int) ($filters['price_level'] ?? 0) === $level)>{{ str_repeat(\App\Support\Currency::symbol(), $level) }}</option>
                 @endfor
             </select>
         </div>

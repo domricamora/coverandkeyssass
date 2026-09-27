@@ -3,7 +3,7 @@
     @php
         $pad = 'px-5 lg:px-10 2xl:px-16';
         $tick = '<svg width="18" height="18" fill="none" stroke="var(--primary)" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
-        $peso = fn (int $cents) => '₱'.number_format($cents / 100, 0);
+        $peso = fn (int $cents) => \App\Support\Currency::symbol().number_format($cents / 100, 0);
     @endphp
 
     <section class="{{ $pad }} pt-12 lg:pt-16">

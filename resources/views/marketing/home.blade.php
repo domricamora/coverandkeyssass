@@ -270,7 +270,7 @@
                             <span class="min-w-0">
                                 <span class="block text-[15px] font-semibold text-fg">{{ $module->name }}</span>
                                 <span class="block text-[14px] text-fg-3">
-                                    @if ($module->monthly_price_cents === 0) Included @else ₱{{ number_format($module->monthly_price_cents / 100, 0) }} / month @endif
+                                    @if ($module->monthly_price_cents === 0) Included @else {{ \App\Support\Currency::symbol() }}{{ number_format($module->monthly_price_cents / 100, 0) }} / month @endif
                                     @if ($module->trial_days > 0) · {{ $module->trial_days }}-day trial @endif
                                 </span>
                             </span>

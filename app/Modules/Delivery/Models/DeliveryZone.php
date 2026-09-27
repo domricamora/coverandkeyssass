@@ -78,9 +78,9 @@ class DeliveryZone extends Model
     public function termsLabel(): string
     {
         return collect([
-            (float) $this->fee > 0 ? '₱'.number_format((float) $this->fee, 0).' fee' : 'free delivery',
-            $this->free_over !== null ? 'free over ₱'.number_format((float) $this->free_over, 0) : null,
-            $this->min_order !== null ? 'min ₱'.number_format((float) $this->min_order, 0) : null,
+            (float) $this->fee > 0 ? \App\Support\Currency::symbol().number_format((float) $this->fee, 0).' fee' : 'free delivery',
+            $this->free_over !== null ? 'free over '.\App\Support\Currency::symbol().number_format((float) $this->free_over, 0) : null,
+            $this->min_order !== null ? 'min '.\App\Support\Currency::symbol().number_format((float) $this->min_order, 0) : null,
             $this->radius_km !== null ? 'within '.(float) $this->radius_km.' km' : null,
             '~'.$this->eta_minutes.' min',
         ])->filter()->implode(' · ');

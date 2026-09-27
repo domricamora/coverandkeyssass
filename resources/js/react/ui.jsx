@@ -18,12 +18,14 @@ export const BrandMark = ({ src, size = 36 }) => (
     </span>
 );
 
-export function money(amount, currency = 'PHP') {
-    try {
-        return new Intl.NumberFormat('en-PH', { style: 'currency', currency }).format(amount ?? 0);
-    } catch {
-        return `${currency} ${Number(amount ?? 0).toFixed(2)}`;
-    }
+// Money shows a symbol, never an ISO code: the business's own symbol, else the platform default (shared prop `moneySymbol`).
+let symbol = '₱';
+export const setMoneySymbol = (s) => { if (s) symbol = s; };
+
+/** money(1250) → "₱1,250.00". The second argument (an ISO code from older call sites) is ignored on purpose. */
+export function money(amount, _currency, digits = 2) {
+    const n = Number(amount ?? 0);
+    return `${n < 0 ? '-' : ''}${symbol}${Math.abs(n).toLocaleString('en-PH', { minimumFractionDigits: digits, maximumFractionDigits: digits })}`;
 }
 
 /** 'YYYY-MM-DD' → local Date (no UTC shift). */

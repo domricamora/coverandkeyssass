@@ -117,7 +117,7 @@ class MaintenanceService
 
         $was = $ticket->cost;
         $ticket->forceFill(['cost' => round($cost, 2)])->save();
-        $this->note($ticket, 'Cost set to ₱'.number_format($cost, 2).'.', $by, true);
+        $this->note($ticket, 'Cost set to '.\App\Support\Currency::symbol().number_format($cost, 2).'.', $by, true);
         $this->audit->log('maintenance.cost', $ticket, ['cost' => $was], ['cost' => $ticket->cost]);
 
         return $ticket;

@@ -35,6 +35,6 @@ class Wallet extends Model
 
     public function money(string|float|null $amount): string
     {
-        return $this->currency.' '.number_format((float) $amount, 2);
+        return \App\Support\Currency::format($amount, $this->relationLoaded('tenant') ? $this->tenant : null);
     }
 }

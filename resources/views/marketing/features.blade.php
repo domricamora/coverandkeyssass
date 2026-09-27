@@ -88,7 +88,7 @@
                             <div class="min-w-0">
                                 <h4 class="text-[17px] font-semibold text-fg">{{ $module->name }}</h4>
                                 <p class="text-[14px] text-fg-3">
-                                    @if ($module->monthly_price_cents === 0) Included in every account @else ₱{{ number_format($module->monthly_price_cents / 100, 0) }} / month @endif
+                                    @if ($module->monthly_price_cents === 0) Included in every account @else {{ \App\Support\Currency::symbol() }}{{ number_format($module->monthly_price_cents / 100, 0) }} / month @endif
                                     @if ($module->trial_days > 0) · {{ $module->trial_days }}-day free trial @endif
                                 </p>
                             </div>

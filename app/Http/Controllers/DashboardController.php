@@ -84,7 +84,8 @@ class DashboardController extends Controller
         $tenant = app(TenantContext::class)->tenant();
 
         return \Inertia\Inertia::render('Settings/Index', [
-            'company' => ['name' => $tenant->name, 'slug' => $tenant->slug, 'type' => \Illuminate\Support\Str::headline((string) $tenant->business_type), 'status' => $tenant->status],
+            'company' => ['name' => $tenant->name, 'slug' => $tenant->slug, 'type' => \Illuminate\Support\Str::headline((string) $tenant->business_type), 'status' => $tenant->status, 'currency_symbol' => $tenant->settings['currency_symbol'] ?? ''],
+            'platformSymbol' => \App\Support\Currency::platform(),
             'shortcuts' => ['team' => route('team'), 'billing' => route('billing.index'), 'notifications' => route('account.notification-settings'), 'profile' => route('profile.edit')],
             'urls' => ['update' => route('tenants.update')],
         ]);
@@ -98,12 +99,16 @@ class DashboardController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:120'],
+            'currency_symbol' => ['nullable', 'string', 'max:4'], // empty = the platform default
         ]);
 
-        $old = ['name' => $tenant->name];
-        $tenant->update($validated);
+        $old = ['name' => $tenant->name, 'currency_symbol' => $tenant->settings['currency_symbol'] ?? null];
+        $tenant->update([
+            'name' => $validated['name'],
+            'settings' => array_merge($tenant->settings ?? [], ['currency_symbol' => $validated['currency_symbol'] ?? null]),
+        ]);
 
-        $this->audit->log('tenant.updated', $tenant, $old, ['name' => $tenant->name]);
+        $this->audit->log('tenant.updated', $tenant, $old, ['name' => $tenant->name, 'currency_symbol' => $validated['currency_symbol'] ?? null]);
 
         return back()->with('success', __('Business profile updated.'));
     }

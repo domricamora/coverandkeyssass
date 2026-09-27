@@ -47,7 +47,7 @@ class PosController extends RestaurantManagementController
 
         $session = $this->pos->closeSession(PosSession::query()->where('restaurant_id', $restaurant->id)->findOrFail($session), (float) $validated['counted_cash'], $request->user(), $validated['notes'] ?? null);
 
-        return redirect()->route('pos.sessions.show', [$restaurant, $session->id])->with('success', 'Day closed. Variance ₱'.number_format((float) $session->variance, 2).'.');
+        return redirect()->route('pos.sessions.show', [$restaurant, $session->id])->with('success', 'Day closed. Variance '.\App\Support\Currency::symbol().number_format((float) $session->variance, 2).'.');
     }
 
     public function showSession(Request $request, string $restaurant, string $session)
@@ -128,7 +128,7 @@ class PosController extends RestaurantManagementController
 
         $payment = $this->pos->pay($this->ticket($restaurant, $ticket), $validated['method'], (float) ($validated['amount'] ?? $validated['tendered']), $request->user(), isset($validated['tendered']) ? (float) $validated['tendered'] : null, $validated['reference'] ?? null);
 
-        return back()->with('success', 'Payment taken'.($payment->change_given > 0 ? ' — change ₱'.number_format((float) $payment->change_given, 2) : '').'.');
+        return back()->with('success', 'Payment taken'.($payment->change_given > 0 ? ' — change '.\App\Support\Currency::symbol().number_format((float) $payment->change_given, 2) : '').'.');
     }
 
     public function chargeToRoom(Request $request, string $restaurant, string $ticket)

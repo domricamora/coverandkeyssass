@@ -44,18 +44,18 @@ class LoyaltyController extends Controller
                 ]),
             'rewards' => Reward::query()->with('promotion')->orderBy('points_cost')->get()->map(fn (Reward $r) => [
                 'id' => $r->id,
-                'text' => $r->name.' · '.number_format($r->points_cost).' pts · '.($r->kind === 'coupon' ? 'coupon '.$r->promotion?->code : '₱'.number_format((float) $r->credit_amount, 0).' credit'),
+                'text' => $r->name.' · '.number_format($r->points_cost).' pts · '.($r->kind === 'coupon' ? 'coupon '.$r->promotion?->code : \App\Support\Currency::symbol().number_format((float) $r->credit_amount, 0).' credit'),
                 'active' => (bool) $r->is_active,
                 'toggle' => route('loyalty.rewards.toggle', $r->id),
             ]),
             'promotions' => Promotion::query()->where('is_active', true)->orderBy('code')->get()->map(fn ($p) => [$p->id, $p->code.' — '.$p->label()]),
             'giftCards' => GiftCard::query()->with('contact')->latest()->limit(20)->get()->map(fn (GiftCard $c) => [
                 'id' => $c->id, 'code' => $c->code, 'kind' => $c->kind, 'guest' => $c->contact?->name ?? '—',
-                'balance' => '₱'.number_format((float) $c->balance, 2).' / '.number_format((float) $c->initial_value, 2),
+                'balance' => \App\Support\Currency::symbol().number_format((float) $c->balance, 2).' / '.number_format((float) $c->initial_value, 2),
                 'note' => $c->status === 'void' ? 'void' : ($c->expires_on ? 'expires '.$c->expires_on->format('M j, Y') : ''),
                 'void' => $c->status === 'active' ? route('loyalty.gift-cards.void', $c->id) : null,
             ]),
-            'outstanding' => '₱'.number_format((float) GiftCard::query()->where('status', 'active')->sum('balance'), 2),
+            'outstanding' => \App\Support\Currency::symbol().number_format((float) GiftCard::query()->where('status', 'active')->sum('balance'), 2),
             'contacts' => Contact::query()->orderBy('name')->limit(500)->get(['id', 'name', 'email'])->map(fn ($c) => [$c->id, $c->name.($c->email ? ' · '.$c->email : '')]),
             'q' => $q ?: null,
             'can' => ['manage' => $request->user()->hasPermissionTo('loyalty.manage')],
@@ -120,7 +120,7 @@ class LoyaltyController extends Controller
                 'points' => ($t->points > 0 ? '+' : '').number_format($t->points), 'minus' => $t->points < 0, 'balance' => number_format($t->balance_after),
             ]),
             'rewards' => Reward::query()->where('is_active', true)->orderBy('points_cost')->get()->map(fn ($r) => ['id' => $r->id, 'name' => $r->name.' ('.number_format($r->points_cost).' pts)', 'affordable' => $r->points_cost <= $account->points_balance]),
-            'cards' => GiftCard::query()->where('crm_contact_id', $account->crm_contact_id)->latest()->get()->map(fn ($c) => $c->code.' · '.$c->kind.' · ₱'.number_format((float) $c->balance, 2).' left'.($c->status === 'void' ? ' · void' : '')),
+            'cards' => GiftCard::query()->where('crm_contact_id', $account->crm_contact_id)->latest()->get()->map(fn ($c) => $c->code.' · '.$c->kind.' · '.\App\Support\Currency::symbol().number_format((float) $c->balance, 2).' left'.($c->status === 'void' ? ' · void' : '')),
             'can' => ['manage' => $request->user()->hasPermissionTo('loyalty.manage')],
             'urls' => [
                 'index' => route('loyalty.index'),
@@ -169,7 +169,7 @@ class LoyaltyController extends Controller
         $card = $this->giftCards->sell((float) $validated['amount'], $validated['paid_via'], $request->user(),
             isset($validated['crm_contact_id']) ? Contact::query()->findOrFail($validated['crm_contact_id']) : null, $validated['expires_on'] ?? null);
 
-        return back()->with('success', 'Gift card '.$card->code.' issued for ₱'.number_format((float) $card->initial_value, 2).'.');
+        return back()->with('success', 'Gift card '.$card->code.' issued for '.\App\Support\Currency::symbol().number_format((float) $card->initial_value, 2).'.');
     }
 
     public function voidGiftCard(Request $request, string $card)

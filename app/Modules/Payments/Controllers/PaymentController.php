@@ -76,7 +76,7 @@ class PaymentController extends Controller
                     'href' => $p->booking ? route('account.bookings.show', $p->booking->reference) : ($p->order ? route('account.orders.show', $p->order->reference) : null),
                     'method' => \Illuminate\Support\Str::headline($p->method ?: $p->provider),
                     'status' => $p->status,
-                    'amount' => $p->currency.' '.number_format((float) $p->amount, 2),
+                    'amount' => \App\Support\Currency::format($p->amount),
                 ]),
         ]);
     }

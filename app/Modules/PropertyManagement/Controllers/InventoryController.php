@@ -62,7 +62,7 @@ class InventoryController extends PropertyManagementController
                 'rates' => $type->ratePeriods->map(fn ($rate) => [
                     'id' => $rate->id,
                     'range' => $rate->rangeLabel(),
-                    'nightly' => $type->currency.' '.number_format((float) $rate->nightly_price, 0),
+                    'nightly' => \App\Support\Currency::format($rate->nightly_price, null, 0),
                     'weekend' => $rate->weekend_nightly_price ? number_format((float) $rate->weekend_nightly_price, 0) : null,
                     'min' => $rate->min_stay_nights,
                     'destroy' => route('properties.rates.destroy', [$p, $type, $rate]),

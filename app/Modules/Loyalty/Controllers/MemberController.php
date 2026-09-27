@@ -41,7 +41,7 @@ class MemberController extends Controller
                     ];
                 }),
             'cards' => GiftCard::query()->withoutGlobalScope('tenant')->whereIn('crm_contact_id', $contactIds)->where('status', 'active')->where('balance', '>', 0)->get()
-                ->map(fn ($c) => ['id' => $c->id, 'business' => Tenant::query()->find($c->tenant_id)?->name, 'code' => $c->code, 'balance' => '₱'.number_format((float) $c->balance, 2)]),
+                ->map(fn ($c) => ['id' => $c->id, 'business' => Tenant::query()->find($c->tenant_id)?->name, 'code' => $c->code, 'balance' => \App\Support\Currency::symbol().number_format((float) $c->balance, 2)]),
             'tabs' => \App\Modules\Customer\Controllers\AccountController::nav('account.loyalty'),
         ]);
     }

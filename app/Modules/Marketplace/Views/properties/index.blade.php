@@ -69,9 +69,9 @@
                     <a class="filter-chip" href="{{ request()->fullUrlWithQuery([$key => null]) }}" aria-label="Remove {{ $key }} filter">
                         <span>
                             @if ($key === 'price_min')
-                                Min ₱{{ number_format((float) $value, 0) }}
+                                Min {{ \App\Support\Currency::symbol() }}{{ number_format((float) $value, 0) }}
                             @elseif ($key === 'price_max')
-                                Max ₱{{ number_format((float) $value, 0) }}
+                                Max {{ \App\Support\Currency::symbol() }}{{ number_format((float) $value, 0) }}
                             @else
                                 {{ Str::headline($key) }}: {{ $value }}
                             @endif

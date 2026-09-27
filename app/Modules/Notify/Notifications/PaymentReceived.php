@@ -17,7 +17,7 @@ class PaymentReceived extends ChannelNotification
 
     public function message(): string
     {
-        return 'We received your payment of '.$this->payment->currency.' '.number_format((float) $this->payment->amount, 2).' for '.$this->reference.'. Thank you!';
+        return 'We received your payment of '.\App\Support\Currency::format($this->payment->amount).' for '.$this->reference.'. Thank you!';
     }
 
     public function link(): ?string

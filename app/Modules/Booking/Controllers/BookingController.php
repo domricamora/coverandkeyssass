@@ -180,7 +180,7 @@ class BookingController extends PropertyManagementController
                 'method' => $p->method ? Str::headline($p->method) : 'PayMongo',
                 'status' => $p->status,
                 'note' => $p->failure_reason,
-                'amount' => $p->currency.' '.number_format((float) $p->amount, 2),
+                'amount' => \App\Support\Currency::format($p->amount),
             ]),
             'can' => ['update' => $user->hasPermissionTo('bookings.update'), 'folio' => $user->hasPermissionTo('folio.view')],
             'urls' => [

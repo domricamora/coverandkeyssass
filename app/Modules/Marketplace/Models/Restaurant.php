@@ -177,6 +177,6 @@ class Restaurant extends Model
     {
         $level = max(1, min(4, (int) $this->price_level));
 
-        return str_repeat('₱', $level);
+        return str_repeat(\App\Support\Currency::symbol(), $level);
     }
 }

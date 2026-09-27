@@ -104,7 +104,7 @@ class PropertyController extends PropertyManagementController
                 'tagline' => $property->tagline,
                 'description' => $property->description,
                 'facts' => [
-                    ['From', $property->priceLabel().' / night · cleaning '.$property->currency.' '.number_format((float) $property->cleaning_fee, 0)],
+                    ['From', $property->priceLabel().' / night · cleaning '.\App\Support\Currency::format($property->cleaning_fee, null, 0)],
                     ['Capacity', 'up to '.$property->max_guests.' guests · '.$property->bedrooms.' bedroom(s) · '.$property->beds.' bed(s) · '.$property->bathrooms.' bath(s)'],
                     ['Check-in / out', $property->check_in_time.' / '.$property->check_out_time],
                     $property->amenities->isNotEmpty() ? ['Amenities', $property->amenities->pluck('name')->implode(', ')] : null,

@@ -7,7 +7,7 @@
 - **Motion** (`resources/css/motion.css`, `resources/js/reveal.js`): a rise + un-blur page enter (320 ms, strong ease-out), native cross-document view transitions on Blade page loads, and sections below the fold fade up once as they scroll in (children of `[data-stagger]` cascade 60 ms apart). Reduced motion keeps fades only.
 - **Optimistic preloading:** React links (sidebar, tabs, row links, back links, pagination) prefetch on hover (`prefetch cacheFor="30s"`); Blade pages use the Speculation Rules API (moderate eagerness), excluding links whose GET changes state (sign-out, sign-in links, unsubscribe, verification, payment returns, CSV).
 - **Preloaders:** a lagoon-to-coral top bar while a page loads (Inertia progress bar restyled; the same bar on Blade navigations after 150 ms), and a spinner in form buttons while they submit.
-- `App\Support\Currency` (symbol helper) added; used by the commissions and payouts screens.
+- **Currency symbol, never an ISO code:** amounts read `₱1,250.00`, not `PHP 1,250.00`. `App\Support\Currency` resolves the business's own symbol (Business settings → Currency symbol, stored in `tenants.settings.currency_symbol`), else the platform default (Super Admin → Settings → Currency symbol), else ₱. Every PHP `money()` helper and the hard-coded ₱ strings go through it; React `money()` uses the shared `moneySymbol` prop, the public widgets read `<meta name="currency-symbol">`. Public listing cards show the platform symbol (no business context there); the listing detail quote uses its business's symbol. Test: `CurrencyTest`.
 
 ## 2026-09-27 — cPanel deploy path hardened and documented
 

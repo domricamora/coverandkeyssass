@@ -180,12 +180,12 @@
 
                     @if ($quote)
                         <p class="booking-widget__price">
-                            {{ $quote['currency'] }} {{ number_format($quote['total'], 0) }} <span>total</span>
+                            {{ \App\Support\Currency::symbol($p->tenant) }}{{ number_format($quote['total'], 0) }} <span>total</span>
                         </p>
                         <div class="price-breakdown">
                             <p><span>{{ \Carbon\Carbon::parse($stayDates['check_in'])->format('D, M j') }} – {{ \Carbon\Carbon::parse($stayDates['check_out'])->format('D, M j') }}</span> <strong>{{ $quote['nights'] }} {{ Str::plural('night', $quote['nights']) }}</strong></p>
-                            <p><span>{{ $quote['room_type'] }}</span> <strong>{{ $quote['currency'] }} {{ number_format($quote['per_night'], 0) }} avg / night</strong></p>
-                            <p class="price-breakdown__total"><span>Total for your stay</span> <span>{{ $quote['currency'] }} {{ number_format($quote['total'], 0) }}</span></p>
+                            <p><span>{{ $quote['room_type'] }}</span> <strong>{{ \App\Support\Currency::symbol($p->tenant) }}{{ number_format($quote['per_night'], 0) }} avg / night</strong></p>
+                            <p class="price-breakdown__total"><span>Total for your stay</span> <span>{{ \App\Support\Currency::symbol($p->tenant) }}{{ number_format($quote['total'], 0) }}</span></p>
                         </div>
                         @if ($quote['rooms_left'] <= 2)
                             <p class="listing-card__scarce" style="margin-top:10px;">Only {{ $quote['rooms_left'] }} {{ Str::plural('room', $quote['rooms_left']) }} left for these dates</p>
@@ -200,7 +200,7 @@
                         <div class="price-breakdown">
                             <p><span>Nightly rate</span> <strong>{{ $p->priceLabel() }}</strong></p>
                             @if ($p->weekend_price)
-                                <p><span>Weekend rate</span> <strong>{{ $p->currency }} {{ number_format((float) $p->weekend_price, 0) }}</strong></p>
+                                <p><span>Weekend rate</span> <strong>{{ \App\Support\Currency::format($p->weekend_price, $p->tenant, 0) }}</strong></p>
                             @endif
                             <p class="price-breakdown__total"><span>Stay total</span> <span>Add dates to see it</span></p>
                         </div>

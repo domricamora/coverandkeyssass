@@ -32,7 +32,7 @@
         <tr><td>Subtotal</td><td class="r">{{ number_format((float) $order->subtotal, 2) }}</td></tr>
         @if ((float) $order->discount_total > 0)<tr><td>Discount{{ $order->discount_reason ? ' ('.$order->discount_reason.')' : '' }}</td><td class="r">-{{ number_format((float) $order->discount_total, 2) }}</td></tr>@endif
         <tr><td>VAT {{ (float) $order->tax_rate }}% {{ $order->tax_inclusive ? 'incl.' : '' }}</td><td class="r">{{ number_format((float) $order->tax_total, 2) }}</td></tr>
-        <tr><td><strong>TOTAL</strong></td><td class="r"><strong>₱{{ number_format((float) $order->total, 2) }}</strong></td></tr>
+        <tr><td><strong>TOTAL</strong></td><td class="r"><strong>{{ \App\Support\Currency::symbol() }}{{ number_format((float) $order->total, 2) }}</strong></td></tr>
     </table>
     <div class="rule"></div>
     <table>

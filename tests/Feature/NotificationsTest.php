@@ -79,7 +79,7 @@ it('follows preferences: opt out of email, opt in to SMS and push with a device'
 
     expect(SmsSender::$sent)->toHaveCount(1)
         ->and(SmsSender::$sent[0]['to'])->toBe('09171234567')
-        ->and(SmsSender::$sent[0]['text'])->toContain('PHP 500.00 for BK-1')
+        ->and(SmsSender::$sent[0]['text'])->toContain('₱500.00 for BK-1')
         ->and(PushMessage::query()->sole())
         ->user_id->toBe($guest->id)
         ->event->toBe('payment_received')

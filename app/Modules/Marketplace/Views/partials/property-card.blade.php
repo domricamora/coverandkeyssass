@@ -62,7 +62,7 @@
             <p class="listing-card__perk">Free cancellation</p>
         @endif
         @if ($stay)
-            <p class="listing-card__price">{{ $stay['currency'] }} {{ number_format($stay['total'], 0) }} <span>total · {{ $stay['nights'] }} {{ Str::plural('night', $stay['nights']) }}</span></p>
+            <p class="listing-card__price">{{ \App\Support\Currency::symbol() }}{{ number_format($stay['total'], 0) }} <span>total · {{ $stay['nights'] }} {{ Str::plural('night', $stay['nights']) }}</span></p>
             @if ($stay['rooms_left'] <= 2)
                 <p class="listing-card__scarce">Only {{ $stay['rooms_left'] }} {{ Str::plural('room', $stay['rooms_left']) }} left for your dates</p>
             @endif

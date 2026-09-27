@@ -73,7 +73,7 @@ class PosService
             $applied = round($method === 'cash' ? min((float) $tendered, $due) : $amount, 2);
 
             if ($applied <= 0 || $applied > $due + 0.001) {
-                $this->fail('amount', 'Enter an amount up to the balance due (₱'.number_format($due, 2).').');
+                $this->fail('amount', 'Enter an amount up to the balance due ('.\App\Support\Currency::symbol().number_format($due, 2).').');
             }
 
             // Gift card / store credit (Phase 23): the code is the reference; the card must cover the amount.

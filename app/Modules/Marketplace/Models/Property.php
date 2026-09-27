@@ -207,7 +207,7 @@ class Property extends Model
     /** "₱8,500" style label for cards and detail pages. */
     public function priceLabel(): string
     {
-        return $this->currency.' '.number_format((float) $this->base_price, 0);
+        return \App\Support\Currency::format($this->base_price, $this->relationLoaded('tenant') ? $this->tenant : null, 0);
     }
 
     public function locationLabel(): string

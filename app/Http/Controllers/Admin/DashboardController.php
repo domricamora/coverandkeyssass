@@ -31,8 +31,8 @@ class DashboardController extends Controller
 
         return \Inertia\Inertia::render('Admin/Dashboard', [
             'stats' => [
-                ['Guest payments', '₱'.number_format((float) $paid()->sum('amount'), 2), '₱'.number_format((float) $paid()->where('paid_at', '>=', $since)->sum('amount'), 2).' last 30 days', route('admin.payments.index')],
-                ['Platform commission', '₱'.number_format((float) $scoped(Commission::class)->where('status', '!=', Commission::REVERSED)->sum('platform_fee'), 2), $scoped(Commission::class)->where('status', Commission::PENDING)->count().' pending release', route('admin.commissions.index')],
+                ['Guest payments', \App\Support\Currency::symbol().number_format((float) $paid()->sum('amount'), 2), \App\Support\Currency::symbol().number_format((float) $paid()->where('paid_at', '>=', $since)->sum('amount'), 2).' last 30 days', route('admin.payments.index')],
+                ['Platform commission', \App\Support\Currency::symbol().number_format((float) $scoped(Commission::class)->where('status', '!=', Commission::REVERSED)->sum('platform_fee'), 2), $scoped(Commission::class)->where('status', Commission::PENDING)->count().' pending release', route('admin.commissions.index')],
                 ['Subscription revenue', Invoice::money((int) Invoice::query()->where('status', Invoice::PAID)->sum('total_cents')), Invoice::query()->where('status', Invoice::OPEN)->count().' open invoices', route('admin.billing.index')],
                 ['Bookings', number_format($scoped(Booking::class)->count()), $scoped(Booking::class)->where('created_at', '>=', $since)->count().' last 30 days', route('admin.bookings.index')],
                 ['Food orders', number_format($scoped(Order::class)->count()), $scoped(Order::class)->where('created_at', '>=', $since)->count().' last 30 days', route('admin.orders.index')],
@@ -41,7 +41,7 @@ class DashboardController extends Controller
                 ['Properties', number_format($scoped(Property::class)->count()), $scoped(Property::class)->where('status', Property::STATUS_PENDING)->count().' awaiting approval', route('admin.listings.index', 'properties')],
                 ['Restaurants', number_format($scoped(Restaurant::class)->count()), $scoped(Restaurant::class)->where('status', Restaurant::STATUS_PENDING)->count().' awaiting approval', route('admin.listings.index', 'restaurants')],
                 ['Subscriptions', number_format(Subscription::query()->where('status', '!=', Subscription::CANCELLED)->count()), Subscription::query()->where('status', Subscription::PAST_DUE)->count().' past due', route('admin.billing.index')],
-                ['Payouts', number_format($scoped(Payout::class)->where('status', Payout::REQUESTED)->count()).' requested', '₱'.number_format((float) $scoped(Payout::class)->where('status', Payout::REQUESTED)->sum('amount'), 2).' to pay', route('admin.payouts.index')],
+                ['Payouts', number_format($scoped(Payout::class)->where('status', Payout::REQUESTED)->count()).' requested', \App\Support\Currency::symbol().number_format((float) $scoped(Payout::class)->where('status', Payout::REQUESTED)->sum('amount'), 2).' to pay', route('admin.payouts.index')],
             ],
             'recentTenants' => Tenant::query()->latest()->take(6)->get()->map(fn (Tenant $t) => [
                 'name' => $t->name, 'type' => ucfirst((string) $t->business_type), 'status' => $t->status, 'href' => route('admin.tenants.show', $t),

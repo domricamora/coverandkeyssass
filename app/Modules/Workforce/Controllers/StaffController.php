@@ -44,7 +44,7 @@ class StaffController extends Controller
                 ->map(fn ($d) => ['id' => $d->id, 'name' => $d->name, 'count' => $d->employees_count]),
             'positions' => Position::query()->with('department')->orderBy('name')->get()->map(fn ($p) => [
                 'id' => $p->id,
-                'text' => collect([$p->name, $p->department?->name, $p->hourly_rate ? '₱'.number_format((float) $p->hourly_rate, 2).'/h' : null])->filter()->implode(' · '),
+                'text' => collect([$p->name, $p->department?->name, $p->hourly_rate ? \App\Support\Currency::symbol().number_format((float) $p->hourly_rate, 2).'/h' : null])->filter()->implode(' · '),
             ]),
             'department' => $request->query('department'),
             'options' => $this->formOptions(),

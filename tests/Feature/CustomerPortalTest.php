@@ -127,5 +127,5 @@ it('renders an invoice for the guest', function () {
         ->get(route('account.bookings.invoice', $booking->reference))
         ->assertOk()
         ->assertSee($booking->reference)
-        ->assertSee('PHP 12,500.00');
+        ->assertSee('₱12,500.00');
 });
