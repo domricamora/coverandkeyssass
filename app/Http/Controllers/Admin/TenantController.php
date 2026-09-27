@@ -14,6 +14,8 @@ use Illuminate\Validation\Rule;
 
 class TenantController extends Controller
 {
+    private const TYPES = ['hotel' => 'Hotel', 'resort' => 'Resort', 'bnb' => 'Bed & Breakfast', 'guesthouse' => 'Guesthouse', 'apartment' => 'Apartment', 'condo' => 'Condo', 'villa' => 'Villa', 'hostel' => 'Hostel', 'restaurant' => 'Restaurant'];
+
     public function __construct(private AuditLogger $audit)
     {
     }
@@ -29,19 +31,34 @@ class TenantController extends Controller
             ->paginate(25)
             ->withQueryString();
 
-        return view('admin.tenants.index', ['tenants' => $tenants]);
+        return \Inertia\Inertia::render('Admin/Tenants/Index', [
+            'tenants' => $tenants->through(fn (Tenant $t) => [
+                'id' => $t->id,
+                'name' => $t->name,
+                'type' => ucfirst((string) $t->business_type),
+                'status' => $t->status,
+                'verified' => (bool) $t->verified_at,
+                'members' => $t->users_count,
+                'href' => route('admin.tenants.show', $t),
+            ]),
+            'filters' => $request->only('q'),
+            'urls' => ['create' => route('admin.tenants.create')],
+        ]);
     }
 
     public function create()
     {
-        return view('admin.tenants.create');
+        return \Inertia\Inertia::render('Admin/Tenants/Create', [
+            'types' => self::TYPES,
+            'urls' => ['store' => route('admin.tenants.store'), 'back' => route('admin.tenants.index')],
+        ]);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:120'],
-            'business_type' => ['required', Rule::in(['hotel', 'resort', 'bnb', 'guesthouse', 'apartment', 'condo', 'villa', 'hostel', 'restaurant'])],
+            'business_type' => ['required', Rule::in(array_keys(self::TYPES))],
             'owner_email' => ['required', 'email', 'exists:users,email'],
         ]);
 
@@ -84,7 +101,32 @@ class TenantController extends Controller
 
         $members = $tenant->tenantUsers()->with('user:id,name,email,status')->get();
 
-        return view('admin.tenants.show', ['tenant' => $tenant, 'members' => $members]);
+        return \Inertia\Inertia::render('Admin/Tenants/Show', [
+            'tenant' => [
+                'name' => $tenant->name,
+                'type' => ucfirst((string) $tenant->business_type),
+                'slug' => $tenant->slug,
+                'status' => $tenant->status,
+                'members' => $tenant->users_count,
+                'created' => $tenant->created_at?->format('M j, Y'),
+                'verified' => $tenant->verified_at?->format('M j, Y'),
+                'verificationNote' => $tenant->verification_note,
+            ],
+            'members' => $members->map(fn ($m) => [
+                'id' => $m->id,
+                'name' => $m->user?->name,
+                'email' => $m->user?->email,
+                'status' => $m->user?->status,
+            ]),
+            'urls' => [
+                'back' => route('admin.tenants.index'),
+                'modules' => route('admin.tenants.modules.edit', $tenant),
+                'verify' => route('admin.tenants.verify', $tenant),
+                'suspend' => route('admin.tenants.suspend', $tenant),
+                'activate' => route('admin.tenants.activate', $tenant),
+                'destroy' => route('admin.tenants.destroy', $tenant),
+            ],
+        ]);
     }
 
     public function suspend(Tenant $tenant)

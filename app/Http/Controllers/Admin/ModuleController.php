@@ -23,12 +23,26 @@ class ModuleController extends Controller
             ->ordered()
             ->paginate(25);
 
-        return view('admin.modules.index', ['modules' => $modules]);
+        return \Inertia\Inertia::render('Admin/Modules/Index', [
+            'modules' => $modules->through(fn (Module $m) => [
+                'id' => $m->id,
+                'name' => $m->name,
+                'slug' => $m->slug,
+                'category' => ucfirst((string) $m->category),
+                'status' => $m->status,
+                'core' => (bool) $m->is_core,
+                'trial' => $m->trial_days > 0 ? $m->trial_days.' days' : null,
+                'tenants' => $m->tenant_modules_count,
+                'edit' => route('admin.modules.edit', $m),
+                'destroy' => route('admin.modules.destroy', $m),
+            ]),
+            'urls' => ['create' => route('admin.modules.create')],
+        ]);
     }
 
     public function create()
     {
-        return view('admin.modules.create');
+        return $this->form(new Module(['status' => 'active', 'trial_days' => 0, 'sort_order' => 0]));
     }
 
     public function store(Request $request)
@@ -64,7 +78,7 @@ class ModuleController extends Controller
 
     public function edit(Module $module)
     {
-        return view('admin.modules.edit', ['module' => $module]);
+        return $this->form($module);
     }
 
     public function update(Request $request, Module $module)
@@ -102,5 +116,16 @@ class ModuleController extends Controller
 
         return redirect()->route('admin.modules.index')
             ->with('success', __('Module deleted.'));
+    }
+
+    private function form(Module $module)
+    {
+        return \Inertia\Inertia::render('Admin/Modules/Form', [
+            'module' => $module->exists ? $module->only(['name', 'slug', 'description', 'category', 'icon', 'trial_days', 'sort_order', 'status']) + ['is_core' => (bool) $module->is_core] : null,
+            'urls' => [
+                'save' => $module->exists ? route('admin.modules.update', $module) : route('admin.modules.store'),
+                'back' => route('admin.modules.index'),
+            ],
+        ]);
     }
 }

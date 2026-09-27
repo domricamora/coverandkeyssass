@@ -26,7 +26,19 @@ class UserController extends Controller
             ->paginate(25)
             ->withQueryString();
 
-        return view('admin.users.index', ['users' => $users]);
+        return \Inertia\Inertia::render('Admin/Users', [
+            'users' => $users->through(fn (User $u) => [
+                'id' => $u->id,
+                'name' => $u->name,
+                'email' => $u->email,
+                'status' => $u->status,
+                'roles' => $u->roles->pluck('display_name')->implode(', '),
+                'protected' => $u->isPlatformAdmin(),
+                'suspend' => route('admin.users.suspend', $u),
+                'activate' => route('admin.users.activate', $u),
+            ]),
+            'filters' => $request->only('q', 'type'),
+        ]);
     }
 
     public function suspend(Request $request, User $user)

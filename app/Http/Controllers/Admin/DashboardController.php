@@ -29,7 +29,7 @@ class DashboardController extends Controller
         $scoped = fn (string $model) => $model::query()->withoutGlobalScope('tenant');
         $paid = fn () => $scoped(Payment::class)->where('status', Payment::PAID);
 
-        return view('admin.dashboard', [
+        return \Inertia\Inertia::render('Admin/Dashboard', [
             'stats' => [
                 ['Guest payments', '₱'.number_format((float) $paid()->sum('amount'), 2), '₱'.number_format((float) $paid()->where('paid_at', '>=', $since)->sum('amount'), 2).' last 30 days', route('admin.payments.index')],
                 ['Platform commission', '₱'.number_format((float) $scoped(Commission::class)->where('status', '!=', Commission::REVERSED)->sum('platform_fee'), 2), $scoped(Commission::class)->where('status', Commission::PENDING)->count().' pending release', route('admin.commissions.index')],
@@ -43,8 +43,13 @@ class DashboardController extends Controller
                 ['Subscriptions', number_format(Subscription::query()->where('status', '!=', Subscription::CANCELLED)->count()), Subscription::query()->where('status', Subscription::PAST_DUE)->count().' past due', route('admin.billing.index')],
                 ['Payouts', number_format($scoped(Payout::class)->where('status', Payout::REQUESTED)->count()).' requested', '₱'.number_format((float) $scoped(Payout::class)->where('status', Payout::REQUESTED)->sum('amount'), 2).' to pay', route('admin.payouts.index')],
             ],
-            'recentTenants' => Tenant::query()->latest()->take(5)->get(),
-            'recentAudit' => AuditLog::query()->with('user:id,name')->latest()->take(8)->get(),
+            'recentTenants' => Tenant::query()->latest()->take(6)->get()->map(fn (Tenant $t) => [
+                'name' => $t->name, 'type' => ucfirst((string) $t->business_type), 'status' => $t->status, 'href' => route('admin.tenants.show', $t),
+            ]),
+            'recentAudit' => AuditLog::query()->with('user:id,name')->latest()->take(8)->get()->map(fn (AuditLog $a) => [
+                'id' => $a->id, 'action' => $a->action, 'who' => $a->user?->name ?? 'system', 'when' => $a->created_at->diffForHumans(),
+            ]),
+            'urls' => ['logs' => route('admin.logs.index'), 'tenants' => route('admin.tenants.index')],
         ]);
     }
 }

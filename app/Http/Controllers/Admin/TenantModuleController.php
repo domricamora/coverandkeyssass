@@ -25,16 +25,23 @@ class TenantModuleController extends Controller
     {
         $allModules = Module::query()->active()->ordered()->get();
 
-        $activeIds = TenantModule::query()
+        $active = TenantModule::query()->withoutGlobalScopes()
             ->where('tenant_id', $tenant->id)
             ->where('status', 'active')
-            ->pluck('module_id')
-            ->all();
+            ->get()->keyBy('module_id');
 
-        return view('admin.tenants.modules', [
-            'tenant' => $tenant,
-            'modules' => $allModules,
-            'activeIds' => $activeIds,
+        return \Inertia\Inertia::render('Admin/Tenants/Modules', [
+            'tenant' => $tenant->name,
+            'modules' => $allModules->map(fn (Module $m) => [
+                'id' => $m->id,
+                'name' => $m->name,
+                'description' => $m->description,
+                'core' => (bool) $m->is_core,
+                'active' => $active->has($m->id),
+                'trialEnds' => $active->get($m->id)?->trialEndsAtDisplay(),
+                'disable' => route('admin.tenants.modules.destroy', [$tenant, $m]),
+            ]),
+            'urls' => ['enable' => route('admin.tenants.modules.store', $tenant), 'back' => route('admin.tenants.show', $tenant)],
         ]);
     }
 
