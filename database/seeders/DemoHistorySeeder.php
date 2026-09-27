@@ -119,7 +119,7 @@ class DemoHistorySeeder
             ['name' => 'Isabel Reyes-Lim', 'password' => 'password', 'status' => 'active', 'email_verified_at' => now()],
         );
 
-        foreach (Tenant::query()->whereIn('slug', ['aplaya-beach-resort', 'kalye-suite-company', 'nido-cove-escapes'])->get() as $tenant) {
+        foreach (Tenant::query()->whereIn('slug', ['aplaya-beach-resort', 'kalye-suite-company', 'nido-cove-escapes', 'ridge-and-reef-hospitality'])->get() as $tenant) {
             $tenant->users()->syncWithoutDetaching([$user->id => ['status' => 'active', 'joined_at' => now()]]);
             $role = Role::query()->withoutGlobalScopes()->where('tenant_id', $tenant->id)->where('slug', 'owner')->first();
 
