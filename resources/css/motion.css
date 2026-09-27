@@ -87,6 +87,33 @@ dialog[open]::backdrop { animation: ck-fade-in 200ms ease-out both; }
 }
 .reveal.is-in { opacity: 1; transform: none; }
 
+/* ---- Hero entrance (public pages) ------------------------------------------------
+   The page's h1 block rises in on first paint: eyebrow, headline, then what follows,
+   80 ms apart. Pure CSS (no flash before scripts run). fill-mode "backwards" so the
+   section reveal below can still take over elements further down. */
+@keyframes ck-rise { from { opacity: 0; transform: translateY(18px); filter: blur(4px); } }
+.public-body main :is(:has(+ h1), h1, h1 ~ *) { animation: ck-rise 650ms var(--ease-out) backwards; animation-delay: var(--rise, 400ms); }
+.public-body main :has(+ h1) { --rise: 40ms; }
+.public-body main h1 { --rise: 120ms; }
+.public-body main h1 + * { --rise: 200ms; }
+.public-body main h1 + * + * { --rise: 280ms; }
+.public-body main h1 + * + * + * { --rise: 360ms; }
+
+/* Cards inside a revealed section cascade in after it (reveal.js sets --i). */
+.reveal :where(.grid) > * { opacity: 0; transform: translateY(14px); transition: opacity 450ms var(--ease-out), transform 550ms var(--ease-out); }
+.reveal.is-in :where(.grid) > * { opacity: 1; transform: none; transition-delay: calc(var(--i, 0) * 60ms + 120ms); }
+
+/* ---- Touch feedback -------------------------------------------------------------- */
+:where(button, [class*='btn'], [role='button']):not(:disabled) { transition-property: transform, background-color, border-color, color, box-shadow; transition-duration: 160ms; transition-timing-function: var(--ease-out); }
+:where(button, [class*='btn'], [role='button']):not(:disabled):active { transform: scale(0.97); }
+.listing-card__media img, .listing-card__media picture { transition: transform 700ms var(--ease-out); }
+@media (hover: hover) and (pointer: fine) {
+    .listing-card:hover .listing-card__media img { transform: scale(1.04); }
+}
+
+/* FAQ / <details>: reveal.js animates the height; the "+" turns to "×" (group-open:rotate-45). */
+details > summary { cursor: pointer; }
+
 /* ---- Preloaders ---------------------------------------------------------------
    1. Top bar while a page loads: Inertia's progress bar (React) and the same
       look on Blade page loads (body.is-loading, set by app.js on navigation;
@@ -128,6 +155,10 @@ button[aria-busy='true'] { cursor: progress; }
     .page-in, dialog[open] { animation: ck-fade-in 120ms ease-out both; }
     .menu-in { animation: ck-fade-in 100ms ease-out both; }
     .reveal { transform: none; transition: opacity 200ms ease-out; }
+    .public-body main :is(:has(+ h1), h1, h1 ~ *) { animation-name: ck-fade-in; animation-duration: 200ms; }
+    .reveal :where(.grid) > * { transform: none; transition: opacity 200ms ease-out; transition-delay: 0ms !important; }
+    :where(button, [class*='btn'], [role='button']):active { transform: none; }
+    .listing-card:hover .listing-card__media img { transform: none; }
     ::view-transition-old(root), ::view-transition-new(root) { animation-duration: 120ms; }
     ::view-transition-new(root) { animation-name: ck-fade-in; }
     .brand-plate > img { transition: none; }

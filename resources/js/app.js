@@ -2,9 +2,10 @@
 
 import '../css/motion.css';
 import Alpine from 'alpinejs';
-import { reveal } from './reveal';
+import { accordions, reveal } from './reveal';
 
 document.addEventListener('DOMContentLoaded', () => reveal());
+accordions();
 
 // Preloader: a top bar while the next page loads (plain links and form posts on Blade pages).
 const loading = (on) => document.body?.classList.toggle('is-loading', on);

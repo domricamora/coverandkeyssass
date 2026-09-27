@@ -1,12 +1,13 @@
 import '../../css/motion.css';
 import { createInertiaApp, router } from '@inertiajs/react';
 import { createRoot } from 'react-dom/client';
-import { reveal } from '../reveal';
+import { accordions, reveal } from '../reveal';
 import { setMoneySymbol } from './ui';
 import Shell from './Shell';
 
 // New screens and pages of results: reveal their below-the-fold sections once rendered.
 router.on('navigate', () => requestAnimationFrame(() => reveal()));
+accordions();
 // Keep money() on the current business's symbol (set before the new page renders).
 router.on('success', (e) => setMoneySymbol(e.detail.page.props.moneySymbol));
 
