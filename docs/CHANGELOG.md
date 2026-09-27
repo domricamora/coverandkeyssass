@@ -1,5 +1,13 @@
 # CHANGELOG.md
 
+## 2026-09-27 — Live demo on ck.deskpulse.click, modern motion
+
+- **Deployed** to the temporary host https://ck.deskpulse.click (cPanel, LiteSpeed, PHP 8.3) with the full demo data; SSH deploys on port 9022 (docs in SESSION_STATE.md). Scheduler cron installed.
+- **Demo seeders on a demo host:** still refused in production unless `ALLOW_DEMO_SEED=true` (`config('app.allow_demo_seed')`). The group owner now spans all four demo businesses.
+- **Fixes found on live:** providers no longer register the empty `Views/` folders of modules that moved to React (`optimize` failed on the server); the root `.htaccess` re-sets the app's security headers because a parent site folder's `.htaccess` was overriding them (its CSP blocked Google Fonts and Alpine).
+- **Modern motion:** hero rise on public pages, grid cards cascade in with their section, FAQ / `<details>` slide open and shut, button press feedback, listing photo hover zoom; reduced motion keeps fades.
+- **For hosts** product tour: all seven screenshots retaken from the live demo with the new brand plate logo.
+
 ## 2026-09-27 — Platform admin on React, brand plate, motion and preloading
 
 - **Platform admin (`/admin/*`) is all React** (26 screens in `resources/js/Pages/Admin`): overview, users, businesses (create, detail with host verification, modules), module catalogue, listings (approve / suspend / send back, placement), bookings, food orders, payments with refunds, subscriptions and invoices, coupons, pricing, commissions, payouts, reviews, reported content, categories & locations, CMS pages, settings, CSV reports, audit log, support inbox (reuses `Messages/Index`). Own grouped sidebar: `DashboardNav::admin()`. Every admin Blade view was removed.

@@ -1,6 +1,6 @@
 # Resume here (Cover & Keys)
 
-Before anything else read `SESSION_STATE.md` → "HAND-OFF (2026-09-27, session 2) — START HERE". Current work: platform admin (`/admin/*`) Blade → React (Inertia), then production deploy to `ck.deskpulse.click` over FTP (SSH if the owner enables it). Run PHP via `cmd.exe //c "_ai\run.bat php artisan <cmd>"`. Checkpoint often: update SESSION_STATE.md + this block, commit, `git push origin master:main`.
+Before anything else read `SESSION_STATE.md` → "HAND-OFF (2026-09-27, session 3) — START HERE". Live demo: https://ck.deskpulse.click (deploy over SSH: `ssh ck-live`, port 9022). Run PHP locally via `cmd.exe //c "_ai\run.bat php artisan <cmd>"`. Checkpoint every milestone: update SESSION_STATE.md + this block, commit, `git push origin master:main`.
 
 <laravel-boost-guidelines>
 # Laravel Application

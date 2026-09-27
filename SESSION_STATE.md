@@ -5,9 +5,9 @@
 ## Snapshot
 
 - Date: 2026-09-27
-- Phase: **38 COMPLETE; now: platform admin → React, then production deploy** (see "HAND-OFF session 2" below). Remaining after that: the INCOMPLETE items in `docs/FINAL_AUDIT.md`
-- Tests: PASS — 333 tests / 2422 assertions (full suite, 2026-09-26, after guest booking flows), MySQL `hospitality_os_testing`
-- Git: `master` → origin <https://github.com/domricamora/coverandkeyssass.git> — **not pushed yet**: the auto-mode classifier blocks `git push` from the agent; the owner runs `git push -u origin master:main` (or adds a Bash permission rule)
+- Phase: **38 COMPLETE + React rebuild done; LIVE demo at https://ck.deskpulse.click** (see "HAND-OFF session 3"). Remaining: the INCOMPLETE items in `docs/FINAL_AUDIT.md` (SMTP, payment sandbox keys, off-site backups, push worker).
+- Tests: PASS — 346 tests / 2750 assertions (full suite, 2026-09-27), MySQL `hospitality_os_testing`
+- Git: `master` → origin <https://github.com/domricamora/coverandkeyssass.git> branch **main**, pushed after every milestone (`git push origin master:main`).
 
 ## Environment (ready)
 
@@ -27,7 +27,24 @@
 
 ## Next actions
 
-## HAND-OFF (2026-09-27, session 2) — START HERE
+## HAND-OFF (2026-09-27, session 3) — START HERE
+
+**State:** everything below is done, committed and pushed. Local and live run the same code.
+
+- **Platform admin → React: DONE** (26 screens, `Pages/Admin/*`, `DashboardNav::admin()`); no Blade admin views left. Print documents (invoices, folio, POS receipt) and public `/pages/{slug}` stay Blade on purpose.
+- **Brand plate logo** (`BrandMark` / `<x-brand-mark>`, styles in `resources/css/motion.css`), tighter-cropped `public/img/brand/logo.svg`.
+- **Motion** (`motion.css`, `resources/js/reveal.js`): page enter, view transitions, hero rise on public pages, sections + grid cards cascade on scroll, `<details>`/FAQ slide open/shut (`accordions()`), button press + photo hover. **Preloading:** Inertia `prefetch` on links, Speculation Rules on Blade pages. **Preloaders:** top bar + button spinner.
+- **Currency symbol** everywhere (`App\Support\Currency`; platform default in admin Settings, per-business override in Business settings).
+- **Live: https://ck.deskpulse.click** (temporary host; the final host comes later).
+  - Server: `/home/htrjymuo/public_html/ck.deskpulse.click`, PHP `/opt/cpanel/ea-php83/root/usr/bin/php`. **SSH: `ssh ck-live`** (port 9022, key `~/.ssh/ck_deskpulse`, alias in `~/.ssh/config`).
+  - Deploy an update: `node node_modules/vite/bin/vite.js build` (no ASSET_URL) → commit/push → `tar -czf - <changed paths> | ssh ck-live 'cd ~/public_html/ck.deskpulse.click && tar -xzf -'` → `ssh ck-live '… php artisan migrate --force && php artisan optimize:clear && php artisan optimize'`. The server keeps its own `.env` (never overwrite) and a root `.htaccess` = cPanel php-ini block + the repo `.htaccess`.
+  - Demo data seeded (4 businesses, 10 stays, 6 restaurants; `ALLOW_DEMO_SEED=true` only on this server). **All non-admin accounts use `password1126`** (owner's choice for the investor demo); Super Admin = nick.weconnect@gmail.com (owner's password). Cron installed (`schedule:run` every minute).
+  - Gotchas found on live: the parent site's `public_html/.htaccess` sets its own CSP/X-Frame/Permissions headers — our root `.htaccess` re-sets the app's values (keep it in step with `SecurityHeaders`); empty module `Views/` folders aren't in git, so providers must not `loadViewsFrom` them; the agent's auto-mode blocks FTP/web-runner deploys — use SSH.
+- **Owner to-dos:** delete the pasted `.ppk` / `~/.ssh/coverandkeys` key and the old `public_html/coverandkeyssass` copy.
+
+**Next (ask the owner):** SMTP settings (emails don't send on live), PayMongo/PayPal sandbox keys, compress the For-hosts screenshots (~150 KB each), local demo passwords still `password`, then the FINAL_AUDIT items.
+
+## HAND-OFF (2026-09-27, session 2) — superseded
 
 **Owner's order this session:** finish the remaining phases, then deploy the production build to the live server (FTP now; SSH only if the owner provides access — ask them how). Checkpoint often: update this file + the resume block in `CLAUDE.md`, commit, `git push origin master:main`.
 

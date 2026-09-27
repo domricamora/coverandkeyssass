@@ -6,10 +6,14 @@
 Options -Indexes
 
 # On shared hosting this app can sit inside another site's folder (e.g. public_html/ck.deskpulse.click),
-# whose .htaccess sets its own Content-Security-Policy. Drop the inherited one: the app sends its own
-# (App\Http\Middleware\SecurityHeaders), which allows Google Fonts and Alpine.
+# whose .htaccess sets its own security headers with "Header always set"; those win over the headers
+# PHP sends, and that site's CSP blocks Google Fonts and Alpine. Re-assert the app's own values here.
+# ponytail: a copy of App\Http\Middleware\SecurityHeaders; keep both in step (or drop this block once the
+# app has its own document root on the final host).
 <IfModule mod_headers.c>
-    Header always unset Content-Security-Policy
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self' https://*.paymongo.com; frame-ancestors 'self'"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(self), payment=(self)"
 </IfModule>
 
 <IfModule mod_rewrite.c>

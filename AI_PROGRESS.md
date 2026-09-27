@@ -64,7 +64,7 @@ Next: close the INCOMPLETE items (PayMongo sandbox run, production deploy, off-s
 - Redis not installed locally: dev uses database cache/queue drivers (config ready for Redis in production)
 - WAMP ships `default_storage_engine=MyISAM`; app now forces InnoDB per connection (server my.ini also updated; apply the same on any host with a MyISAM default)
 - The `&` in the project path breaks npm `.bin` shims under cmd — build via `node node_modules/vite/bin/vite.js build`
-- **No git remote configured** — commits are local-only until an origin is added (`git remote add origin <url>`)
+- Git remote: origin = https://github.com/domricamora/coverandkeyssass.git (branch `main`), pushed after every milestone. Live demo: https://ck.deskpulse.click (see SESSION_STATE.md).
 
 ## Last Agent
 
@@ -72,10 +72,10 @@ Claude Code (Opus)
 
 ## Last Updated
 
-2026-09-26
+2026-09-27
 
 ## Last Successful Test
 
 php artisan test
 
-Result: PASS (305 tests, 1965 assertions, MySQL `hospitality_os_testing`)
+Result: PASS (346 tests, 2750 assertions, MySQL `hospitality_os_testing`)
