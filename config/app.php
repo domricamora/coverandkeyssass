@@ -67,6 +67,9 @@ return [
 
     'timezone' => 'UTC',
 
+    // Demo seeders refuse to run in production unless a demo/investor host opts in with ALLOW_DEMO_SEED=true.
+    'allow_demo_seed' => (bool) env('ALLOW_DEMO_SEED', false),
+
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration

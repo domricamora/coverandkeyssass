@@ -127,8 +127,8 @@ class DemoOperationsSeeder extends Seeder
 
     public function run(): void
     {
-        if (app()->environment('production')) {
-            throw new \RuntimeException('DemoOperationsSeeder is for development only.');
+        if (app()->environment('production') && ! config('app.allow_demo_seed')) {
+            throw new \RuntimeException('DemoOperationsSeeder is for development only (set ALLOW_DEMO_SEED=true on a demo host).');
         }
 
         $context = app(TenantContext::class);
