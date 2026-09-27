@@ -31,6 +31,8 @@
 
 **State:** committed and pushed (`master` = `origin/main`). Tests: 346 passing.
 
+- **Share previews (DONE, local + live, 2026-09-28):** every public page sends `og:image` (1200x630 branded cards `public/img/og/share.jpg` guests, `share-hosts.jpg` features/pricing; listing and destination pages use their photo), `summary_large_image`, `og:locale en_US`. Cards were rendered from an HTML template with Playwright; re-render if the copy changes. Facebook caches previews: re-scrape a URL at https://developers.facebook.com/tools/debug/.
+
 - **Five new demo destinations (DONE, local + live):** Dumaguete, Siquijor, Iloilo City, Davao City, Anda (Bohol); Panglao now featured. Five new businesses, each with an owner (`owner@bahaydagat|islasiquijor|casailonggo|madayaw|boholtide.example.test`), 2 stays, 1 restaurant + menu, a 20-person team, bookings and orders. `MarketplaceDemoSeeder::TENANTS` is the one list of demo business slugs. 45 Unsplash photos in `public/img/demo` (credited). Home pages show 12 destinations.
 - **Photo fetching:** `https://unsplash.com/napi/search/photos?query=…` works without a key only with a curl user agent (PHP's default gets 403/401). Skip `premium`/`plus` results; look at each cover (one search returned a painting).
 - **Live re-seed** ran (`db:seed --class=MarketplaceDemoSeeder --force`, ~5 min). It resets every demo account's password to `password`.
