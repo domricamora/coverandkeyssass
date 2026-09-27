@@ -1,6 +1,6 @@
 {
-  "_PublicShell-CCbxXqy1.js": {
-    "file": "assets/PublicShell-CCbxXqy1.js",
+  "_PublicShell-CiHiLRIe.js": {
+    "file": "assets/PublicShell-CiHiLRIe.js",
     "name": "PublicShell",
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
@@ -11,22 +11,33 @@
     "file": "assets/jsx-runtime-B7K_IRuH.js",
     "name": "jsx-runtime"
   },
-  "_kit-Bfc-iQhj.js": {
-    "file": "assets/kit-Bfc-iQhj.js",
+  "_kit-BFC5OMgU.js": {
+    "file": "assets/kit-BFC5OMgU.js",
     "name": "kit",
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx"
     ]
   },
-  "_media-vCYy7W6F.js": {
-    "file": "assets/media-vCYy7W6F.js",
+  "_media-DrpOcJW3.js": {
+    "file": "assets/media-DrpOcJW3.js",
     "name": "media",
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
+  },
+  "_reveal-BC9uaFEe.js": {
+    "file": "assets/reveal-BC9uaFEe.js",
+    "name": "reveal",
+    "css": [
+      "assets/reveal-DsDiHNDS.css"
+    ]
+  },
+  "_reveal-DsDiHNDS.css": {
+    "file": "assets/reveal-DsDiHNDS.css",
+    "src": "_reveal-DsDiHNDS.css"
   },
   "node_modules/leaflet/dist/images/layers-2x.png": {
     "file": "assets/layers-2x-Bpkbi35X.png",
@@ -41,7 +52,7 @@
     "src": "node_modules/leaflet/dist/images/marker-icon.png"
   },
   "resources/css/app.css": {
-    "file": "assets/app-DDGMvsFE.css",
+    "file": "assets/app-D-P7lUjs.css",
     "name": "app",
     "names": [
       "app.css"
@@ -50,7 +61,7 @@
     "isEntry": true
   },
   "resources/css/react.css": {
-    "file": "assets/react-uhn0KOnV.css",
+    "file": "assets/react-D0zx3HYU.css",
     "name": "react",
     "names": [
       "react.css"
@@ -58,169 +69,165 @@
     "src": "resources/css/react.css",
     "isEntry": true
   },
-  "resources/images/logo.svg": {
-    "file": "assets/logo-CymcAhlG.svg",
-    "src": "resources/images/logo.svg"
-  },
   "resources/js/Pages/Account/Home.jsx": {
-    "file": "assets/Home-B5NBuz9b.js",
+    "file": "assets/Home-CD21uIj2.js",
     "name": "Home",
     "src": "resources/js/Pages/Account/Home.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_PublicShell-CCbxXqy1.js",
+      "_PublicShell-CiHiLRIe.js",
       "resources/js/Pages/Account/TripCard.jsx"
     ]
   },
   "resources/js/Pages/Account/MessageNew.jsx": {
-    "file": "assets/MessageNew-DC4Jnc1l.js",
+    "file": "assets/MessageNew-B6Xlm5PN.js",
     "name": "MessageNew",
     "src": "resources/js/Pages/Account/MessageNew.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_PublicShell-CCbxXqy1.js",
+      "_PublicShell-CiHiLRIe.js",
       "resources/js/widgets/ui.jsx"
     ]
   },
   "resources/js/Pages/Account/Messages.jsx": {
-    "file": "assets/Messages-Kp9Bk1d2.js",
+    "file": "assets/Messages-DfMDqKHJ.js",
     "name": "Messages",
     "src": "resources/js/Pages/Account/Messages.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_PublicShell-CCbxXqy1.js",
+      "_PublicShell-CiHiLRIe.js",
       "resources/js/widgets/ui.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Account/NotificationSettings.jsx": {
-    "file": "assets/NotificationSettings-DqAfggq_.js",
+    "file": "assets/NotificationSettings-DBoSNdyg.js",
     "name": "NotificationSettings",
     "src": "resources/js/Pages/Account/NotificationSettings.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_PublicShell-CCbxXqy1.js",
+      "_PublicShell-CiHiLRIe.js",
       "resources/js/widgets/ui.jsx"
     ]
   },
   "resources/js/Pages/Account/Notifications.jsx": {
-    "file": "assets/Notifications-BUbDxNIv.js",
+    "file": "assets/Notifications-BN6Gcr1H.js",
     "name": "Notifications",
     "src": "resources/js/Pages/Account/Notifications.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_PublicShell-CCbxXqy1.js",
-      "_kit-Bfc-iQhj.js"
+      "_PublicShell-CiHiLRIe.js",
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Account/Order.jsx": {
-    "file": "assets/Order-BEQAkrCF.js",
+    "file": "assets/Order-DGDmTjUl.js",
     "name": "Order",
     "src": "resources/js/Pages/Account/Order.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_PublicShell-CCbxXqy1.js",
+      "_PublicShell-CiHiLRIe.js",
       "resources/js/Pages/Account/TripCard.jsx",
       "resources/js/widgets/ui.jsx"
     ]
   },
   "resources/js/Pages/Account/Orders.jsx": {
-    "file": "assets/Orders-BXKjjpZO.js",
+    "file": "assets/Orders-CqcohBkR.js",
     "name": "Orders",
     "src": "resources/js/Pages/Account/Orders.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_PublicShell-CCbxXqy1.js",
+      "_PublicShell-CiHiLRIe.js",
       "resources/js/Pages/Account/TripCard.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Account/Payments.jsx": {
-    "file": "assets/Payments-DKDR3kby.js",
+    "file": "assets/Payments-ChjUR6xL.js",
     "name": "Payments",
     "src": "resources/js/Pages/Account/Payments.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_PublicShell-CCbxXqy1.js",
+      "_PublicShell-CiHiLRIe.js",
       "resources/js/Pages/Account/TripCard.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Account/Profile.jsx": {
-    "file": "assets/Profile-CYSf4E7z.js",
+    "file": "assets/Profile-Cb-EEcIp.js",
     "name": "Profile",
     "src": "resources/js/Pages/Account/Profile.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_PublicShell-CCbxXqy1.js",
+      "_PublicShell-CiHiLRIe.js",
       "resources/js/widgets/ui.jsx"
     ]
   },
   "resources/js/Pages/Account/Reviews.jsx": {
-    "file": "assets/Reviews-DekMMaVZ.js",
+    "file": "assets/Reviews-Cj0bESRQ.js",
     "name": "Reviews",
     "src": "resources/js/Pages/Account/Reviews.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_PublicShell-CCbxXqy1.js",
-      "_kit-Bfc-iQhj.js"
+      "_PublicShell-CiHiLRIe.js",
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Account/Rewards.jsx": {
-    "file": "assets/Rewards-Byn9Yv-A.js",
+    "file": "assets/Rewards-MofufQta.js",
     "name": "Rewards",
     "src": "resources/js/Pages/Account/Rewards.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_PublicShell-CCbxXqy1.js",
+      "_PublicShell-CiHiLRIe.js",
       "resources/js/widgets/ui.jsx"
     ]
   },
   "resources/js/Pages/Account/Tables.jsx": {
-    "file": "assets/Tables-CHdBNU53.js",
+    "file": "assets/Tables-Dk59vWH5.js",
     "name": "Tables",
     "src": "resources/js/Pages/Account/Tables.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_PublicShell-CCbxXqy1.js",
+      "_PublicShell-CiHiLRIe.js",
       "resources/js/Pages/Account/TripCard.jsx",
       "resources/js/widgets/ui.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Account/Trip.jsx": {
-    "file": "assets/Trip-CgX7mSfz.js",
+    "file": "assets/Trip-C5lAZA5t.js",
     "name": "Trip",
     "src": "resources/js/Pages/Account/Trip.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_PublicShell-CCbxXqy1.js",
+      "_PublicShell-CiHiLRIe.js",
       "resources/js/Pages/Account/TripCard.jsx",
       "resources/js/widgets/ui.jsx"
     ]
@@ -235,479 +242,479 @@
     ]
   },
   "resources/js/Pages/Account/Trips.jsx": {
-    "file": "assets/Trips-CWZQVoC-.js",
+    "file": "assets/Trips-DK85t5Q5.js",
     "name": "Trips",
     "src": "resources/js/Pages/Account/Trips.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_PublicShell-CCbxXqy1.js",
+      "_PublicShell-CiHiLRIe.js",
       "resources/js/Pages/Account/TripCard.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Account/WishList.jsx": {
-    "file": "assets/WishList-Bn59r256.js",
+    "file": "assets/WishList-BHyEVJ41.js",
     "name": "WishList",
     "src": "resources/js/Pages/Account/WishList.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_PublicShell-CCbxXqy1.js",
-      "_kit-Bfc-iQhj.js"
+      "_PublicShell-CiHiLRIe.js",
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Accounting/Expenses.jsx": {
-    "file": "assets/Expenses-BetihlMC.js",
+    "file": "assets/Expenses-De2LXKU3.js",
     "name": "Expenses",
     "src": "resources/js/Pages/Accounting/Expenses.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Accounting/Index.jsx": {
-    "file": "assets/Index-M61m_DoJ.js",
+    "file": "assets/Index-DJIERDck.js",
     "name": "Index",
     "src": "resources/js/Pages/Accounting/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Accounting/Invoice.jsx": {
-    "file": "assets/Invoice-hRF_2Wib.js",
+    "file": "assets/Invoice-DclUVBVI.js",
     "name": "Invoice",
     "src": "resources/js/Pages/Accounting/Invoice.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Accounting/Invoices.jsx": {
-    "file": "assets/Invoices-DgTLCvAa.js",
+    "file": "assets/Invoices-CgtaLxZF.js",
     "name": "Invoices",
     "src": "resources/js/Pages/Accounting/Invoices.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Accounting/Journal.jsx": {
-    "file": "assets/Journal-oTV6dYpw.js",
+    "file": "assets/Journal-B6nUxUyB.js",
     "name": "Journal",
     "src": "resources/js/Pages/Accounting/Journal.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Accounting/Payables.jsx": {
-    "file": "assets/Payables-DAu-DT7-.js",
+    "file": "assets/Payables-B57KbBgJ.js",
     "name": "Payables",
     "src": "resources/js/Pages/Accounting/Payables.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Accounting/TrialBalance.jsx": {
-    "file": "assets/TrialBalance-Cye7mGF2.js",
+    "file": "assets/TrialBalance-DM7MBF-H.js",
     "name": "TrialBalance",
     "src": "resources/js/Pages/Accounting/TrialBalance.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Admin/Billing.jsx": {
-    "file": "assets/Billing-B8c0bcOC.js",
+    "file": "assets/Billing-Bg_TJgJ9.js",
     "name": "Billing",
     "src": "resources/js/Pages/Admin/Billing.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Admin/Bookings.jsx": {
-    "file": "assets/Bookings-DWRtknjE.js",
+    "file": "assets/Bookings-DtTqVzhI.js",
     "name": "Bookings",
     "src": "resources/js/Pages/Admin/Bookings.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Admin/Commissions.jsx": {
-    "file": "assets/Commissions-Bobrzv3D.js",
+    "file": "assets/Commissions-BGbYS3QW.js",
     "name": "Commissions",
     "src": "resources/js/Pages/Admin/Commissions.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Admin/Dashboard.jsx": {
-    "file": "assets/Dashboard-BvujnrDJ.js",
+    "file": "assets/Dashboard-D8dlX40C.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Admin/Dashboard.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Admin/Listings.jsx": {
-    "file": "assets/Listings-CeSWR1zX.js",
+    "file": "assets/Listings-DqXylcoT.js",
     "name": "Listings",
     "src": "resources/js/Pages/Admin/Listings.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Admin/Logs.jsx": {
-    "file": "assets/Logs-C_2nayf2.js",
+    "file": "assets/Logs-CuYjAOU0.js",
     "name": "Logs",
     "src": "resources/js/Pages/Admin/Logs.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Admin/Moderation.jsx": {
-    "file": "assets/Moderation-BxeOlzk-.js",
+    "file": "assets/Moderation-BiK6WRHU.js",
     "name": "Moderation",
     "src": "resources/js/Pages/Admin/Moderation.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Admin/Modules/Form.jsx": {
-    "file": "assets/Form-DHWlO4d6.js",
+    "file": "assets/Form-4c_XM2Jm.js",
     "name": "Form",
     "src": "resources/js/Pages/Admin/Modules/Form.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Admin/Modules/Index.jsx": {
-    "file": "assets/Index-Dh2o8Uqv.js",
+    "file": "assets/Index-CASiFK8C.js",
     "name": "Index",
     "src": "resources/js/Pages/Admin/Modules/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Admin/Orders.jsx": {
-    "file": "assets/Orders-CI8ZoQWi.js",
+    "file": "assets/Orders-D0lP2_qg.js",
     "name": "Orders",
     "src": "resources/js/Pages/Admin/Orders.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Admin/Pages/Form.jsx": {
-    "file": "assets/Form-BiCtImNE.js",
+    "file": "assets/Form-CtiLNehT.js",
     "name": "Form",
     "src": "resources/js/Pages/Admin/Pages/Form.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Admin/Pages/Index.jsx": {
-    "file": "assets/Index-DhX4PYne.js",
+    "file": "assets/Index-CfPDQ9Uz.js",
     "name": "Index",
     "src": "resources/js/Pages/Admin/Pages/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Admin/Payments.jsx": {
-    "file": "assets/Payments-CeyMPOy4.js",
+    "file": "assets/Payments-CpCe4oQb.js",
     "name": "Payments",
     "src": "resources/js/Pages/Admin/Payments.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Admin/Payouts.jsx": {
-    "file": "assets/Payouts-Dm1-KQw9.js",
+    "file": "assets/Payouts-wV20Sg6v.js",
     "name": "Payouts",
     "src": "resources/js/Pages/Admin/Payouts.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Admin/Pricing.jsx": {
-    "file": "assets/Pricing-Cbqs2l2H.js",
+    "file": "assets/Pricing-BJ3sRjOO.js",
     "name": "Pricing",
     "src": "resources/js/Pages/Admin/Pricing.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Admin/Reports.jsx": {
-    "file": "assets/Reports-BnMDdltE.js",
+    "file": "assets/Reports-wqhAFunD.js",
     "name": "Reports",
     "src": "resources/js/Pages/Admin/Reports.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Admin/Reviews.jsx": {
-    "file": "assets/Reviews-DFubliEr.js",
+    "file": "assets/Reviews-qvOGQ68P.js",
     "name": "Reviews",
     "src": "resources/js/Pages/Admin/Reviews.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Admin/Settings.jsx": {
-    "file": "assets/Settings-D7Hk0aoE.js",
+    "file": "assets/Settings-dkikAgk-.js",
     "name": "Settings",
     "src": "resources/js/Pages/Admin/Settings.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Admin/Taxonomy.jsx": {
-    "file": "assets/Taxonomy-BFFDrJvt.js",
+    "file": "assets/Taxonomy-C_aI3BYm.js",
     "name": "Taxonomy",
     "src": "resources/js/Pages/Admin/Taxonomy.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Admin/Tenants/Create.jsx": {
-    "file": "assets/Create-PcAMJNuy.js",
+    "file": "assets/Create-qbhWErpP.js",
     "name": "Create",
     "src": "resources/js/Pages/Admin/Tenants/Create.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Admin/Tenants/Index.jsx": {
-    "file": "assets/Index-CDV1g5I8.js",
+    "file": "assets/Index-BaFXP3rc.js",
     "name": "Index",
     "src": "resources/js/Pages/Admin/Tenants/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Admin/Tenants/Modules.jsx": {
-    "file": "assets/Modules-C_NHPytI.js",
+    "file": "assets/Modules-8_VRIQAs.js",
     "name": "Modules",
     "src": "resources/js/Pages/Admin/Tenants/Modules.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Admin/Tenants/Show.jsx": {
-    "file": "assets/Show-DYrpdgKW.js",
+    "file": "assets/Show-Df1Qw8P-.js",
     "name": "Show",
     "src": "resources/js/Pages/Admin/Tenants/Show.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Admin/Users.jsx": {
-    "file": "assets/Users-CdyEXCdr.js",
+    "file": "assets/Users-Vkx9l8J1.js",
     "name": "Users",
     "src": "resources/js/Pages/Admin/Users.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Billing/Index.jsx": {
-    "file": "assets/Index-DWBvLH-7.js",
+    "file": "assets/Index-B3BJ4Ko3.js",
     "name": "Index",
     "src": "resources/js/Pages/Billing/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Billing/Invoice.jsx": {
-    "file": "assets/Invoice-k5TljfFC.js",
+    "file": "assets/Invoice-SKLZZDc9.js",
     "name": "Invoice",
     "src": "resources/js/Pages/Billing/Invoice.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Bookings/Create.jsx": {
-    "file": "assets/Create-4Q8fMgfM.js",
+    "file": "assets/Create-ByvxlxTe.js",
     "name": "Create",
     "src": "resources/js/Pages/Bookings/Create.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Bookings/Index.jsx": {
-    "file": "assets/Index-DuNyoZWD.js",
+    "file": "assets/Index-DrkXy58U.js",
     "name": "Index",
     "src": "resources/js/Pages/Bookings/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Bookings/Promotions.jsx": {
-    "file": "assets/Promotions-D3N-fXPE.js",
+    "file": "assets/Promotions-BMAAwnHc.js",
     "name": "Promotions",
     "src": "resources/js/Pages/Bookings/Promotions.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Bookings/Show.jsx": {
-    "file": "assets/Show-CDkOotUO.js",
+    "file": "assets/Show-CDJuY4KI.js",
     "name": "Show",
     "src": "resources/js/Pages/Bookings/Show.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Businesses/Index.jsx": {
-    "file": "assets/Index-BilUl2sd.js",
+    "file": "assets/Index-CUPbCC0p.js",
     "name": "Index",
     "src": "resources/js/Pages/Businesses/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Crm/Index.jsx": {
-    "file": "assets/Index-B0uxroZP.js",
+    "file": "assets/Index-Cd-FtDNp.js",
     "name": "Index",
     "src": "resources/js/Pages/Crm/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Crm/Show.jsx": {
-    "file": "assets/Show-BALfQIXh.js",
+    "file": "assets/Show-BNrJruqM.js",
     "name": "Show",
     "src": "resources/js/Pages/Crm/Show.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Folio/Show.jsx": {
-    "file": "assets/Show-uwK3Wrce.js",
+    "file": "assets/Show-BQFbml6v.js",
     "name": "Show",
     "src": "resources/js/Pages/Folio/Show.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/FrontDesk/Index.jsx": {
-    "file": "assets/Index-D9go7GHF.js",
+    "file": "assets/Index-B4xz73G6.js",
     "name": "Index",
     "src": "resources/js/Pages/FrontDesk/Index.jsx",
     "isDynamicEntry": true,
@@ -717,7 +724,7 @@
     ]
   },
   "resources/js/Pages/Housekeeping/Index.jsx": {
-    "file": "assets/Index-BNrWO02Y.js",
+    "file": "assets/Index-CQvoapZP.js",
     "name": "Index",
     "src": "resources/js/Pages/Housekeeping/Index.jsx",
     "isDynamicEntry": true,
@@ -727,173 +734,173 @@
     ]
   },
   "resources/js/Pages/Inventory/Index.jsx": {
-    "file": "assets/Index-BI1XslIE.js",
+    "file": "assets/Index-BPD9tbId.js",
     "name": "Index",
     "src": "resources/js/Pages/Inventory/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Inventory/Item.jsx": {
-    "file": "assets/Item-BqmpVGPf.js",
+    "file": "assets/Item-D8u5lgBw.js",
     "name": "Item",
     "src": "resources/js/Pages/Inventory/Item.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Inventory/PurchaseOrder.jsx": {
-    "file": "assets/PurchaseOrder-BCVgnPSx.js",
+    "file": "assets/PurchaseOrder-CDQPJT6L.js",
     "name": "PurchaseOrder",
     "src": "resources/js/Pages/Inventory/PurchaseOrder.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Inventory/PurchaseOrders.jsx": {
-    "file": "assets/PurchaseOrders-B0QESmEq.js",
+    "file": "assets/PurchaseOrders-Jz0zEgcN.js",
     "name": "PurchaseOrders",
     "src": "resources/js/Pages/Inventory/PurchaseOrders.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Inventory/Recipes.jsx": {
-    "file": "assets/Recipes-BEOQn-X3.js",
+    "file": "assets/Recipes-31rI9Z-I.js",
     "name": "Recipes",
     "src": "resources/js/Pages/Inventory/Recipes.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Loyalty/Index.jsx": {
-    "file": "assets/Index-Dfq0V8Hw.js",
+    "file": "assets/Index-CGb676RH.js",
     "name": "Index",
     "src": "resources/js/Pages/Loyalty/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Loyalty/Member.jsx": {
-    "file": "assets/Member-nZ10KXkx.js",
+    "file": "assets/Member-C8vdT93V.js",
     "name": "Member",
     "src": "resources/js/Pages/Loyalty/Member.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Maintenance/Index.jsx": {
-    "file": "assets/Index-CDcx8CxD.js",
+    "file": "assets/Index-BrpPNnrx.js",
     "name": "Index",
     "src": "resources/js/Pages/Maintenance/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Maintenance/Show.jsx": {
-    "file": "assets/Show-ByJivoWj.js",
+    "file": "assets/Show-CbYLWkWh.js",
     "name": "Show",
     "src": "resources/js/Pages/Maintenance/Show.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Marketing/Campaign.jsx": {
-    "file": "assets/Campaign-C7KDa-qv.js",
+    "file": "assets/Campaign-C5L1gjXp.js",
     "name": "Campaign",
     "src": "resources/js/Pages/Marketing/Campaign.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Marketing/Index.jsx": {
-    "file": "assets/Index-CssQWeUh.js",
+    "file": "assets/Index-B8CXEWJv.js",
     "name": "Index",
     "src": "resources/js/Pages/Marketing/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Messages/Index.jsx": {
-    "file": "assets/Index-Dwat-g7g.js",
+    "file": "assets/Index-DK8dmPwZ.js",
     "name": "Index",
     "src": "resources/js/Pages/Messages/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/MyWork/Index.jsx": {
-    "file": "assets/Index-CMG8zzyG.js",
+    "file": "assets/Index-DHn7BWcl.js",
     "name": "Index",
     "src": "resources/js/Pages/MyWork/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Notifications/Index.jsx": {
-    "file": "assets/Index-RIKWSWri.js",
+    "file": "assets/Index-BxRX1leu.js",
     "name": "Index",
     "src": "resources/js/Pages/Notifications/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Order/Checkout.jsx": {
-    "file": "assets/Checkout-493Kq3a6.js",
+    "file": "assets/Checkout-DmLrxmS9.js",
     "name": "Checkout",
     "src": "resources/js/Pages/Order/Checkout.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_PublicShell-CCbxXqy1.js",
+      "_PublicShell-CiHiLRIe.js",
       "resources/js/widgets/ui.jsx"
     ]
   },
   "resources/js/Pages/Overview/Index.jsx": {
-    "file": "assets/Index-C4uIOXjr.js",
+    "file": "assets/Index-DGcfoOvP.js",
     "name": "Index",
     "src": "resources/js/Pages/Overview/Index.jsx",
     "isDynamicEntry": true,
@@ -903,63 +910,63 @@
     ]
   },
   "resources/js/Pages/Properties/Form.jsx": {
-    "file": "assets/Form-Bhr-ldDc.js",
+    "file": "assets/Form-DStZl6VE.js",
     "name": "Form",
     "src": "resources/js/Pages/Properties/Form.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js",
-      "_media-vCYy7W6F.js"
+      "_kit-BFC5OMgU.js",
+      "_media-DrpOcJW3.js"
     ]
   },
   "resources/js/Pages/Properties/Index.jsx": {
-    "file": "assets/Index-BVXvcGcJ.js",
+    "file": "assets/Index-LE8VKdGk.js",
     "name": "Index",
     "src": "resources/js/Pages/Properties/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Properties/Inventory.jsx": {
-    "file": "assets/Inventory-CJTMWL20.js",
+    "file": "assets/Inventory-DZH9pi5e.js",
     "name": "Inventory",
     "src": "resources/js/Pages/Properties/Inventory.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js",
-      "_media-vCYy7W6F.js"
+      "_kit-BFC5OMgU.js",
+      "_media-DrpOcJW3.js"
     ]
   },
   "resources/js/Pages/Properties/Show.jsx": {
-    "file": "assets/Show-CN1TB-x1.js",
+    "file": "assets/Show-COgYDofs.js",
     "name": "Show",
     "src": "resources/js/Pages/Properties/Show.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Properties/Staff.jsx": {
-    "file": "assets/Staff-irJy60eS.js",
+    "file": "assets/Staff-CYJ4deZU.js",
     "name": "Staff",
     "src": "resources/js/Pages/Properties/Staff.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/RestaurantFloor/Index.jsx": {
-    "file": "assets/Index-DygUJ7Al.js",
+    "file": "assets/Index-DmtlIw6f.js",
     "name": "Index",
     "src": "resources/js/Pages/RestaurantFloor/Index.jsx",
     "isDynamicEntry": true,
@@ -969,242 +976,246 @@
     ]
   },
   "resources/js/Pages/RestaurantFloor/ZReport.jsx": {
-    "file": "assets/ZReport-BhwUhyAU.js",
+    "file": "assets/ZReport-Ci0mkJZf.js",
     "name": "ZReport",
     "src": "resources/js/Pages/RestaurantFloor/ZReport.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Restaurants/Delivery.jsx": {
-    "file": "assets/Delivery-D2_3Ap9u.js",
+    "file": "assets/Delivery-ysohA029.js",
     "name": "Delivery",
     "src": "resources/js/Pages/Restaurants/Delivery.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Restaurants/Form.jsx": {
-    "file": "assets/Form-tRt1mZq4.js",
+    "file": "assets/Form-6riEE9D6.js",
     "name": "Form",
     "src": "resources/js/Pages/Restaurants/Form.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js",
-      "_media-vCYy7W6F.js"
+      "_kit-BFC5OMgU.js",
+      "_media-DrpOcJW3.js"
     ]
   },
   "resources/js/Pages/Restaurants/Index.jsx": {
-    "file": "assets/Index-DPwaibtp.js",
+    "file": "assets/Index-B0pX0XWo.js",
     "name": "Index",
     "src": "resources/js/Pages/Restaurants/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Restaurants/Menu.jsx": {
-    "file": "assets/Menu-LYnU52Sr.js",
+    "file": "assets/Menu-C5xCkKSZ.js",
     "name": "Menu",
     "src": "resources/js/Pages/Restaurants/Menu.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js",
-      "_media-vCYy7W6F.js"
+      "_kit-BFC5OMgU.js",
+      "_media-DrpOcJW3.js"
     ]
   },
   "resources/js/Pages/Restaurants/Order.jsx": {
-    "file": "assets/Order-CZ7zz6Ca.js",
+    "file": "assets/Order-DdQ2XTej.js",
     "name": "Order",
     "src": "resources/js/Pages/Restaurants/Order.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Restaurants/Orders.jsx": {
-    "file": "assets/Orders-DS453NB6.js",
+    "file": "assets/Orders-D7yMrHqx.js",
     "name": "Orders",
     "src": "resources/js/Pages/Restaurants/Orders.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Restaurants/Reservations.jsx": {
-    "file": "assets/Reservations-BcS0QS8s.js",
+    "file": "assets/Reservations-D-tZlt-_.js",
     "name": "Reservations",
     "src": "resources/js/Pages/Restaurants/Reservations.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Restaurants/Show.jsx": {
-    "file": "assets/Show-CBaZOuVm.js",
+    "file": "assets/Show-K9kgUEeO.js",
     "name": "Show",
     "src": "resources/js/Pages/Restaurants/Show.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Restaurants/Tables.jsx": {
-    "file": "assets/Tables-BumP0YXH.js",
+    "file": "assets/Tables-Bl2jKkbX.js",
     "name": "Tables",
     "src": "resources/js/Pages/Restaurants/Tables.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Reviews/Index.jsx": {
-    "file": "assets/Index-BgzhVAFe.js",
+    "file": "assets/Index-CT8FEzWY.js",
     "name": "Index",
     "src": "resources/js/Pages/Reviews/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Settings/Index.jsx": {
-    "file": "assets/Index-CXMgSex5.js",
+    "file": "assets/Index-CqVkplDg.js",
     "name": "Index",
     "src": "resources/js/Pages/Settings/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Staff/Attendance.jsx": {
-    "file": "assets/Attendance-CBtQb9s2.js",
+    "file": "assets/Attendance-DjikkgVx.js",
     "name": "Attendance",
     "src": "resources/js/Pages/Staff/Attendance.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Staff/Index.jsx": {
-    "file": "assets/Index-0hCopO3O.js",
+    "file": "assets/Index-Cbcu1Fg4.js",
     "name": "Index",
     "src": "resources/js/Pages/Staff/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Staff/Leave.jsx": {
-    "file": "assets/Leave-YzM8h-F1.js",
+    "file": "assets/Leave-BKjTQD6u.js",
     "name": "Leave",
     "src": "resources/js/Pages/Staff/Leave.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Staff/Schedule.jsx": {
-    "file": "assets/Schedule-7XGMgsUy.js",
+    "file": "assets/Schedule-LFM4MF1W.js",
     "name": "Schedule",
     "src": "resources/js/Pages/Staff/Schedule.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Staff/Show.jsx": {
-    "file": "assets/Show-Ln1O6gki.js",
+    "file": "assets/Show-D00IAoyv.js",
     "name": "Show",
     "src": "resources/js/Pages/Staff/Show.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js",
+      "_kit-BFC5OMgU.js",
       "resources/js/Pages/Staff/Index.jsx"
     ]
   },
   "resources/js/Pages/Stay/Review.jsx": {
-    "file": "assets/Review-BI9zEPWi.js",
+    "file": "assets/Review-CqzSDQE9.js",
     "name": "Review",
     "src": "resources/js/Pages/Stay/Review.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_PublicShell-CCbxXqy1.js",
+      "_PublicShell-CiHiLRIe.js",
       "resources/js/widgets/ui.jsx"
     ]
   },
   "resources/js/Pages/Team/Index.jsx": {
-    "file": "assets/Index-BazrZDsF.js",
+    "file": "assets/Index-Db2dGIAs.js",
     "name": "Index",
     "src": "resources/js/Pages/Team/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/Pages/Wallet/Index.jsx": {
-    "file": "assets/Index-D22zb_dh.js",
+    "file": "assets/Index-BL0Hi5bb.js",
     "name": "Index",
     "src": "resources/js/Pages/Wallet/Index.jsx",
     "isDynamicEntry": true,
     "imports": [
       "_jsx-runtime-B7K_IRuH.js",
       "resources/js/react/app.jsx",
-      "_kit-Bfc-iQhj.js"
+      "_kit-BFC5OMgU.js"
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-qVfKvd79.js",
+    "file": "assets/app-CaPJNHj9.js",
     "name": "app",
     "src": "resources/js/app.js",
-    "isEntry": true
+    "isEntry": true,
+    "imports": [
+      "_reveal-BC9uaFEe.js"
+    ]
   },
   "resources/js/react/app.jsx": {
-    "file": "assets/app-gNozW7kH.js",
+    "file": "assets/app-BcbPLQhf.js",
     "name": "app",
     "src": "resources/js/react/app.jsx",
     "isEntry": true,
     "imports": [
-      "_jsx-runtime-B7K_IRuH.js"
+      "_jsx-runtime-B7K_IRuH.js",
+      "_reveal-BC9uaFEe.js"
     ],
     "dynamicImports": [
       "resources/js/Pages/Account/Home.jsx",
@@ -1308,9 +1319,6 @@
       "resources/js/Pages/Stay/Review.jsx",
       "resources/js/Pages/Team/Index.jsx",
       "resources/js/Pages/Wallet/Index.jsx"
-    ],
-    "assets": [
-      "assets/logo-CymcAhlG.svg"
     ]
   },
   "resources/js/widgets.jsx": {

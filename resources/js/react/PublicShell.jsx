@@ -1,6 +1,6 @@
-import logo from '../../images/logo.svg';
 import { usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
+import { BrandMark } from './ui';
 
 /**
  * Shell for guest-facing React pages (stay review, checkout, account):
@@ -24,7 +24,7 @@ export default function PublicShell({ children }) {
         <div className="min-h-dvh bg-canvas text-fg">
             <header className="sticky top-0 z-30 border-b border-line bg-surface/95 backdrop-blur">
                 <div className="mx-auto flex h-16 max-w-6xl items-center gap-6 px-5 sm:px-10">
-                    <a href={app.home} className="flex items-center gap-2.5 font-display text-[17px] font-medium tracking-tight"><img className="brand-logo" src={logo} width="36" height="36" alt="" aria-hidden="true" style={{ borderRadius: 9999, border: '2px solid #c9a13b', padding: 3, boxSizing: 'border-box' }} />{app.name}</a>
+                    <a href={app.home} className="flex items-center gap-2.5 font-display text-[17px] font-medium tracking-tight"><BrandMark src={app.logo} size={44} />{app.name}</a>
                     <nav aria-label="Site" className="hidden items-center gap-5 sm:flex">
                         {nav.map(([label, href]) => <a key={label} href={href} className="text-[14px] text-fg-2 transition-colors duration-150 hover:text-fg">{label}</a>)}
                     </nav>

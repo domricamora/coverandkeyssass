@@ -1,7 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { Icon, cx } from './ui';
-import logo from '../../images/logo.svg';
+import { BrandMark, Icon, cx } from './ui';
 
 /**
  * Full-screen dashboard shell: fixed sidebar rail (drawer under lg), slim
@@ -28,7 +27,7 @@ export default function Shell({ children }) {
                 style={{ transitionTimingFunction: 'var(--ease-out)' }}
             >
                 <a href={props.app.home} className="flex h-14 shrink-0 items-center gap-2.5 border-b border-line px-5">
-                    <Mark />
+                    <BrandMark src={props.app.logo} size={42} />
                     <span className="font-display text-[15px] font-medium tracking-tight">{props.app.name}</span>
                 </a>
                 {props.business && (
@@ -90,7 +89,7 @@ function NavLink({ item }) {
 
     // Inertia screens swap in place; the Blade screens get a normal page load.
     return item.spa ? (
-        <Link href={item.href} className={className} aria-current={item.active ? 'page' : undefined}>{body}</Link>
+        <Link href={item.href} prefetch cacheFor="30s" className={className} aria-current={item.active ? 'page' : undefined}>{body}</Link>
     ) : (
         <a href={item.href} className={className} aria-current={item.active ? 'page' : undefined}>{body}</a>
     );
@@ -171,10 +170,4 @@ function Toasts() {
             ))}
         </div>
     );
-}
-
-const LOGO_RING = { borderRadius: 9999, border: '2px solid #c9a13b', padding: 3, boxSizing: 'border-box' };
-
-function Mark() {
-    return <img className="brand-logo" src={logo} width="32" height="32" alt="" aria-hidden="true" style={LOGO_RING} />;
 }

@@ -22,7 +22,7 @@ class HandleInertiaRequests extends Middleware
 
         return [
             ...parent::share($request),
-            'app' => ['name' => config('app.name'), 'home' => route('home'), 'stays' => route('marketplace.home'), 'restaurants' => route('marketplace.restaurants.index'), 'login' => route('login')],
+            'app' => ['name' => config('app.name'), 'logo' => asset('img/brand/logo.svg'), 'home' => route('home'), 'stays' => route('marketplace.home'), 'restaurants' => route('marketplace.restaurants.index'), 'login' => route('login')],
             'guestUrls' => fn () => $user ? null : ['identify' => route('guest.identify'), 'password' => route('guest.password'), 'link' => route('login.link.send')],
             'auth' => $user ? [
                 'name' => $user->name,

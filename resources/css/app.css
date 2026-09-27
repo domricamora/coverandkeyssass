@@ -998,7 +998,7 @@ h1, h2, .stat__value, .plan__price, .stat-band dd {
     --radius-lg: 0;
 }
 
-*:not(.avatar):not(.checklist__mark):not(.brand-logo),
+*:not(.avatar):not(.checklist__mark):not(.brand-logo):not(.brand-plate),
 *::before,
 *::after {
     border-radius: 0 !important;
@@ -1758,19 +1758,7 @@ body.admin-body {
 .public-body .filter-bar__field:first-of-type .filter-bar__input,
 .public-body .filter-bar__field:first-of-type .filter-bar__label { padding-left: 0 !important; margin-left: 0 !important; }
 
-/* ---- Motion (quiet by design): one page-enter moment, dialogs that open from
-   near their final state, nothing looping. Reduced motion keeps fades only. ---- */
-@keyframes ck-page-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-@keyframes ck-fade-in { from { opacity: 0; } to { opacity: 1; } }
-@keyframes ck-dialog-in { from { opacity: 0; transform: translateY(8px) scale(0.985); } to { opacity: 1; transform: none; } }
-
-.page-in { animation: ck-page-in 260ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)) both; }
-dialog[open] { animation: ck-dialog-in 220ms var(--ease-out, cubic-bezier(0.23, 1, 0.32, 1)) both; }
-dialog[open]::backdrop { animation: ck-fade-in 200ms ease-out both; }
-
-@media (prefers-reduced-motion: reduce) {
-    .page-in, dialog[open] { animation: ck-fade-in 120ms ease-out both; }
-}
+/* Page enter, dialogs, menus, section reveal and the brand plate: resources/css/motion.css. */
 
 /* Sticky filter bar sits under the header (70) so the account menu opens over it. */
 

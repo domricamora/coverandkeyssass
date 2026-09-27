@@ -1,5 +1,14 @@
 # CHANGELOG.md
 
+## 2026-09-27 — Platform admin on React, brand plate, motion and preloading
+
+- **Platform admin (`/admin/*`) is all React** (26 screens in `resources/js/Pages/Admin`): overview, users, businesses (create, detail with host verification, modules), module catalogue, listings (approve / suspend / send back, placement), bookings, food orders, payments with refunds, subscriptions and invoices, coupons, pricing, commissions, payouts, reviews, reported content, categories & locations, CMS pages, settings, CSV reports, audit log, support inbox (reuses `Messages/Index`). Own grouped sidebar: `DashboardNav::admin()`. Every admin Blade view was removed.
+- **Brand plate:** the gold-rimmed spoon-and-key mark now rests on a dark teal plate (lit rim, recessed well) everywhere: `BrandMark` (React) and `<x-brand-mark>` (Blade), styles in `resources/css/motion.css`. The logo SVG was cropped tighter so the spoon and key read at header size. Fix: the React shells imported the logo through Vite, which gave it a `/build/...` URL that 404s under a sub-folder install; they now use the shared `app.logo` (an `asset()` URL).
+- **Motion** (`resources/css/motion.css`, `resources/js/reveal.js`): a rise + un-blur page enter (320 ms, strong ease-out), native cross-document view transitions on Blade page loads, and sections below the fold fade up once as they scroll in (children of `[data-stagger]` cascade 60 ms apart). Reduced motion keeps fades only.
+- **Optimistic preloading:** React links (sidebar, tabs, row links, back links, pagination) prefetch on hover (`prefetch cacheFor="30s"`); Blade pages use the Speculation Rules API (moderate eagerness), excluding links whose GET changes state (sign-out, sign-in links, unsubscribe, verification, payment returns, CSV).
+- **Preloaders:** a lagoon-to-coral top bar while a page loads (Inertia progress bar restyled; the same bar on Blade navigations after 150 ms), and a spinner in form buttons while they submit.
+- `App\Support\Currency` (symbol helper) added; used by the commissions and payouts screens.
+
 ## 2026-09-27 — cPanel deploy path hardened and documented
 
 - `.cpanel.yml` recreates `storage/app/public`, the framework cache directories, `storage/logs` and `bootstrap/cache` and fixes their permissions before artisan runs. rsync skips `storage/app/public`, so a fresh target had no upload directory and `storage:link` failed silently. The deploy now also stops with a visible failure when `.env` is missing, and prints the target path.

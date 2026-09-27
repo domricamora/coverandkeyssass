@@ -13,7 +13,7 @@ export function Page({ title, eyebrow, subtitle, actions, back, children }) {
             <Head title={title} />
             <header className="flex flex-wrap items-end gap-x-6 gap-y-4">
                 <div className="min-w-0 basis-full md:basis-0 md:flex-1">
-                    {back && <Link href={back.href} className="mb-2 inline-block text-[12px] text-fg-3 hover:text-fg">← {back.label}</Link>}
+                    {back && <Link href={back.href} prefetch cacheFor="30s" className="mb-2 inline-block text-[12px] text-fg-3 hover:text-fg">← {back.label}</Link>}
                     {eyebrow && <p className="text-[12px] font-medium uppercase tracking-[0.1em] text-coral-deep">{eyebrow}</p>}
                     <h1 className="mt-1 font-display text-[28px] font-medium tracking-tight text-fg">{title}</h1>
                     {subtitle && <p className="mt-1 text-[13px] text-fg-3">{subtitle}</p>}
@@ -45,7 +45,7 @@ export function Tabs({ tabs }) {
     return (
         <nav className="-mt-2 flex gap-1 overflow-x-auto border-b border-line" aria-label="Sections">
             {tabs.map((t) => (
-                <Link
+                <Link prefetch cacheFor="30s"
                     key={t.href}
                     href={t.href}
                     aria-current={t.active ? 'page' : undefined}
@@ -97,7 +97,7 @@ export const Td = ({ children, right, muted, className, ...rest }) => (
 /** Primary cell: linked title + muted second line. */
 export const Main = ({ href, title, sub }) => (
     <>
-        {href ? <Link href={href} className="font-medium text-fg hover:text-brand">{title}</Link> : <span className="font-medium text-fg">{title}</span>}
+        {href ? <Link href={href} prefetch cacheFor="30s" className="font-medium text-fg hover:text-brand">{title}</Link> : <span className="font-medium text-fg">{title}</span>}
         {sub && <span className="mt-0.5 block text-[12px] text-fg-3">{sub}</span>}
     </>
 );
@@ -108,7 +108,7 @@ export function Pager({ page }) {
     return (
         <nav className="flex flex-wrap items-center gap-1 border-t border-line px-5 py-3" aria-label="Pages">
             {page.links.map((l, i) => (
-                <Link
+                <Link prefetch cacheFor="30s"
                     key={i}
                     href={l.url ?? '#'}
                     preserveScroll
@@ -302,7 +302,9 @@ export function Form({ form, url, method, reset, button = 'Save', className, chi
     return (
         <form onSubmit={submit(form, url, { method, reset })} className={cx('space-y-4', className)}>
             {children}
-            <button type="submit" className={danger ? 'btn-danger' : 'btn-primary'} disabled={form.processing}>{button}</button>
+            <button type="submit" className={danger ? 'btn-danger' : 'btn-primary'} disabled={form.processing} aria-busy={form.processing}>
+                {form.processing && <span className="spinner" aria-hidden="true" />}{button}
+            </button>
         </form>
     );
 }

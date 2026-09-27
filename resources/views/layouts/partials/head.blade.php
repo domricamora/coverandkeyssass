@@ -9,3 +9,20 @@
 <link rel="stylesheet" href="{{ asset('css/bnb-components.css') }}?v=1">
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 <style>[x-cloak]{display:none!important}</style>
+{{-- Optimistic preloading: the browser fetches a same-origin page while the pointer rests on its link (Chrome/Edge; others ignore this).
+     Never links whose GET changes state: sign-out, sign-in links, unsubscribe, verification, payment returns, CSV exports. --}}
+<script type="speculationrules">
+{"prefetch": [{"where": {"and": [
+    {"href_matches": "/*"},
+    {"not": {"href_matches": "/*\\?*"}},
+    {"not": {"href_matches": "*/logout*"}},
+    {"not": {"href_matches": "*/login-link/*"}},
+    {"not": {"href_matches": "*/unsubscribe/*"}},
+    {"not": {"href_matches": "*/verify-email*"}},
+    {"not": {"href_matches": "*/continue*"}},
+    {"not": {"href_matches": "*/payment-return*"}},
+    {"not": {"href_matches": "*/return"}},
+    {"not": {"href_matches": "*.csv*"}},
+    {"not": {"selector_matches": "[rel~=nofollow], [download], [data-no-prefetch]"}}
+]}, "eagerness": "moderate"}]}
+</script>

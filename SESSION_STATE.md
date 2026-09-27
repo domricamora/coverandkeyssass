@@ -36,9 +36,7 @@
 **Platform admin (`/admin/*`) → React: DONE (2026-09-27).** All 26 screens are Inertia pages in `resources/js/Pages/Admin/*` (support reuses `Messages/Index` with title props); every admin Blade view deleted; full suite 344 passing. `App\Support\Currency` added (symbol helper, used by commissions/payouts). Owner's local Super Admin: nick.weconnect@gmail.com (password given by the owner in chat; not stored in the repo).
 
 **Owner queue (in order), added 2026-09-27:**
-1. Logo not showing on admin/dashboard shell (check the `logo.svg` import URL when built without ASSET_URL).
-2. Logo as a "plate": dark teal circle behind the gold ring + spoon/key mark, overlapping like a plate.
-3. Better page transition + section entrance animation on all pages (respect reduced motion).
+1-3. DONE: logo fix + brand plate, motion (page enter, view transitions, section reveal), optimistic preloading (Inertia prefetch + Speculation Rules) and preloaders (top bar, button spinner). See CHANGELOG.
 4. Currency symbol: platform default in admin Settings (`Setting::KEYS.currency_symbol`), per-business override in Business settings (`tenants.settings.currency_symbol`); show the symbol (₱), never "PHP" — sweep React `money()` (share the symbol as an Inertia prop) and PHP `money()` helpers + Blade.
 5. Then deploy (below).
 

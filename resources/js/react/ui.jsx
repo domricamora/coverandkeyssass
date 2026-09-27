@@ -11,6 +11,13 @@ export function Icon({ d, className = 'h-[18px] w-[18px]' }) {
 
 export const cx = (...classes) => classes.filter(Boolean).join(' ');
 
+/** The gold-rimmed logo on its teal plate (styles in css/motion.css). src = shared `app.logo` (an asset() URL, so it works under any base path). */
+export const BrandMark = ({ src, size = 36 }) => (
+    <span className="brand-plate" style={{ width: size, height: size }} aria-hidden="true">
+        <img className="brand-logo" src={src} alt="" width={size} height={size} />
+    </span>
+);
+
 export function money(amount, currency = 'PHP') {
     try {
         return new Intl.NumberFormat('en-PH', { style: 'currency', currency }).format(amount ?? 0);

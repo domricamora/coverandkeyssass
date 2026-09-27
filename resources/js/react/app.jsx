@@ -1,6 +1,11 @@
-import { createInertiaApp } from '@inertiajs/react';
+import '../../css/motion.css';
+import { createInertiaApp, router } from '@inertiajs/react';
 import { createRoot } from 'react-dom/client';
+import { reveal } from '../reveal';
 import Shell from './Shell';
+
+// New screens and pages of results: reveal their below-the-fold sections once rendered.
+router.on('navigate', () => requestAnimationFrame(() => reveal()));
 
 const pages = import.meta.glob('../Pages/**/*.jsx');
 
