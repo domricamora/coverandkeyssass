@@ -102,11 +102,22 @@ class MarketplaceAdminController extends Controller
     {
         [$model, $label] = self::TAXONOMY[$type] ?? abort(404);
 
-        return view('platform-admin::taxonomy', [
+        return \Inertia\Inertia::render('Admin/Taxonomy', [
             'type' => $type,
             'label' => $label,
-            'types' => collect(self::TAXONOMY)->map(fn ($t) => $t[1]),
-            'items' => $model::query()->orderBy('sort_order')->orderBy('name')->get(),
+            'tabs' => collect(self::TAXONOMY)->map(fn ($t, $key) => ['label' => $t[1], 'href' => route('admin.taxonomy.index', $key), 'active' => $key === $type])->values(),
+            'items' => $model::query()->orderBy('sort_order')->orderBy('name')->get()->map(fn ($i) => [
+                'id' => $i->id,
+                'name' => $i->name,
+                'slug' => $i->slug,
+                'region' => $i->region ?? '',
+                'category' => $i->category ?? '',
+                'sort_order' => (int) $i->sort_order,
+                'flag' => (bool) ($type === 'locations' ? $i->is_featured : $i->is_active),
+                'update' => route('admin.taxonomy.update', [$type, $i->id]),
+                'destroy' => route('admin.taxonomy.destroy', [$type, $i->id]),
+            ]),
+            'urls' => ['store' => route('admin.taxonomy.store', $type)],
         ]);
     }
 
@@ -168,9 +179,22 @@ class MarketplaceAdminController extends Controller
     {
         $status = in_array($request->query('status'), ['open', 'resolved', 'dismissed'], true) ? $request->query('status') : 'open';
 
-        return view('platform-admin::moderation', [
+        return \Inertia\Inertia::render('Admin/Moderation', [
             'status' => $status,
-            'reports' => ContentReport::query()->with(['reportable', 'user:id,name,email'])->where('status', $status)->latest('id')->paginate(30)->withQueryString(),
+            'reports' => ContentReport::query()->with(['reportable', 'user:id,name,email'])->where('status', $status)->latest('id')->paginate(30)->withQueryString()->through(fn (ContentReport $r) => [
+                'id' => $r->id,
+                'listing' => $r->reportable?->name,
+                'kind' => class_basename((string) $r->reportable_type),
+                'listingStatus' => $r->reportable?->status,
+                'reason' => ContentReport::REASONS[$r->reason] ?? $r->reason,
+                'details' => $r->details,
+                'by' => $r->user?->name,
+                'when' => $r->created_at->diffForHumans(),
+                'status' => $r->status,
+                'outcome' => trim(ucfirst($r->status).' '.$r->resolved_at?->format('M j').($r->resolution_note ? ' · '.$r->resolution_note : '')),
+                'resolve' => route('admin.moderation.resolve', $r),
+            ]),
+            'urls' => ['reviews' => route('admin.reviews.index', ['flagged' => 1])],
             'flaggedReviews' => \App\Modules\Marketplace\Models\Review::query()->withoutGlobalScope('tenant')->whereNotNull('flagged_at')->whereNull('moderated_by')->count(),
         ]);
     }

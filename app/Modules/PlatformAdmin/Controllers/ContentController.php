@@ -17,12 +17,32 @@ class ContentController extends Controller
 
     public function pages()
     {
-        return view('platform-admin::pages.index', ['pages' => Page::query()->orderBy('title')->get()]);
+        return \Inertia\Inertia::render('Admin/Pages/Index', [
+            'pages' => Page::query()->orderBy('title')->get()->map(fn (Page $p) => [
+                'id' => $p->id,
+                'title' => $p->title,
+                'slug' => $p->slug,
+                'published' => (bool) $p->is_published,
+                'footer' => (bool) $p->in_footer,
+                'updated' => $p->updated_at?->format('M j, Y'),
+                'view' => route('pages.show', $p->slug),
+                'edit' => route('admin.pages.edit', $p),
+                'destroy' => route('admin.pages.destroy', $p),
+            ]),
+            'urls' => ['create' => route('admin.pages.create')],
+        ]);
     }
 
     public function editPage(?Page $page = null)
     {
-        return view('platform-admin::pages.form', ['page' => $page ?? new Page]);
+        return \Inertia\Inertia::render('Admin/Pages/Form', [
+            'page' => $page ? $page->only(['title', 'slug', 'meta_description', 'body']) + ['is_published' => (bool) $page->is_published, 'in_footer' => (bool) $page->in_footer] : null,
+            'urls' => [
+                'save' => $page ? route('admin.pages.update', $page) : route('admin.pages.store'),
+                'back' => route('admin.pages.index'),
+                'view' => $page ? route('pages.show', $page->slug) : null,
+            ],
+        ]);
     }
 
     public function savePage(Request $request, ?Page $page = null)
@@ -53,8 +73,16 @@ class ContentController extends Controller
 
     public function pricing()
     {
-        return view('platform-admin::pricing', [
-            'plans' => ModulePlan::query()->with('module')->get()->sortBy(fn ($p) => [$p->module->sort_order, $p->billing_interval])->values(),
+        return \Inertia\Inertia::render('Admin/Pricing', [
+            'plans' => ModulePlan::query()->with('module')->get()->sortBy(fn ($p) => [$p->module->sort_order, $p->billing_interval])->values()->map(fn (ModulePlan $p) => [
+                'id' => $p->id,
+                'module' => $p->module->name,
+                'name' => $p->name,
+                'price' => number_format($p->price_cents / 100, 2, '.', ''),
+                'is_active' => (bool) $p->is_active,
+                'limits' => $p->limits ? collect($p->limits)->map(fn ($v, $k) => str_replace('_', ' ', $k).': '.$v)->implode(', ') : null,
+            ]),
+            'urls' => ['save' => route('admin.pricing.update')],
         ]);
     }
 
@@ -83,7 +111,10 @@ class ContentController extends Controller
 
     public function settings()
     {
-        return view('platform-admin::settings', ['values' => collect(Setting::KEYS)->map(fn ($meta, $key) => Setting::get($key))]);
+        return \Inertia\Inertia::render('Admin/Settings', [
+            'fields' => collect(Setting::KEYS)->map(fn ($meta, $key) => ['key' => $key, 'label' => $meta[0], 'help' => $meta[2], 'value' => (string) Setting::get($key, '')])->values(),
+            'urls' => ['save' => route('admin.settings.update')],
+        ]);
     }
 
     public function saveSettings(Request $request)

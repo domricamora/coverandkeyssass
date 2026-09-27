@@ -27,7 +27,27 @@ class ListingController extends Controller
             ->orderByRaw("status = 'pending' desc")->latest('id')
             ->paginate(30)->withQueryString();
 
-        return view('platform-admin::listings', ['kind' => $kind, 'listings' => $listings]);
+        return \Inertia\Inertia::render('Admin/Listings', [
+            'kind' => $kind,
+            'listings' => $listings->through(fn ($l) => [
+                'id' => $l->id,
+                'name' => $l->name,
+                'business' => $l->tenant?->name,
+                'status' => $l->status,
+                'view' => $l->status === 'published' ? route($kind === 'properties' ? 'marketplace.properties.show' : 'marketplace.restaurants.show', $l->slug) : null,
+                'sponsored' => $l->isSponsored(),
+                'featured' => $l->isFeaturedNow(),
+                'placement' => [
+                    'is_featured' => (bool) $l->is_featured,
+                    'featured_until' => $l->featured_until?->toDateString() ?? '',
+                    'sponsored_until' => $l->sponsored_until?->toDateString() ?? '',
+                    'ranking_boost' => (int) $l->ranking_boost,
+                    'verified' => $l->isVerified(),
+                ],
+                'urls' => ['status' => route('admin.listings.status', [$kind, $l->id]), 'placement' => route('admin.listings.placement', [$kind, $l->id])],
+            ]),
+            'filters' => $request->only('q', 'status'),
+        ]);
     }
 
     public function status(Request $request, string $kind, int $id, AuditLogger $audit)

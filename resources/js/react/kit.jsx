@@ -248,6 +248,26 @@ export function Filter({ name, value, options, placeholder, url, params = {} }) 
     );
 }
 
+/** Segmented GET filter: options [[value, label], …]; '' clears the param. */
+export function Chips({ url, name, value, options, params = {} }) {
+    return (
+        <div className="flex flex-wrap gap-1" role="group" aria-label={label(name)}>
+            {options.map(([v, text]) => (
+                <Link
+                    key={v}
+                    href={url}
+                    data={{ ...params, [name]: v || undefined }}
+                    preserveState
+                    aria-current={(value ?? '') === v ? 'true' : undefined}
+                    className={cx('h-8 border px-3 text-[12px] leading-[30px]', (value ?? '') === v ? 'border-ink bg-ink text-white' : 'border-line bg-surface text-fg-2 hover:border-line-strong')}
+                >
+                    {text}
+                </Link>
+            ))}
+        </div>
+    );
+}
+
 /** Search box for list pages (submits on Enter). */
 export function Search({ url, value, params = {}, placeholder = 'Search' }) {
     return (

@@ -32,7 +32,8 @@ it('shows the platform dashboard and admin screens to Super Admins only', functi
     [$guest, $booking] = PayMongoFake::paidBooking();
 
     $this->actingAs($this->admin)->get(route('admin.dashboard'))->assertOk()
-        ->assertSee('Guest payments')->assertSee('₱12,500.00')->assertSee('Platform commission')->assertSee('Subscriptions');
+        ->assertSee('Guest payments')->assertSee('Platform commission')->assertSee('Subscriptions')
+        ->assertInertia(fn ($p) => $p->component('Admin/Dashboard')->where('stats.0.1', '₱12,500.00'));
 
     foreach (['admin.bookings.index', 'admin.orders.index', 'admin.payments.index', 'admin.pricing.index', 'admin.settings.index', 'admin.pages.index', 'admin.reports.index', 'admin.logs.index'] as $name) {
         $this->get(route($name))->assertOk();
@@ -50,7 +51,8 @@ it('approves, suspends and reinstates listings with an audited reason', function
     $property = MarketplaceFixtures::property($tenant, $owner, ['status' => Property::STATUS_PENDING, 'name' => 'Seaside Inn']);
     MarketplaceFixtures::asTenant(null);
 
-    $this->actingAs($this->admin)->get(route('admin.listings.index', 'properties'))->assertOk()->assertSee('Seaside Inn')->assertSee('Approve');
+    $this->actingAs($this->admin)->get(route('admin.listings.index', 'properties'))->assertOk()->assertSee('Seaside Inn')
+        ->assertInertia(fn ($p) => $p->component('Admin/Listings')->where('listings.data.0.status', 'pending'));
 
     $this->post(route('admin.listings.status', ['properties', $property->id]), ['status' => 'published'])->assertRedirect();
     expect(Property::query()->withoutGlobalScope('tenant')->find($property->id)->status)->toBe('published');
@@ -139,5 +141,5 @@ it('exports CSV reports safely, filters the audit log and splits hosts from cust
     [$owner] = MarketplaceFixtures::business('Hotel Z');
     $this->get(route('admin.users.index', ['type' => 'hosts']))->assertSee($owner->email)->assertDontSee($guest->email);
     $this->get(route('admin.users.index', ['type' => 'customers']))->assertSee($guest->email)->assertDontSee($owner->email)
-        ->assertViewHas('users', fn ($users) => ! $users->contains('id', $this->admin->id));
+        ->assertInertia(fn ($p) => $p->where('users.data', fn ($users) => ! collect($users)->contains('id', $this->admin->id)));
 });

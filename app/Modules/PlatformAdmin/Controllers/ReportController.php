@@ -49,7 +49,11 @@ class ReportController extends Controller
 
     public function index()
     {
-        return view('platform-admin::reports', ['reports' => collect($this->reports())->map(fn ($r) => $r[0])]);
+        return \Inertia\Inertia::render('Admin/Reports', [
+            'reports' => collect($this->reports())->map(fn ($r, $key) => ['key' => $key, 'label' => $r[0], 'url' => route('admin.reports.export', $key)])->values(),
+            'from' => now()->startOfMonth()->toDateString(),
+            'to' => now()->toDateString(),
+        ]);
     }
 
     public function export(Request $request, string $report): StreamedResponse
@@ -83,8 +87,17 @@ class ReportController extends Controller
             ->when($request->query('from'), fn ($q, $d) => $q->where('created_at', '>=', $d))
             ->latest('id')->paginate(50)->withQueryString();
 
-        return view('platform-admin::logs', [
-            'logs' => $logs,
+        return \Inertia\Inertia::render('Admin/Logs', [
+            'logs' => $logs->through(fn (AuditLog $l) => [
+                'id' => $l->id,
+                'when' => $l->created_at->format('M j, Y g:i A'),
+                'action' => $l->action,
+                'who' => $l->user?->name ?? 'system',
+                'ip' => $l->ip_address,
+                'business' => $l->tenant?->name,
+                'details' => \Illuminate\Support\Str::limit(json_encode($l->new_values ?? [], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 200),
+            ]),
+            'filters' => $request->only('action', 'user', 'tenant', 'from'),
             'prefixes' => AuditLog::query()->selectRaw("substring_index(action, '.', 1) as p")->distinct()->orderBy('p')->pluck('p'),
         ]);
     }

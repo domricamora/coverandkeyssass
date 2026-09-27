@@ -31,7 +31,22 @@ class ActivityController extends Controller
             ->when($request->query('q'), fn ($q, $term) => $q->where(fn ($w) => $w->where('reference', 'like', "%{$term}%")->orWhere('guest_name', 'like', "%{$term}%")->orWhere('guest_email', 'like', "%{$term}%")))
             ->latest('id')->paginate(30)->withQueryString();
 
-        return view('platform-admin::bookings', ['bookings' => $bookings, 'statuses' => Booking::statuses()]);
+        return \Inertia\Inertia::render('Admin/Bookings', [
+            'bookings' => $bookings->through(fn (Booking $b) => [
+                'id' => $b->id,
+                'reference' => $b->reference,
+                'created' => $b->created_at->format('M j, Y'),
+                'business' => $b->tenant?->name,
+                'property' => $b->property?->name,
+                'guest' => $b->guest_name,
+                'email' => $b->guest_email,
+                'dates' => $b->check_in?->format('M j').' – '.$b->check_out?->format('M j, Y'),
+                'total' => $b->currency.' '.number_format((float) $b->total, 2),
+                'status' => $b->status,
+            ]),
+            'statuses' => Booking::statuses(),
+            'filters' => $request->only('q', 'status'),
+        ]);
     }
 
     public function orders(Request $request)
@@ -42,7 +57,21 @@ class ActivityController extends Controller
             ->when($request->query('q'), fn ($q, $term) => $q->where(fn ($w) => $w->where('reference', 'like', "%{$term}%")->orWhere('customer_name', 'like', "%{$term}%")))
             ->latest('id')->paginate(30)->withQueryString();
 
-        return view('platform-admin::orders', ['orders' => $orders]);
+        return \Inertia\Inertia::render('Admin/Orders', [
+            'orders' => $orders->through(fn (Order $o) => [
+                'id' => $o->id,
+                'reference' => $o->reference,
+                'created' => $o->created_at->format('M j, Y g:i A'),
+                'restaurant' => $o->restaurant?->name,
+                'customer' => $o->customer_name,
+                'type' => $o->channel.' · '.str_replace('_', ' ', (string) $o->fulfillment),
+                'payment' => $o->payment_method.' / '.$o->payment_status,
+                'total' => $o->currency.' '.number_format((float) $o->total, 2),
+                'status' => $o->status,
+            ]),
+            'statuses' => ['pending', 'accepted', 'preparing', 'ready', 'out_for_delivery', 'delivered', 'completed', 'cancelled', 'refunded'],
+            'filters' => $request->only('q', 'status'),
+        ]);
     }
 
     public function payments(Request $request)
@@ -52,7 +81,21 @@ class ActivityController extends Controller
             ->when($request->query('status'), fn ($q, $s) => $q->where('status', $s))
             ->latest('id')->paginate(30)->withQueryString();
 
-        return view('platform-admin::payments', ['payments' => $payments]);
+        return \Inertia\Inertia::render('Admin/Payments', [
+            'payments' => $payments->through(fn (Payment $p) => [
+                'id' => $p->id,
+                'created' => $p->created_at->format('M j, Y'),
+                'method' => $p->method,
+                'for' => $p->booking ? 'Booking '.$p->booking->reference : ($p->order ? 'Order '.$p->order->reference : null),
+                'payer' => $p->user?->name,
+                'email' => $p->user?->email,
+                'amount' => $p->currency.' '.number_format((float) $p->amount, 2),
+                'status' => $p->status,
+                'refunded' => $p->refunded_at?->format('M j'),
+                'refund' => $p->status === Payment::PAID ? route('admin.payments.refund', $p->id) : null,
+            ]),
+            'filters' => $request->only('status'),
+        ]);
     }
 
     public function refund(Request $request, string $payment, AuditLogger $audit)
