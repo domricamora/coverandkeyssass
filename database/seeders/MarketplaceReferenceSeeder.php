@@ -33,8 +33,13 @@ class MarketplaceReferenceSeeder extends Seeder
             ['Siargao', 'Surigao del Norte', 'Caraga', 9.8482, 126.0460, true, 4, 'Cloud 9 surf breaks, island hopping and slow-living guesthouses.'],
             ['Baguio', 'Benguet', 'Cordillera', 16.4023, 120.5960, false, 5, 'Cool highland air: pine cabins, B&Bs and long-stay apartments.'],
             ['Tagaytay', 'Cavite', 'Calabarzon', 14.1153, 120.9621, false, 6, 'Taal views, weekend villas and garden restaurants an hour from Manila.'],
-            ['Panglao', 'Bohol', 'Central Visayas', 9.5769, 123.7600, false, 7, 'Dive resorts and beachfront villas on Bohol\'s southwest coast.'],
+            ['Panglao', 'Bohol', 'Central Visayas', 9.5769, 123.7600, true, 7, 'Dive resorts and beachfront villas on Bohol\'s southwest coast.'],
             ['Laiya', 'Batangas', 'Calabarzon', 13.6720, 121.2960, false, 8, 'Weekend beach houses and dive camps on Batangas\' San Juan coast.'],
+            ['Dumaguete', 'Negros Oriental', 'Central Visayas', 9.3068, 123.3054, true, 9, 'The City of Gentle People: Rizal Boulevard, sans rival and dive trips to Apo Island.'],
+            ['Siquijor', 'Siquijor', 'Central Visayas', 9.1999, 123.5952, true, 10, 'Quiet coves, waterfalls and sunset cottages on the island of fireflies.'],
+            ['Iloilo City', 'Iloilo', 'Western Visayas', 10.7202, 122.5621, true, 11, 'Heritage streets, river esplanades and the best batchoy in the country.'],
+            ['Davao City', 'Davao del Sur', 'Davao Region', 7.1907, 125.4553, true, 12, 'Mindanao\'s gateway: Mount Apo, durian season and island resorts on Samal.'],
+            ['Anda', 'Bohol', 'Central Visayas', 9.7445, 124.5765, false, 13, 'Bohol\'s quiet east coast: powder-white beaches, cave pools and no crowds.'],
         ];
 
         foreach ($locations as [$name, $region, $country, $lat, $lng, $featured, $sort, $description]) {

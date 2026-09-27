@@ -24,7 +24,7 @@ it('seeds a fully explorable demo through the real services, and re-runs safely'
 
     expect($statuses)->toContain(Booking::CHECKED_OUT, Booking::CHECKED_IN, Booking::CONFIRMED, Booking::PENDING)
         ->and(Order::query()->withoutGlobalScopes()->where('status', Order::COMPLETED)->exists())->toBeTrue()
-        ->and(Media::query()->whereIn('mediable_type', ['property', 'restaurant'])->where('path', 'like', 'img/demo/%')->count())->toBe(176)          // 3 own + 8 tour photos x 16 listings (room and dish photos are extra)
+        ->and(Media::query()->whereIn('mediable_type', ['property', 'restaurant'])->where('path', 'like', 'img/demo/%')->count())->toBe(341)          // 3 own + 8 tour photos x 31 listings (room and dish photos are extra)
         ->and(Media::query()->where('path', 'like', 'img/demo/tour/%')->whereNull('caption')->exists())->toBeFalse()
         ->and(DB::table('tenant_modules')->whereNotNull('expires_at')->exists())->toBeFalse()
         ->and(DB::table('housekeeping_tasks')->exists())->toBeTrue()          // queued by real check-outs
@@ -32,9 +32,9 @@ it('seeds a fully explorable demo through the real services, and re-runs safely'
 
     // A full team per business (not one person), with logins, a rota, clock-ins and register history.
     $perTenant = DB::table('employees')->selectRaw('tenant_id, count(*) c, count(user_id) u')->groupBy('tenant_id')->get();
-    expect($perTenant)->toHaveCount(4)
+    expect($perTenant)->toHaveCount(count(MarketplaceDemoSeeder::TENANTS))
         ->and($perTenant->every(fn ($r) => $r->c === 20 && $r->u >= 15))->toBeTrue()
-        ->and(DB::table('employees')->distinct()->count('name'))->toBe(80)
+        ->and(DB::table('employees')->distinct()->count('name'))->toBe(180)
         ->and(DB::table('attendances')->whereNotNull('clock_out_at')->exists())->toBeTrue()
         ->and(DB::table('shifts')->where('starts_at', '>', now())->exists())->toBeTrue()
         ->and(DB::table('pos_sessions')->whereNotNull('closed_at')->exists())->toBeTrue()
@@ -42,7 +42,7 @@ it('seeds a fully explorable demo through the real services, and re-runs safely'
         ->and(DB::table('bookings')->where('check_in', '<', today()->subDays(30))->exists())->toBeFalse()
         ->and(DB::table('orders')->where('created_at', '<', today()->subDays(30))->exists())->toBeFalse()
         ->and(DB::table('orders')->where('channel', 'pos')->where('created_at', '<', today())->whereIn('status', ['accepted', 'preparing', 'ready'])->exists())->toBeFalse()
-        ->and(DB::table('tenant_users')->where('user_id', App\Models\User::query()->where('email', 'group@coverandkeys.example.test')->value('id'))->count())->toBe(4);
+        ->and(DB::table('tenant_users')->where('user_id', App\Models\User::query()->where('email', 'group@coverandkeys.example.test')->value('id'))->count())->toBe(count(MarketplaceDemoSeeder::TENANTS));
 
     $count = $bookings()->count();
     $media = Media::query()->count();

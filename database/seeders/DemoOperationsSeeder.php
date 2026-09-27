@@ -112,6 +112,64 @@ class DemoOperationsSeeder extends Seeder
                 ['Mango shake', 'Carabao mango.', 150],
             ],
         ],
+        'boulevard-sans-rival-cafe' => [
+            'Cakes & pastries' => [
+                ['Sans rival slice', 'Cashew meringue, French buttercream.', 165],
+                ['Silvanas, box of 6', 'Frozen cashew-meringue cookies.', 240],
+                ['Budbud kabog', 'Millet rice cake with ripe mango.', 120],
+            ],
+            'Coffee' => [
+                ['Negros brewed coffee', 'Canlaon highland beans.', 110],
+                ['Tablea hot chocolate', 'Local cacao, thick and dark.', 145],
+            ],
+        ],
+        'lazi-firefly-kitchen' => [
+            'Boodle' => [
+                ['Boodle for four', 'Grilled fish, liempo, seaweed, rice on banana leaves.', 1450],
+                ['Boodle for two', 'Half the spread, same leaves.', 780],
+            ],
+            'Plates' => [
+                ['Chicken tinola', 'Ginger broth, green papaya, malunggay.', 280],
+                ['Lato salad', 'Sea grapes, tomato, cane vinegar.', 160],
+            ],
+        ],
+        'la-paz-batchoy-house' => [
+            'Batchoy' => [
+                ['Special batchoy', 'Egg noodles, pork broth, liver, chicharon, raw egg.', 185],
+                ['Extra-large batchoy', 'Double noodles and toppings.', 245],
+            ],
+            'Sides' => [
+                ['Pancit molo', 'Pork dumplings in chicken broth.', 150],
+                ['Puto manapla', 'Soft rice cakes, banana leaf.', 60],
+                ['Pandesal with butter', 'Warm from the oven.', 45],
+            ],
+        ],
+        'madayaw-grill-house' => [
+            'Grill' => [
+                ['Grilled tuna panga', 'General Santos tuna jaw, soy-calamansi.', 620],
+                ['Pork barbecue sticks', 'Sweet marinade, three sticks.', 180],
+            ],
+            'Raw' => [
+                ['Sinuglaw', 'Tuna kinilaw with grilled pork belly.', 340],
+            ],
+            'Dessert' => [
+                ['Durian ice cream', 'Davao durian. You have been warned.', 150],
+                ['Fresh pomelo', 'Peeled to order.', 130],
+            ],
+        ],
+        'anda-tidepool-grill' => [
+            'From the grill' => [
+                ['Catch of the day', 'Whole fish, charcoal, tomato-onion salsa.', 890],
+                ['Grilled prawns', 'Garlic, chilli, calamansi.', 720],
+            ],
+            'Sweets' => [
+                ['Calamay cup', 'Bohol coconut-sugar sweet in a coconut shell.', 120],
+                ['Peanut kisses', 'Bohol\'s meringue cookies.', 90],
+            ],
+            'Drinks' => [
+                ['Fresh buko juice', 'Served in the shell.', 120],
+            ],
+        ],
     ];
 
 
@@ -136,7 +194,7 @@ class DemoOperationsSeeder extends Seeder
 
         // Months of trading history: full scale on a dev database, a few days under tests.
         $history = app()->runningUnitTests() ? new DemoHistorySeeder(stayDays: 12, ticketDays: 3) : new DemoHistorySeeder;
-        $tenants = Tenant::query()->whereIn('slug', ['aplaya-beach-resort', 'kalye-suite-company', 'nido-cove-escapes', 'ridge-and-reef-hospitality'])->orderBy('id')->get();
+        $tenants = Tenant::query()->whereIn('slug', MarketplaceDemoSeeder::TENANTS)->orderBy('id')->get();
 
         foreach ($tenants as $t => $tenant) {
             $owner = User::query()->where('email', 'like', 'owner@%')->whereHas('tenants', fn ($q) => $q->whereKey($tenant->id))->first();

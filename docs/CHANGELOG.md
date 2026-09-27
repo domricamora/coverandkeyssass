@@ -1,5 +1,11 @@
 # CHANGELOG.md
 
+## 2026-09-28 — Five new demo destinations
+
+- **Destinations:** Dumaguete, Siquijor, Iloilo City, Davao City and Anda (Bohol) added to `MarketplaceReferenceSeeder`; Panglao (Bohol) is now featured. The home pages show 12 destinations (was 6).
+- **Demo businesses** (each with an owner, 2 stays, 1 restaurant with a menu, a 20-person team with logins, rota, bookings and orders): Bahay Dagat Hospitality (Dumaguete), Isla Siquijor Retreats, Casa Ilonggo Hotels (Iloilo), Madayaw Island Stays (Davao / Samal), Bohol Tide & Hill (Anda + Panglao). 45 new Unsplash photos, credited in `public/img/demo/CREDITS.md`.
+- `MarketplaceDemoSeeder::TENANTS` is now the single list of demo business slugs (operations seeder and group owner read it).
+
 ## 2026-09-27 — Live demo on ck.deskpulse.click, modern motion
 
 - **Deployed** to the temporary host https://ck.deskpulse.click (cPanel, LiteSpeed, PHP 8.3) with the full demo data; SSH deploys on port 9022 (docs in SESSION_STATE.md). Scheduler cron installed.

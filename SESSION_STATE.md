@@ -4,7 +4,7 @@
 
 ## Snapshot
 
-- Date: 2026-09-27
+- Date: 2026-09-28
 - Phase: **38 COMPLETE + React rebuild done; LIVE demo at https://ck.deskpulse.click** (see "HAND-OFF session 3"). Remaining: the INCOMPLETE items in `docs/FINAL_AUDIT.md` (SMTP, payment sandbox keys, off-site backups, push worker).
 - Tests: PASS — 346 tests / 2750 assertions (full suite, 2026-09-27), MySQL `hospitality_os_testing`
 - Git: `master` → origin <https://github.com/domricamora/coverandkeyssass.git> branch **main**, pushed after every milestone (`git push origin master:main`).
@@ -38,7 +38,7 @@
 - **Live: https://ck.deskpulse.click** (temporary host; the final host comes later).
   - Server: `/home/htrjymuo/public_html/ck.deskpulse.click`, PHP `/opt/cpanel/ea-php83/root/usr/bin/php`. **SSH: `ssh ck-live`** (port 9022, key `~/.ssh/ck_deskpulse`, alias in `~/.ssh/config`).
   - Deploy an update: `node node_modules/vite/bin/vite.js build` (no ASSET_URL) → commit/push → `tar -czf - <changed paths> | ssh ck-live 'cd ~/public_html/ck.deskpulse.click && tar -xzf -'` → `ssh ck-live '… php artisan migrate --force && php artisan optimize:clear && php artisan optimize'`. The server keeps its own `.env` (never overwrite) and a root `.htaccess` = cPanel php-ini block + the repo `.htaccess`.
-  - Demo data seeded (4 businesses, 10 stays, 6 restaurants; `ALLOW_DEMO_SEED=true` only on this server). **All non-admin accounts use `password1126`** (owner's choice for the investor demo); Super Admin = nick.weconnect@gmail.com (owner's password). Cron installed (`schedule:run` every minute).
+  - Demo data seeded (9 businesses, 20 stays, 11 restaurants; 2026-09-28 added Dumaguete, Siquijor, Iloilo City, Davao City, Anda/Panglao Bohol — slugs in `MarketplaceDemoSeeder::TENANTS`; `ALLOW_DEMO_SEED=true` only on this server). **All non-admin accounts use `password1126`** (owner's choice for the investor demo); Super Admin = nick.weconnect@gmail.com (owner's password). Cron installed (`schedule:run` every minute).
   - Gotchas found on live: the parent site's `public_html/.htaccess` sets its own CSP/X-Frame/Permissions headers — our root `.htaccess` re-sets the app's values (keep it in step with `SecurityHeaders`); empty module `Views/` folders aren't in git, so providers must not `loadViewsFrom` them; the agent's auto-mode blocks FTP/web-runner deploys — use SSH.
 - **Owner to-dos:** delete the pasted `.ppk` / `~/.ssh/coverandkeys` key and the old `public_html/coverandkeyssass` copy.
 

@@ -18,7 +18,7 @@ class HomeController extends Controller
     {
         return view('marketplace::home', [
             'featured' => $this->search->featuredProperties(6),
-            'destinations' => $this->search->destinations(6),
+            'destinations' => $this->search->destinations(12),
             'types' => $this->search->propertyTypes(),
             'restaurants' => $this->search->featuredRestaurants(3),
             'stats' => $this->search->stats(),
