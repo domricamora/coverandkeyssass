@@ -18,7 +18,6 @@ class BookingServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadMigrationsFrom(__DIR__.'/../Migrations');
-        $this->loadViewsFrom(__DIR__.'/../Views', 'booking');
 
         Route::middleware('web')->group(__DIR__.'/../routes.php');
 
