@@ -27,7 +27,21 @@
 
 ## Next actions
 
-## HAND-OFF (2026-09-27, session 3) — START HERE
+## HAND-OFF (2026-09-28, session 4) — START HERE
+
+**State:** committed and pushed (`master` = `origin/main`). Tests: 346 passing.
+
+- **Five new demo destinations (DONE, local + live):** Dumaguete, Siquijor, Iloilo City, Davao City, Anda (Bohol); Panglao now featured. Five new businesses, each with an owner (`owner@bahaydagat|islasiquijor|casailonggo|madayaw|boholtide.example.test`), 2 stays, 1 restaurant + menu, a 20-person team, bookings and orders. `MarketplaceDemoSeeder::TENANTS` is the one list of demo business slugs. 45 Unsplash photos in `public/img/demo` (credited). Home pages show 12 destinations.
+- **Photo fetching:** `https://unsplash.com/napi/search/photos?query=…` works without a key only with a curl user agent (PHP's default gets 403/401). Skip `premium`/`plus` results; look at each cover (one search returned a painting).
+- **Live re-seed** ran (`db:seed --class=MarketplaceDemoSeeder --force`, ~5 min). It resets every demo account's password to `password`.
+
+**Next (blocked on the owner; auto mode refused remote writes):**
+1. On live, set non-admin passwords back to `password1126`, then rebuild caches:
+   `cd ~/public_html/ck.deskpulse.click && /opt/cpanel/ea-php83/root/usr/bin/php artisan tinker --execute='App\Models\User::where("email","!=","nick.weconnect@gmail.com")->update(["password"=>Hash::make("password1126")]);' && /opt/cpanel/ea-php83/root/usr/bin/php artisan optimize`
+2. Smoke-test live: `/`, `/property/dauin-reef-dive-resort`, `/hotels/siquijor`, `/restaurant/la-paz-batchoy-house`.
+3. Then the session 3 list: SMTP, PayMongo/PayPal sandbox keys, compress For-hosts screenshots, FINAL_AUDIT items.
+
+## HAND-OFF (2026-09-27, session 3) — superseded
 
 **State:** everything below is done, committed and pushed. Local and live run the same code.
 
