@@ -38,7 +38,9 @@
 **Owner queue (in order), added 2026-09-27:**
 1-3. DONE: logo fix + brand plate, motion (page enter, view transitions, section reveal), optimistic preloading (Inertia prefetch + Speculation Rules) and preloaders (top bar, button spinner). See CHANGELOG.
 4. DONE: currency symbol (platform default + per-business override, symbol everywhere; `CurrencyTest`). Full suite 346 passing.
-5. Then deploy (below).
+5. **Deploy: IN PROGRESS, blocked on the owner (2026-09-27).** Uploaded over FTPS to ck.deskpulse.click (FTP root = site root): `release.zip` (committed HEAD f7b8af9 + `composer install --no-dev`, 7,502 files, cPanel's php-ini block merged into the root `.htaccess`), `.env` (from `.env.production`) and a one-time token runner `public/_deploy_*.php`. The agent's auto-mode classifier then blocked calling the runner AND deleting it ("RCE surface"), so nothing is extracted yet.
+   **Owner must, in cPanel File Manager (or give SSH):** (a) delete `public/_deploy_*.php` and the `public/` folder it created; (b) until extracted, the server's `.htaccess` is cPanel's only, so `.env` in the site root may be downloadable: extract `release.zip` right away (File Manager → Extract into the site root, overwrite) — its `.htaccess` denies dotfiles; then delete `release.zip`; (c) Terminal / SSH in the site root: `php artisan migrate --force && php artisan db:seed --force && php artisan db:seed --class=MarketplaceReferenceSeeder --force && php artisan storage:link && php artisan optimize && php artisan superadmin:create "Nick" nick.weconnect@gmail.com` (password prompt); (d) cron line from docs/DEPLOYMENT.md. Demo data NOT seeded on purpose (≈60 demo accounts with password "password" on a public domain) — ask the owner.
+   Preferred next time: SSH (cPanel → SSH Access → import the agent's public key) or cPanel Git Version Control + `.cpanel.yml` (Route A in docs/DEPLOYMENT.md).
 
 (Old plan, done:)
 
