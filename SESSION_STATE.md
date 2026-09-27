@@ -4,8 +4,8 @@
 
 ## Snapshot
 
-- Date: 2026-09-26
-- Phase: **38 COMPLETE + post-audit owner queue (see Next actions)** Remaining: the INCOMPLETE items in `docs/FINAL_AUDIT.md`
+- Date: 2026-09-27
+- Phase: **38 COMPLETE; now: platform admin → React, then production deploy** (see "HAND-OFF session 2" below). Remaining after that: the INCOMPLETE items in `docs/FINAL_AUDIT.md`
 - Tests: PASS — 333 tests / 2422 assertions (full suite, 2026-09-26, after guest booking flows), MySQL `hospitality_os_testing`
 - Git: `master` → origin <https://github.com/domricamora/coverandkeyssass.git> — **not pushed yet**: the auto-mode classifier blocks `git push` from the agent; the owner runs `git push -u origin master:main` (or adds a Bash permission rule)
 
@@ -27,7 +27,24 @@
 
 ## Next actions
 
-## HAND-OFF (2026-09-27, latest) — start here
+## HAND-OFF (2026-09-27, session 2) — START HERE
+
+**Owner's order this session:** finish the remaining phases, then deploy the production build to the live server (FTP now; SSH only if the owner provides access — ask them how). Checkpoint often: update this file + the resume block in `CLAUDE.md`, commit, `git push origin master:main`.
+
+**Already done (do not redo):** every guest account tab is React (incl. notification settings + profile, 421e777); cPanel deploy path hardened (119f601). Invoices, folio print, POS receipt and public `/pages/{slug}` stay **Blade on purpose** (print / public documents).
+
+**Now: platform admin (`/admin/*`) → React.** Nothing written yet. Plan (all research done):
+
+1. `DashboardNav::for()`: if the route name starts with `admin.`, return a new `DashboardNav::admin($route)` (groups: Overview · People & businesses [Users, Businesses, Modules] · Marketplace [Properties, Restaurants, Reported content, Reviews, Categories & locations] · Activity [Bookings, Orders, Payments & refunds, Support] · Money [Subscriptions=admin.billing.index, Pricing, Commissions, Payouts] · Site [CMS pages, Settings, Reports, Logs]), all `spa: true`. The shell + Blade sidebar both read it.
+2. Convert each controller's `view(...)` to `Inertia::render('Admin/<Name>', props)`, pages in `resources/js/Pages/Admin/`, using `react/kit.jsx` (Page, Panel, Table, Td, Main, Pager, Stats, Status, Filter, Search, Action, Form, Input, Select, TextArea, Row). Screens (24): Dashboard; Users; Tenants index/create/show/modules; Modules index/create/edit; Listings (+placement form, `admin.listings.placement`); Bookings; Orders; Payments (refund w/ reason); Pricing (plans keyed by id: `{price, is_active}`); Settings (`Setting::KEYS`); Pages index/form; Reports (GET CSV download links — plain form, not Inertia); Logs; Taxonomy; Moderation; Billing admin (invoices mark-paid/void, subscriptions, coupons); Reviews admin; Commissions; Payouts; Support index/show (reuse the two-pane pattern from `Pages/Messages`).
+   Controllers: `app/Http/Controllers/Admin/*`, `app/Modules/PlatformAdmin/Controllers/*`, `Billing/Controllers/AdminBillingController`, `Reviews/Controllers/AdminReviewController`, `Wallet/Controllers/Admin{Commission,Payout}Controller`, `Messaging/Controllers/SupportController` (index/show).
+3. Tests use `assertSee` on these pages (BillingTest, MarketplaceAdminTest, MessagingTest, ModuleEngineHttpTest, PlatformAdminTest, ReviewsTest, WalletTest): keep asserted strings in props **pre-formatted** (commissions `'2,500.00'`, payout account number, `'Booking '.$ref`, `'Approve'` for pending listings). Logs test asserts `assertDontSee('booking.confirmed')` — only send filtered rows.
+4. Delete the Blade views once converted (`resources/views/admin/**`, `PlatformAdmin/Views/*` except `pages/show` + `partials/listing-trust`, `billing::admin`, `reviews::admin`, `wallet::admin`, `messaging::admin`); drop view registrations from providers left with zero views.
+5. Full suite (`cmd.exe //c "_ai\run.bat php artisan test"`), browser QA at 390/1440, docs (CHANGELOG, modules), commit + push.
+
+**Then: deploy** (memory `deploy-target`; secrets only in `.deploy.env` / `.env.production`): production build *without* ASSET_URL, `composer install --no-dev`, upload over FTPS (exclude `.deploy.env`, `.git`, `node_modules`, `tests`), migrate + seed per `docs/DEPLOYMENT.md` cPanel section, smoke test `https://ck.deskpulse.click`. Ask the owner whether they can enable SSH (cPanel → SSH Access → add key) — makes migrate/artisan far easier than FTP-only.
+
+## HAND-OFF (2026-09-27, session 1) — superseded
 
 **Done since the dashboard conversion:**
 - **Guest account on React (`Pages/Account/*`):** Home, Trips, Trip, Orders, Order, Tables, Reviews, Notifications. They use `PublicShell`, which now has site nav, an account menu with sign-out (business links only for members), a mobile menu and page transitions.
